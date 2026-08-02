@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NetShield AI — Upload CIC-IDS-2017 network traffic CSV for AI-powered anomaly detection using Random Forest classification.">
+  <title>NetShield AI — Network Anomaly Detection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      NetShield AI
+    </a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <a href="/dashboard" class="navbar-link">
+        Live Dashboard
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- ── Hero ── -->
+    <section class="hero">
+      <div class="hero-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+        AI-Powered Threat Analysis
+      </div>
+      <h1>Network <span>Anomaly</span> Detection</h1>
+    </section>
+
+    <!-- ── Upload Zone ── -->
+    <div class="upload-zone" id="dropZone">
+      <input type="file" id="fileInput" name="file" accept=".csv">
+      <div class="upload-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+      </div>
+      <div class="upload-title">Drag &amp; drop your CSV file here</div>
+      <div class="upload-sub">or</div>
+      <span class="upload-browse">Browse files</span>
+      <div class="upload-hint">Accepts .csv files · Max 16 MB · CIC-IDS-2017 format</div>
+      <div class="upload-filename" id="uploadFilename"></div>
+    </div>
+
+    <!-- ── Error Card ── -->
+    <div class="error-card" id="errorCard" role="alert">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="errorText">An error occurred.</span>
+    </div>
+
+    <!-- ── Analyze Button ── -->
+    <button class="btn-analyze" id="analyzeBtn" disabled>
+      <svg id="btnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span id="btnText">Analyze Traffic</span>
+    </button>
+
+    <!-- ── Results ── -->
+    <section class="results-section" id="resultsSection" aria-live="polite">
+
+      <div class="section-title">Analysis Results</div>
+
+      <!-- Stat Cards -->
+      <div class="stat-cards" id="statCards">
+        <div class="stat-card">
+          <div class="stat-icon cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label">Total Flows</div>
+            <div class="stat-value cyan" id="statTotal">0</div>
+            <div class="stat-sub">Network flows analyzed</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label">Benign Flows</div>
+            <div class="stat-value green" id="statBenign">0</div>
+            <div class="stat-sub" id="statBenignPct">Safe traffic</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label">Attack Flows</div>
+            <div class="stat-value red" id="statAttack">0</div>
+            <div class="stat-sub" id="statAttackPct">Threats detected</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Traffic Distribution</h3>
+          <div class="chart-wrapper" style="height:280px;">
+            <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Attack Type Breakdown</h3>
+          <div class="chart-wrapper" style="height:280px;">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attack Details Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Attack Details</h3>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="attackTable">
+            <thead>
+              <tr>
+                <th>Attack Type</th>
+                <th>Count</th>
+                <th>% of Total</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody id="attackTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

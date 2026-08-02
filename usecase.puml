@@ -1,0 +1,38 @@
+@startuml
+!define RECTANGLE class
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Security Analyst" as User
+
+rectangle "AI‑Driven Network Anomaly Detection System" {
+  
+  usecase "Upload Network Flow CSV" as UC1
+  usecase "Analyze Traffic for Anomalies" as UC2
+  usecase "View Detection Results (Chart & Stats)" as UC3
+  usecase "Export / Download Results" as UC4
+  usecase "View Live Traffic Dashboard" as UC5
+  usecase "Pause / Resume Live Stream" as UC6
+  usecase "Toggle Dark / Light Mode" as UC7
+  
+  usecase "Preprocess CSV Data" as UC8
+  usecase "Run Random Forest Inference" as UC9
+  usecase "Generate Anomaly Alerts" as UC10
+}
+
+User --> UC1
+User --> UC5
+User --> UC6
+User --> UC7
+
+UC1 <-- UC2 : <<include>>
+UC2 <-- UC3 : <<include>>
+UC3 <-- UC4 : <<extend>>
+
+UC5 <-- UC10 : <<include>>
+UC2 <-- UC8 : <<include>>
+UC2 <-- UC9 : <<include>>
+
+@enduml
