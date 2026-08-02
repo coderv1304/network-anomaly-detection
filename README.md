@@ -256,6 +256,19 @@ Contributions are welcome! Please open an issue to discuss proposed changes, or 
 
 ---
 
+## 📊 Dataset
+
+This project uses the **CIC-IDS-2017** dataset (Canadian Institute for Cybersecurity Intrusion Detection Evaluation Dataset), which contains labeled network traffic including both benign and various attack scenarios.
+
+Due to file size (1GB+), the raw dataset files are **not included** in this repository.
+
+To reproduce training:
+1. Download the dataset from the [official CIC-IDS-2017 page](https://www.unb.ca/cic/datasets/ids-2017.html)
+2. Place the CSV files inside a `data/` folder in the project root
+3. Run `python train_model.py` to train the model from scratch
+
+Pre-trained model artifacts (`random_forest.pkl`, `scaler.pkl`, etc.) are included in `models/`, so you can run the app directly without retraining.
+
 ## License
 This project is licensed under the MIT License. See `LICENSE` for details.
 
