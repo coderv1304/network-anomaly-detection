@@ -6,7 +6,7 @@
 [![Flask](https://img.shields.io/badge/Flask-2.3-black.svg?logo=flask&logoColor=white)](https://flask.palletsprojects.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
-[![CI/CD](https://github.com/your-username/network-anomaly-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/network-anomaly-detection/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/coderv1304/network-anomaly-detection/ci.yml?branch=main&label=CI%2FCD&logo=github)](https://github.com/coderv1304/network-anomaly-detection/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 *A full-stack machine learning application that classifies network flows into benign or 14 attack types in real time.*
@@ -50,4 +50,38 @@ While built as an academic/research project, it is designed with **operational r
 ### Architecture Diagram
 
 ```mermaid
-![Uploading Screenshot_2026-08-06-11-01-46-109_com.android.chrome-edit.jpg…]()
+flowchart TD
+    %% Styling Definitions
+    classDef client fill:#2563eb,stroke:#1d4ed8,color:#fff,stroke-width:2px;
+    classDef server fill:#059669,stroke:#047857,color:#fff,stroke-width:2px;
+    classDef ml fill:#d97706,stroke:#b45309,color:#fff,stroke-width:2px;
+    classDef sim fill:#7c3aed,stroke:#6d28d9,color:#fff,stroke-width:2px;
+
+    subgraph ClientLayer [" Client Layer "]
+        Browser["💻 User Browser\n(Dashboard & Batch UI)"]:::client
+    end
+
+    subgraph ServerLayer [" Application Server (Flask) "]
+        API["⚡ Flask App (app.py)\n/predict & WebSocket Dashboard"]:::server
+        Preprocessing["⚙️ Preprocessing Pipeline\n(scaler.pkl & feature_names.pkl)"]:::server
+        Static["🎨 Static Assets\n(HTML/CSS/JS)"]:::server
+    end
+
+    subgraph MLLayer [" ML Inference Artifacts "]
+        RFModel["🧠 Random Forest Model\n(random_forest.pkl)"]:::ml
+        LabelEnc["🏷️ Label Encoder\n(label_encoder.pkl)"]:::ml
+    end
+
+    subgraph SimulationLayer [" Traffic Capture Engine "]
+        Simulator["📡 Wi-Fi Simulator / Live Capture\n(simulate_live.py / cicflowmeter)"]:::sim
+    end
+
+    %% Flow Connections
+    Browser <-->|HTTP / WebSockets| API
+    API --> Static
+    API --> Preprocessing
+    Preprocessing --> RFModel
+    RFModel --> LabelEnc
+    LabelEnc -->|Inference Result| API
+    Simulator -->|Real-time Flow Stream| API
+
