@@ -38,54 +38,57 @@ What's actually working today:
 
 ## 📐 System Architecture
 
-This reflects what's actually in `app.py` today — a single Flask process, no WebSocket layer, no live traffic ingestion.
+<svg width="680" height="590" viewBox="0 0 680 590" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>System architecture of the network anomaly detection app</title>
+<desc>Browser sends HTTP requests to the Flask app, which either renders the dashboard template with no live data, or runs the predict route through preprocessing and the loaded model artifacts to return a JSON classification response.</desc>
 
-```
-┌──────────────────┐
-│   User Browser    │
-└─────────┬─────────┘
-          │ HTTP (GET / POST)
-          ▼
-┌───────────────────────────┐
-│      Flask App (app.py)    │
-│  ─────────────────────────│
-│  GET  /            → index.html (upload page)
-│  GET  /dashboard    → dashboard.html (static template)
-│  POST /predict       → CSV upload + classification
-└─────────┬──────────────────┘
-          │
-          ▼
-┌────────────────────────────┐
-│   Preprocessing (in-request)│
-│  - encoding fallback         │
-│  - column strip/clean        │
-│  - inf/NaN handling          │
-│  - column alignment          │
-│  - StandardScaler.transform  │
-└─────────┬───────────────────┘
-          │
-          ▼
-┌────────────────────────────┐
-│  Loaded Model Artifacts      │
-│  (models/*.pkl, loaded once  │
-│   at process startup)        │
-│  - random_forest.pkl         │
-│  - scaler.pkl                │
-│  - label_encoder.pkl         │
-│  - feature_names.pkl         │
-└─────────┬───────────────────┘
-          │ predictions
-          ▼
-┌────────────────────────────┐
-│   JSON Response              │
-│  { total, benign, attack,    │
-│    attack_types: {...} }     │
-└────────────────────────────┘
-```
+<rect x="0" y="0" width="680" height="590" fill="#FFFFFF"/>
 
-There is currently no separate simulator, capture agent, or WebSocket/streaming layer feeding the `/dashboard` route — everything runs through the single request/response cycle above.
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
 
----
+<!-- User browser -->
+<rect x="260" y="40" width="160" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="340" y="62" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#444441">User browser</text>
+
+<line x1="340" y1="84" x2="340" y2="140" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- Flask app -->
+<rect x="190" y="144" width="300" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+<text x="340" y="164" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#0C447C">Flask app (app.py)</text>
+<text x="340" y="184" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#185FA5">GET /, GET /dashboard, POST /predict</text>
+
+<!-- Dashboard side note -->
+<line x1="490" y1="172" x2="506" y2="172" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="510" y="144" width="120" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="570" y="164" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#444441">/dashboard</text>
+<text x="570" y="184" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5F5E5A">no live feed</text>
+
+<line x1="340" y1="200" x2="340" y2="256" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- Preprocessing -->
+<rect x="190" y="260" width="300" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="1"/>
+<text x="340" y="280" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#712B13">Preprocessing (per request)</text>
+<text x="340" y="300" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#993C1D">clean, align columns, scale</text>
+
+<line x1="340" y1="316" x2="340" y2="372" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- Model artifacts -->
+<rect x="190" y="376" width="300" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="1"/>
+<text x="340" y="396" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#712B13">Model artifacts (loaded once)</text>
+<text x="340" y="416" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#993C1D">RF model + scaler + label encoder</text>
+
+<line x1="340" y1="432" x2="340" y2="488" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- JSON response -->
+<rect x="190" y="492" width="300" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="340" y="512" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">JSON response</text>
+<text x="340" y="532" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5F5E5A">total, benign, attack, attack_types</text>
+
+</svg>
 
 ## 🧰 Technology Stack
 
