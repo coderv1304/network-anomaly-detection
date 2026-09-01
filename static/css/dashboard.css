@@ -1,0 +1,680 @@
+/* ============================================================
+   NETSHIELD AI — SOC Sentinel Operations Console Stylesheet
+   Hyper-Modern High-Contrast Dark Glassmorphism Operations Center
+   ============================================================ */
+
+/* ── Cyber Background Grid ── */
+.cyber-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+}
+
+/* ── Console Layout Shell ── */
+.console {
+  position: relative;
+  z-index: 2;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── System Status Banner ── */
+.system-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.system-banner.secure {
+  border-color: rgba(46, 213, 115, 0.35);
+  background: linear-gradient(135deg, rgba(46, 213, 115, 0.08) 0%, rgba(21, 27, 44, 0.95) 100%);
+}
+
+.system-banner.secure .banner-title {
+  color: var(--green);
+}
+
+.system-banner.alert {
+  border-color: rgba(255, 71, 87, 0.6);
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.12) 0%, rgba(21, 27, 44, 0.95) 100%);
+  animation: banner-pulse 2s ease-in-out infinite;
+}
+
+.system-banner.alert .banner-title {
+  color: var(--red);
+}
+
+@keyframes banner-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 71, 87, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(255, 71, 87, 0.5); }
+}
+
+.banner-status-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.banner-icon-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: dot-pulse 1.8s infinite;
+}
+
+.system-banner.alert .banner-icon-pulse {
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+}
+
+.banner-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.banner-meta {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-med);
+  margin-top: 2px;
+}
+
+/* ── Threat Level Gauge Meter ── */
+.threat-gauge-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.threat-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-med);
+}
+
+.gauge-label {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.gauge-value {
+  font-weight: 700;
+  color: var(--text-hi);
+}
+
+.gauge-track {
+  width: 100%;
+  height: 7px;
+  background: var(--bg-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--green) 0%, var(--orange) 60%, var(--red) 100%);
+  transition: width 0.5s ease-out;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+/* ── Real-time Stats Grid ── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--cyan);
+}
+
+.stat-card.benign::before { background: var(--green); }
+.stat-card.attack::before { background: var(--red); }
+.stat-card.indigo::before { background: #6366f1; }
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-bright);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  color: var(--cyan);
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.stat-icon-wrap.cyan { color: var(--cyan); background: var(--cyan-glow); border-color: rgba(0, 212, 255, 0.3); }
+.stat-icon-wrap.green { color: var(--green); background: var(--green-glow); border-color: rgba(46, 213, 115, 0.3); }
+.stat-icon-wrap.red { color: var(--red); background: var(--red-glow); border-color: rgba(255, 71, 87, 0.3); }
+.stat-icon-wrap.indigo { color: #6366f1; background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); }
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-med);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  line-height: 1.2;
+}
+
+.stat-value.text-indigo {
+  color: #818cf8;
+}
+
+.stat-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-lo);
+  margin-top: 2px;
+}
+
+/* ── Operations Split Grid ── */
+.ops-split-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 992px) {
+  .ops-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Live Pulse Panel (Canvas) ── */
+.pulse-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pulse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pulse-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pulse-legend {
+  display: flex;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-med);
+}
+
+.pulse-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.benign { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.dot.attack { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+#pulseCanvas {
+  width: 100%;
+  height: 130px;
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ── Threat Distribution Breakdown Panel ── */
+.breakdown-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.breakdown-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.b-info {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.b-name {
+  color: var(--text-med);
+  font-weight: 500;
+}
+
+.b-count {
+  color: var(--text-hi);
+  font-weight: 600;
+}
+
+.b-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.b-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.b-fill.benign { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.b-fill.attack { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.b-fill.warning { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+
+/* ── Live Log Stream Panel ── */
+.log-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.log-title h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+
+.log-hint {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-med);
+}
+
+.log-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ── Search Input Box ── */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-med);
+  transition: var(--transition);
+}
+
+.search-box:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-hi);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  width: 160px;
+}
+
+.search-box input::placeholder {
+  color: var(--text-lo);
+}
+
+/* ── Action Buttons ── */
+.sim-btn {
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sim-btn:hover {
+  background: rgba(0, 212, 255, 0.25);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.35);
+}
+
+.sim-btn.active {
+  background: var(--cyan);
+  color: #000;
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px var(--cyan);
+  animation: pulse-glow 1.5s infinite alternate;
+}
+
+.sim-btn.burst {
+  background: rgba(255, 71, 87, 0.12);
+  border: 1px solid rgba(255, 71, 87, 0.35);
+  color: var(--red);
+}
+
+.sim-btn.burst:hover {
+  background: rgba(255, 71, 87, 0.25);
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(255, 71, 87, 0.35);
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px var(--cyan); }
+  100% { box-shadow: 0 0 18px var(--cyan); }
+}
+
+.btn-group-filter {
+  display: flex;
+  background: var(--bg-subtle);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+}
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-med);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-btn.active {
+  background: var(--surface);
+  color: var(--text-hi);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-clear-log {
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  color: var(--text-med);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-clear-log:hover {
+  color: var(--red);
+  border-color: rgba(255, 71, 87, 0.4);
+  background: var(--red-glow);
+}
+
+/* ── Log Table Layout ── */
+.log-table-wrap {
+  max-height: 520px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.log-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-raised);
+  padding: 10px 14px;
+  color: var(--text-med);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--line);
+  z-index: 2;
+}
+
+.log-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-hi);
+  transition: background 0.2s ease;
+}
+
+.log-table tbody tr:hover td {
+  background: var(--surface-hover);
+}
+
+.log-table tbody tr.attack-row {
+  background: rgba(255, 71, 87, 0.08);
+}
+
+.log-table tbody tr.attack-row td:nth-child(5) {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.log-table tbody tr:not(.attack-row) td:nth-child(5) {
+  color: var(--cyan);
+}
+
+.empty-state-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 2.5rem 1rem;
+  color: var(--text-med);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.empty-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: dot-pulse 1.5s infinite;
+}
+
+/* ── Status Badge in Topbar ── */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.status-dot-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-lo);
+}
+
+.status.online {
+  border-color: rgba(46, 213, 115, 0.4);
+  background: var(--green-glow);
+  color: var(--green);
+}
+
+.status.online .status-dot-icon {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: dot-pulse 1.6s infinite;
+}
+
+.status.offline {
+  border-color: rgba(255, 71, 87, 0.4);
+  background: var(--red-glow);
+  color: var(--red);
+}
+
+.status.offline .status-dot-icon {
+  background: var(--red);
+}

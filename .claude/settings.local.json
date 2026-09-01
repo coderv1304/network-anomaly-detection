@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir C:UsersvarunOneDriveDesktopnetwork-anomaly-detection *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5000)",
+      "Bash(dir venv *)",
+      "Bash(venv\\\\Scripts\\\\activate)"
+    ]
+  }
+}

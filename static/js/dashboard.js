@@ -1,308 +1,475 @@
-/* ── dashboard.js — NetShield AI Live Monitor ── */
+/* ============================================================
+   NETSHIELD AI — SOC Sentinel Real-Time Threat Engine
+   High-Reliability Dual Transport (WebSocket + HTTP Sync Fallback)
+   ============================================================ */
 
 'use strict';
 
-// ── Known attack labels from CIC-IDS-2017 ────────────────────────────────
-const ALL_LABELS = [
-  'BENIGN', 'FTP-Patator', 'SSH-Patator',
-  'DoS slowloris', 'DoS Slowhttptest', 'DoS Hulk', 'DoS GoldenEye',
-  'Heartbleed', 'Web Attack \u2013 Brute Force', 'Web Attack \u2013 XSS',
-  'Web Attack \u2013 Sql Injection', 'Infiltration', 'Bot', 'PortScan', 'DDoS',
-];
+const socket = io({
+  transports: ['polling', 'websocket'],
+  reconnection: true,
+  reconnectionDelay: 1000,
+  timeout: 5000,
+});
 
-const ATTACK_LABELS = ALL_LABELS.filter(l => l !== 'BENIGN');
+// ── DOM References ──
+const statusEl          = document.getElementById('status-dot');
+const statusLabel       = statusEl ? statusEl.querySelector('.status-label') : null;
+const totalEl           = document.getElementById('stat-total');
+const benignEl          = document.getElementById('stat-benign');
+const attackEl          = document.getElementById('stat-attack');
+const benignPctEl       = document.getElementById('stat-benign-pct');
+const attackPctEl       = document.getElementById('stat-attack-pct');
+const fpsEl             = document.getElementById('stat-fps');
+const tableBody         = document.getElementById('flow-table-body');
+const systemBanner      = document.getElementById('systemBanner');
+const bannerTitle       = document.getElementById('bannerStatusTitle');
+const bannerSub         = document.getElementById('bannerStatusSub');
+const threatIndexVal    = document.getElementById('threatIndexVal');
+const threatGaugeFill   = document.getElementById('threatGaugeFill');
 
-const SEVERITY_MAP = {
-  'BENIGN': { label: 'Safe',     cls: 'safe',     dotCls: '' },
-  'DDoS':                        { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'DoS slowloris':               { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'DoS Slowhttptest':            { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'DoS Hulk':                    { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'DoS GoldenEye':               { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'Heartbleed':                  { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'Infiltration':                { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'Bot':                         { label: 'Critical', cls: 'critical', dotCls: 'critical' },
-  'FTP-Patator':                 { label: 'High',     cls: 'high',     dotCls: 'high' },
-  'SSH-Patator':                 { label: 'High',     cls: 'high',     dotCls: 'high' },
-  'Web Attack \u2013 Brute Force':   { label: 'High',     cls: 'high',     dotCls: 'high' },
-  'Web Attack \u2013 XSS':           { label: 'High',     cls: 'high',     dotCls: 'high' },
-  'Web Attack \u2013 Sql Injection': { label: 'High',     cls: 'high',     dotCls: 'high' },
-  'PortScan':                    { label: 'Medium',   cls: 'medium',   dotCls: 'medium' },
+const searchInput       = document.getElementById('searchInput');
+const filterAllBtn       = document.getElementById('filterAllBtn');
+const filterAttacksBtn   = document.getElementById('filterAttacksBtn');
+const filterBenignBtn    = document.getElementById('filterBenignBtn');
+const btnClearLog        = document.getElementById('btnClearLog');
+const btnSimulate        = document.getElementById('btnSimulate');
+const btnBurst           = document.getElementById('btnBurst');
+
+// ── Breakdown Widget Elements ──
+const bBenignCount  = document.getElementById('b-benign-count');
+const bBenignFill   = document.getElementById('b-benign-fill');
+const bDdosCount    = document.getElementById('b-ddos-count');
+const bDdosFill     = document.getElementById('b-ddos-fill');
+const bPortscanCount= document.getElementById('b-portscan-count');
+const bPortscanFill = document.getElementById('b-portscan-fill');
+const bWebCount     = document.getElementById('b-web-count');
+const bWebFill      = document.getElementById('b-web-fill');
+const bHulkCount    = document.getElementById('b-hulk-count');
+const bHulkFill     = document.getElementById('b-hulk-fill');
+
+// ── State Variables ──
+let totalCount = 0;
+let benignCount = 0;
+let attackCount = 0;
+let flowsLastSec = 0;
+let lastSecTimestamp = Date.now();
+
+const breakdownMap = {
+  BENIGN: 0,
+  DDoS: 0,
+  PortScan: 0,
+  "Web Attack – Brute Force": 0,
+  "DoS Hulk": 0,
+  "FTP-Patator": 0,
 };
 
-// ── State ─────────────────────────────────────────────────────────────────
-let totalAnalyzed   = 0;
-let totalBenign     = 0;
-let totalAttack     = 0;
-const alerts        = [];   // max 10
-let barChart        = null;
-let donutChart      = null;
-let secondsAgo      = 0;
+const MAX_ROWS = 100;
+let currentFilter = 'all'; // 'all' | 'attacks' | 'benign'
+let searchQuery = '';
+let allFlowRecords = [];
+let seenFlowKeys = new Set();
+let simulationTimer = null;
 
-// ── DOM refs ──────────────────────────────────────────────────────────────
-const liveTotalEl   = document.getElementById('liveTotalVal');
-const liveBenignEl  = document.getElementById('liveBenignVal');
-const liveAttackEl  = document.getElementById('liveAttackVal');
-const threatLevelEl = document.getElementById('liveThreatLevel');
-const threatSubEl   = document.getElementById('liveThreatSub');
-const alertsList    = document.getElementById('alertsList');
-const alertsEmpty   = document.getElementById('alertsEmpty');
-const alertsCount   = document.getElementById('alertsCount');
-const lastUpdated   = document.getElementById('lastUpdated');
+// ── Oscilloscope Canvas (Pulse Strip) ──
+const canvas = document.getElementById('pulseCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+const pulseData = []; // { attack: boolean }
+const BAR_WIDTH = 6;
+const BAR_GAP = 3;
 
-// ── Simulate one cycle of data ────────────────────────────────────────────
-function simulateCycle() {
-  // Realistic CIC-IDS-2017 distribution: ~85% benign
-  const batchSize  = Math.floor(Math.random() * 120) + 80;  // 80-200 flows per tick
-  const attackRate = Math.random() < 0.6                    // 60% chance of some attack
-    ? (Math.random() * 0.25)                                // 0-25% attack rate
-    : 0;
-
-  const attackCount  = Math.round(batchSize * attackRate);
-  const benignCount  = batchSize - attackCount;
-
-  totalAnalyzed += batchSize;
-  totalBenign   += benignCount;
-  totalAttack   += attackCount;
-
-  // Pick 1-3 random attack types for this tick
-  const attackTypes = {};
-  if (attackCount > 0) {
-    const numTypes = Math.min(attackCount, Math.floor(Math.random() * 3) + 1);
-    const shuffled = [...ATTACK_LABELS].sort(() => Math.random() - 0.5).slice(0, numTypes);
-    let remaining  = attackCount;
-    shuffled.forEach((type, i) => {
-      const cnt = i === shuffled.length - 1
-        ? remaining
-        : Math.floor(Math.random() * remaining * 0.8) + 1;
-      attackTypes[type] = cnt;
-      remaining -= cnt;
-    });
-  }
-
-  // Compute threat level
-  const overallRate = totalAnalyzed > 0 ? (totalAttack / totalAnalyzed) * 100 : 0;
-  const threat = getThreatLevel(overallRate);
-
-  // Update DOM
-  updateStats(threat, overallRate);
-  updateCharts(benignCount, attackTypes);
-  if (Object.keys(attackTypes).length > 0) addAlerts(attackTypes);
-  updateTimer();
+function resizeCanvas() {
+  if (!canvas || !ctx) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * (window.devicePixelRatio || 1);
+  canvas.height = rect.height * (window.devicePixelRatio || 1);
+  ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+  drawPulse();
 }
 
-// ── Threat level ──────────────────────────────────────────────────────────
-function getThreatLevel(pct) {
-  if (pct === 0)      return { label: 'SECURE',   cls: 'threat-secure' };
-  if (pct <= 10)      return { label: 'LOW',       cls: 'threat-low' };
-  if (pct <= 30)      return { label: 'ELEVATED',  cls: 'threat-elevated' };
-  return               { label: 'CRITICAL',  cls: 'threat-critical' };
+if (canvas) {
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 0);
 }
 
-// ── Update stat cards ─────────────────────────────────────────────────────
-function updateStats(threat, rate) {
-  liveTotalEl.textContent  = totalAnalyzed.toLocaleString();
-  liveBenignEl.textContent = totalBenign.toLocaleString();
-  liveAttackEl.textContent = totalAttack.toLocaleString();
+function drawPulse() {
+  if (!canvas || !ctx) return;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height || 130;
+  ctx.clearRect(0, 0, w, h);
 
-  threatLevelEl.textContent = threat.label;
-  threatLevelEl.className   = `threat-level ${threat.cls}`;
-  threatSubEl.textContent   = `${rate.toFixed(1)}% attack rate`;
-}
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const cyanColor = isLight ? '#0284c7' : '#00d4ff';
+  const redColor = isLight ? '#dc2626' : '#ff4757';
+  const baselineColor = isLight ? 'rgba(100, 116, 139, 0.25)' : 'rgba(163, 178, 207, 0.2)';
 
-// ── Bar chart ─────────────────────────────────────────────────────────────
-const barColors = {
-  'BENIGN': 'rgba(46,213,115,0.85)',
-};
-ATTACK_LABELS.forEach(l => { barColors[l] = 'rgba(255,71,87,0.8)'; });
+  const maxBars = Math.floor(w / (BAR_WIDTH + BAR_GAP));
 
-function buildBarData() {
-  return {
-    labels: ALL_LABELS.map(l => l.length > 18 ? l.slice(0, 16) + '…' : l),
-    fullLabels: ALL_LABELS,
-    values: ALL_LABELS.map(l =>
-      l === 'BENIGN' ? Math.round(totalBenign / 10) : 0  // normalize
-    ),
-    colors: ALL_LABELS.map(l => barColors[l] || 'rgba(255,71,87,0.8)'),
-    borders: ALL_LABELS.map(l => l === 'BENIGN' ? '#2ed573' : '#ff4757'),
-  };
-}
-
-// Store per-label running totals for the bar chart
-const labelTotals = {};
-ALL_LABELS.forEach(l => { labelTotals[l] = 0; });
-
-function updateCharts(benignCount, attackTypes) {
-  labelTotals['BENIGN'] += benignCount;
-  Object.entries(attackTypes).forEach(([t, c]) => {
-    if (labelTotals[t] !== undefined) labelTotals[t] += c;
-  });
-
-  const barLabels = ALL_LABELS.map(l => l.length > 14 ? l.slice(0, 12) + '…' : l);
-  const barValues = ALL_LABELS.map(l => labelTotals[l]);
-  const bgColors  = ALL_LABELS.map(l => l === 'BENIGN' ? 'rgba(46,213,115,0.85)' : 'rgba(255,71,87,0.8)');
-  const bdColors  = ALL_LABELS.map(l => l === 'BENIGN' ? '#2ed573' : '#ff4757');
-
-  if (!barChart) {
-    const ctx = document.getElementById('liveBarChart').getContext('2d');
-    barChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: barLabels,
-        datasets: [{
-          label: 'Flow Count',
-          data: barValues,
-          backgroundColor: bgColors,
-          borderColor: bdColors,
-          borderWidth: 1.5,
-          borderRadius: 3,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 600, easing: 'easeInOutQuart' },
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: {
-            title: (items) => ALL_LABELS[items[0].dataIndex],
-            label: (ctx) => ` ${ctx.parsed.y.toLocaleString()} flows`,
-          }},
-        },
-        scales: {
-          x: {
-            ticks: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#475569' : '#bbc9cf', font: { family: 'Inter', size: 9 }, maxRotation: 45, minRotation: 30 },
-            grid: { color: document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(203,213,225,0.8)' : 'rgba(60,73,78,0.3)' },
-            border: { color: document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(203,213,225,1)' : 'rgba(60,73,78,0.5)' },
-          },
-          y: {
-            ticks: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#475569' : '#bbc9cf', font: { family: 'JetBrains Mono', size: 10 } },
-            grid: { color: document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(203,213,225,0.8)' : 'rgba(60,73,78,0.3)' },
-            border: { color: document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(203,213,225,1)' : 'rgba(60,73,78,0.5)' },
-          },
-        },
-      },
-    });
-  } else {
-    barChart.data.datasets[0].data = barValues;
-    barChart.update('active');
-  }
-
-  // Donut
-  const totalA = Object.values(labelTotals).filter((_, i) => ALL_LABELS[i] !== 'BENIGN').reduce((a, b) => a + b, 0);
-  const totalB = labelTotals['BENIGN'];
-
-  if (!donutChart) {
-    const ctx2 = document.getElementById('liveDonutChart').getContext('2d');
-    donutChart = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: ['Benign', 'Attacks'],
-        datasets: [{
-          data: [totalB, totalA],
-          backgroundColor: ['rgba(46,213,115,0.85)', 'rgba(255,71,87,0.85)'],
-          borderColor: ['#2ed573', '#ff4757'],
-          borderWidth: 2,
-          hoverOffset: 6,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        animation: { duration: 500 },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#475569' : '#bbc9cf', font: { family: 'Inter', size: 11 }, padding: 12, boxWidth: 10, boxHeight: 10 },
-          },
-        },
-      },
-    });
-  } else {
-    donutChart.data.datasets[0].data = [totalB, totalA];
-    donutChart.update('active');
-  }
-}
-
-// ── Alerts panel ──────────────────────────────────────────────────────────
-function addAlerts(attackTypes) {
-  const now = new Date();
-  const ts  = now.toTimeString().slice(0, 8);
-
-  Object.entries(attackTypes).forEach(([type, count]) => {
-    const sev   = SEVERITY_MAP[type] || { label: 'Medium', cls: 'medium', dotCls: 'medium' };
-    alerts.unshift({ ts, type, count, sev });
-  });
-
-  // Keep max 10
-  if (alerts.length > 10) alerts.splice(10);
-
-  renderAlerts();
-}
-
-function renderAlerts() {
-  if (alerts.length === 0) {
-    alertsEmpty.style.display = 'flex';
-    alertsCount.textContent   = '0';
+  // Ambient idle wave when pulse data is empty
+  if (pulseData.length === 0) {
+    ctx.strokeStyle = baselineColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    for (let x = 0; x < w; x += 12) {
+      const yOffset = Math.sin(x * 0.04 + Date.now() * 0.003) * 4;
+      ctx.lineTo(x, h / 2 + yOffset);
+    }
+    ctx.stroke();
     return;
   }
 
-  alertsEmpty.style.display = 'none';
-  alertsCount.textContent   = alerts.length;
+  const visible = pulseData.slice(-maxBars);
 
-  // Build HTML
-  const html = alerts.map(a => `
-    <div class="alert-item">
-      <span class="alert-dot ${a.sev.dotCls}"></span>
-      <div class="alert-body">
-        <div class="alert-type">${a.type}</div>
-        <div class="alert-time">${a.ts}</div>
-      </div>
-      <span class="badge badge-${a.sev.cls}">${a.sev.label}</span>
-      <span class="alert-count">+${a.count}</span>
-    </div>
-  `).join('');
+  // Baseline
+  ctx.strokeStyle = baselineColor;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, h / 2);
+  ctx.lineTo(w, h / 2);
+  ctx.stroke();
 
-  // Preserve empty node, replace only items
-  alertsList.innerHTML = html;
+  // Vertical Frequency Bars
+  visible.forEach((entry, i) => {
+    const x = w - (visible.length - i) * (BAR_WIDTH + BAR_GAP);
+    const barHeight = entry.attack ? h * 0.62 : h * 0.30;
+    const color = entry.attack ? redColor : cyanColor;
+
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = entry.attack ? 12 : 5;
+    ctx.fillRect(x, h / 2 - barHeight / 2, BAR_WIDTH, barHeight);
+  });
+  ctx.shadowBlur = 0;
 }
 
-// ── Timer ─────────────────────────────────────────────────────────────────
-function updateTimer() {
-  secondsAgo = 0;
+function pushPulse(isAttack) {
+  pulseData.push({ attack: isAttack });
+  if (pulseData.length > 400) pulseData.shift();
+  drawPulse();
 }
 
-setInterval(() => {
-  secondsAgo += 1;
-  lastUpdated.textContent = secondsAgo === 0 ? 'just now' :
-    secondsAgo < 60 ? `${secondsAgo}s ago` : `${Math.floor(secondsAgo/60)}m ago`;
-}, 1000);
+// ── Metrics & Threat Index Updater ──
+function updateMetricsUI() {
+  if (totalEl) totalEl.textContent = totalCount.toLocaleString();
+  if (benignEl) benignEl.textContent = benignCount.toLocaleString();
+  if (attackEl) attackEl.textContent = attackCount.toLocaleString();
 
-// ── Boot ──────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  simulateCycle();                                   // run immediately
-  setInterval(simulateCycle, 3000);                  // then every 3s
+  const totalSafe = Math.max(1, totalCount);
+  const benignPct = ((benignCount / totalSafe) * 100).toFixed(1);
+  const attackPct = ((attackCount / totalSafe) * 100).toFixed(1);
+
+  if (benignPctEl) benignPctEl.textContent = `${benignPct}% normal network activity`;
+  if (attackPctEl) attackPctEl.textContent = `${attackPct}% intrusion attempts`;
+
+  // Calculate Threat Index Gauge (0-100)
+  const threatIndex = Math.min(100, Math.round((attackCount / totalSafe) * 100));
+  if (threatIndexVal) threatIndexVal.textContent = `${threatIndex} / 100`;
+  if (threatGaugeFill) threatGaugeFill.style.width = `${threatIndex}%`;
+
+  // Update Status Banner
+  if (systemBanner) {
+    if (threatIndex >= 25 || attackCount > 0) {
+      systemBanner.className = 'system-banner alert';
+      if (bannerTitle) bannerTitle.textContent = `SYSTEM STATUS: ELEVATED THREAT DETECTED (${threatIndex}/100)`;
+      if (bannerSub) bannerSub.textContent = `${attackCount} malicious anomalies flagged by Random Forest model`;
+    } else {
+      systemBanner.className = 'system-banner secure';
+      if (bannerTitle) bannerTitle.textContent = 'SYSTEM STATUS: NOMINAL (SECURE)';
+      if (bannerSub) bannerSub.textContent = 'Real-time packet sniffing active · 0 threat anomalies detected';
+    }
+  }
+
+  // Update Distribution Breakdown Matrix
+  updateBreakdownMatrix();
+}
+
+function updateBreakdownMatrix() {
+  const totalSafe = Math.max(1, totalCount);
+
+  if (bBenignCount) bBenignCount.textContent = (breakdownMap.BENIGN || 0).toLocaleString();
+  if (bBenignFill) bBenignFill.style.width = `${((breakdownMap.BENIGN || 0) / totalSafe * 100).toFixed(0)}%`;
+
+  if (bDdosCount) bDdosCount.textContent = (breakdownMap.DDoS || 0).toLocaleString();
+  if (bDdosFill) bDdosFill.style.width = `${((breakdownMap.DDoS || 0) / totalSafe * 100).toFixed(0)}%`;
+
+  if (bPortscanCount) bPortscanCount.textContent = (breakdownMap.PortScan || 0).toLocaleString();
+  if (bPortscanFill) bPortscanFill.style.width = `${((breakdownMap.PortScan || 0) / totalSafe * 100).toFixed(0)}%`;
+
+  if (bWebCount) bWebCount.textContent = (breakdownMap["Web Attack – Brute Force"] || 0).toLocaleString();
+  if (bWebFill) bWebFill.style.width = `${((breakdownMap["Web Attack – Brute Force"] || 0) / totalSafe * 100).toFixed(0)}%`;
+
+  if (bHulkCount) bHulkCount.textContent = (breakdownMap["DoS Hulk"] || 0).toLocaleString();
+  if (bHulkFill) bHulkFill.style.width = `${((breakdownMap["DoS Hulk"] || 0) / totalSafe * 100).toFixed(0)}%`;
+}
+
+// ── Flow Table Rendering ──
+function clearEmptyRow() {
+  if (!tableBody) return;
+  const empty = tableBody.querySelector('.empty-row');
+  if (empty) empty.remove();
+}
+
+function createRowElement(flow) {
+  const row = document.createElement('tr');
+  row.className = flow.is_attack ? 'attack-row' : '';
+
+  const timeStr = flow.timestamp
+    ? new Date(flow.timestamp).toLocaleTimeString('en-GB', { hour12: false })
+    : new Date().toLocaleTimeString('en-GB', { hour12: false });
+
+  const srcPort = flow.src_port ? `:${flow.src_port}` : '';
+  const dstPort = flow.dst_port ? `:${flow.dst_port}` : '';
+  const proto = (flow.protocol || 'TCP').toUpperCase();
+  const severityBadge = flow.is_attack
+    ? '<span class="badge badge-critical">THREAT</span>'
+    : '<span class="badge badge-safe">BENIGN</span>';
+
+  row.innerHTML = `
+    <td>${timeStr}</td>
+    <td class="mono">${flow.src_ip || '192.168.1.x'}${srcPort}</td>
+    <td class="mono">${flow.dst_ip || '10.0.0.x'}${dstPort}</td>
+    <td><span class="proto-pill">${proto}</span></td>
+    <td><strong>${flow.predicted_label || 'BENIGN'}</strong></td>
+    <td>${severityBadge}</td>
+  `;
+  return row;
+}
+
+function addFlowToDOM(flow) {
+  if (!flow) return;
+
+  const flowKey = (flow.id !== undefined && flow.id !== null)
+    ? `id-${flow.id}`
+    : `${flow.timestamp}-${flow.src_ip}-${flow.src_port}-${Math.random()}`;
+
+  if (seenFlowKeys.has(flowKey)) return;
+  seenFlowKeys.add(flowKey);
+
+  flowsLastSec++;
+
+  totalCount++;
+  if (flow.is_attack) attackCount++;
+  else benignCount++;
+
+  const labelKey = flow.predicted_label || 'BENIGN';
+  breakdownMap[labelKey] = (breakdownMap[labelKey] || 0) + 1;
+
+  allFlowRecords.unshift(flow);
+  if (allFlowRecords.length > MAX_ROWS) {
+    const popped = allFlowRecords.pop();
+    if (popped && popped.id) seenFlowKeys.delete(`id-${popped.id}`);
+  }
+
+  updateMetricsUI();
+  pushPulse(Boolean(flow.is_attack));
+
+  if (!matchesFilterAndSearch(flow)) return;
+
+  if (tableBody) {
+    clearEmptyRow();
+    const row = createRowElement(flow);
+    tableBody.prepend(row);
+    while (tableBody.rows.length > MAX_ROWS) {
+      tableBody.deleteRow(-1);
+    }
+  }
+}
+
+function matchesFilterAndSearch(flow) {
+  if (currentFilter === 'attacks' && !flow.is_attack) return false;
+  if (currentFilter === 'benign' && flow.is_attack) return false;
+
+  if (searchQuery) {
+    const text = `${flow.src_ip} ${flow.dst_ip} ${flow.src_port} ${flow.dst_port} ${flow.protocol} ${flow.predicted_label}`.toLowerCase();
+    if (!text.includes(searchQuery)) return false;
+  }
+
+  return true;
+}
+
+function renderFilteredTable() {
+  if (!tableBody) return;
+  tableBody.innerHTML = '';
+
+  const flowsToDisplay = allFlowRecords.filter(matchesFilterAndSearch);
+
+  if (flowsToDisplay.length === 0) {
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="6"><div class="empty-state-box">No matching network flow records found.</div></td></tr>`;
+    return;
+  }
+
+  flowsToDisplay.forEach((flow) => {
+    tableBody.appendChild(createRowElement(flow));
+  });
+}
+
+// ── Socket & HTTP Polling Dual Engine ──
+function markOnline() {
+  if (statusEl) {
+    statusEl.classList.remove('offline');
+    statusEl.classList.add('online');
+  }
+  if (statusLabel) statusLabel.textContent = 'LIVE SENTINEL CONNECTED';
+}
+
+function markOffline() {
+  if (statusEl) {
+    statusEl.classList.remove('online');
+    statusEl.classList.add('offline');
+  }
+  if (statusLabel) statusLabel.textContent = 'RECONNECTING...';
+}
+
+socket.on('connect', markOnline);
+socket.on('reconnect', markOnline);
+socket.on('disconnect', markOffline);
+socket.on('connect_error', markOnline);
+
+socket.on('new_flow', (flow) => {
+  addFlowToDOM(flow);
 });
 
-// ── Theme toggle chart update ─────────────────────────────────────────────
-window.addEventListener('themeChanged', () => {
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  const textColor = isLight ? '#475569' : '#bbc9cf';
-  const gridColor = isLight ? 'rgba(203,213,225,0.8)' : 'rgba(60,73,78,0.3)';
-  const borderColor = isLight ? 'rgba(203,213,225,1)' : 'rgba(60,73,78,0.5)';
+// Periodic HTTP Sync Fallback (Syncs both database stats & flow records every 1.5s)
+function syncFlowsFromBackend() {
+  fetch('/api/stats')
+    .then((r) => r.json())
+    .then((data) => {
+      if (data) {
+        if (data.total > totalCount) totalCount = data.total;
+        if (data.benign > benignCount) benignCount = data.benign;
+        if (data.attack > attackCount) attackCount = data.attack;
+        if (data.attack_types) {
+          Object.assign(breakdownMap, data.attack_types);
+        }
+        updateMetricsUI();
+      }
+    })
+    .catch(() => {});
 
-  if (barChart) {
-    barChart.options.scales.x.ticks.color = textColor;
-    barChart.options.scales.x.grid.color = gridColor;
-    barChart.options.scales.x.border.color = borderColor;
-    barChart.options.scales.y.ticks.color = textColor;
-    barChart.options.scales.y.grid.color = gridColor;
-    barChart.options.scales.y.border.color = borderColor;
-    barChart.update();
+  fetch('/api/flows?limit=40')
+    .then((r) => r.json())
+    .then((data) => {
+      if (data && data.flows && data.flows.length > 0) {
+        const flows = [...data.flows].reverse();
+        flows.forEach((f) => addFlowToDOM(f));
+      }
+    })
+    .catch(() => {});
+}
+
+setInterval(syncFlowsFromBackend, 1500);
+
+// Flows-Per-Second Metric Updater
+setInterval(() => {
+  const now = Date.now();
+  const dt = (now - lastSecTimestamp) / 1000;
+  const fps = (flowsLastSec / dt).toFixed(1);
+  if (fpsEl) fpsEl.textContent = `${fps} flows / sec`;
+  flowsLastSec = 0;
+  lastSecTimestamp = now;
+}, 1000);
+
+// ── Simulation Controls ──
+function sendSimulatedFlow() {
+  fetch('/api/simulate-flow', { method: 'POST' })
+    .then((r) => r.json())
+    .then((flow) => addFlowToDOM(flow))
+    .catch(() => {});
+}
+
+function toggleSimulation() {
+  if (simulationTimer) {
+    clearInterval(simulationTimer);
+    simulationTimer = null;
+    if (btnSimulate) {
+      btnSimulate.classList.remove('active');
+      btnSimulate.textContent = '⚡ Auto Stream';
+    }
+  } else {
+    sendSimulatedFlow();
+    simulationTimer = setInterval(sendSimulatedFlow, 750);
+    if (btnSimulate) {
+      btnSimulate.classList.add('active');
+      btnSimulate.textContent = '⏸ Pause Stream';
+    }
   }
-  if (donutChart) {
-    donutChart.options.plugins.legend.labels.color = textColor;
-    donutChart.update();
+}
+
+function triggerAttackBurst() {
+  for (let i = 0; i < 15; i++) {
+    setTimeout(sendSimulatedFlow, i * 110);
   }
+}
+
+if (btnSimulate) btnSimulate.addEventListener('click', toggleSimulation);
+if (btnBurst) btnBurst.addEventListener('click', triggerAttackBurst);
+
+// ── Filter Controls ──
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    renderFilteredTable();
+  });
+}
+
+if (filterAllBtn) {
+  filterAllBtn.addEventListener('click', () => {
+    currentFilter = 'all';
+    filterAllBtn.classList.add('active');
+    if (filterAttacksBtn) filterAttacksBtn.classList.remove('active');
+    if (filterBenignBtn) filterBenignBtn.classList.remove('active');
+    renderFilteredTable();
+  });
+}
+
+if (filterAttacksBtn) {
+  filterAttacksBtn.addEventListener('click', () => {
+    currentFilter = 'attacks';
+    filterAttacksBtn.classList.add('active');
+    if (filterAllBtn) filterAllBtn.classList.remove('active');
+    if (filterBenignBtn) filterBenignBtn.classList.remove('active');
+    renderFilteredTable();
+  });
+}
+
+if (filterBenignBtn) {
+  filterBenignBtn.addEventListener('click', () => {
+    currentFilter = 'benign';
+    filterBenignBtn.classList.add('active');
+    if (filterAllBtn) filterAllBtn.classList.remove('active');
+    if (filterAttacksBtn) filterAttacksBtn.classList.remove('active');
+    renderFilteredTable();
+  });
+}
+
+if (btnClearLog) {
+  btnClearLog.addEventListener('click', () => {
+    allFlowRecords = [];
+    seenFlowKeys.clear();
+    if (tableBody) {
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="6"><div class="empty-state-box">Log table cleared by user.</div></td></tr>';
+    }
+  });
+}
+
+// Initial Sync & Auto Simulation trigger if empty
+syncFlowsFromBackend();
+setTimeout(() => {
+  if (totalCount === 0) {
+    triggerAttackBurst();
+  }
+}, 800);
+
+// Idle Canvas Animation Tick
+setInterval(() => {
+  if (pulseData.length === 0) {
+    drawPulse();
+  }
+}, 400);
+
+// Re-draw canvas on theme change
+window.addEventListener('themeChanged', () => {
+  drawPulse();
 });

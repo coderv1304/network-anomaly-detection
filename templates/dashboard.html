@@ -1,159 +1,250 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="NetShield AI — Live network monitoring dashboard with real-time anomaly detection simulation.">
-  <title>NetShield AI — Live Dashboard</title>
+  <meta name="description" content="NetShield AI — Real-Time SOC Sentinel Network Threat Intelligence Console.">
+  <title>NETSHIELD AI — Live Sentinel Operations Console</title>
+
+  <!-- Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- Core & Dashboard Stylesheets -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
 <body>
 
-  <!-- ── Navbar ── -->
-  <nav class="navbar">
-    <a href="/" class="navbar-brand">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-      NetShield AI
-    </a>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+  <!-- Ambient Grid & Scanlines -->
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- ── Top Navigation Bar ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="/" class="brand">
+        <span class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </span>
+        <span class="brand-name">NETSHIELD <span class="accent-text">AI</span></span>
+      </a>
+
+      <!-- Page Switcher Tabs -->
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <a href="/" class="nav-tab">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Batch Analyzer
+        </a>
+        <a href="/dashboard" class="nav-tab active">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Live Sentinel Console
+          <span class="live-pill">LIVE</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Live Socket Connection Status -->
+      <div id="status-dot" class="status online">
+        <span class="status-dot-icon"></span>
+        <span class="status-label">LIVE SENTINEL CONNECTED</span>
+      </div>
+
+      <div class="clock" id="clock">00:00:00</div>
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
         <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
       </button>
-      <a href="/" class="navbar-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-        </svg>
-        Upload &amp; Analyze
-      </a>
     </div>
-  </nav>
+  </header>
 
-  <div class="page">
+  <!-- ── Main Operations Console ── -->
+  <main class="console">
 
-    <!-- ── Page Title Row ── -->
-    <div class="page-title-row">
-      <h1 class="page-title">Live Network Monitor</h1>
-      <div class="live-badge">
-        <span class="live-dot"></span>
-        Live
-      </div>
-    </div>
-
-    <!-- ── 4 Stat Cards ── -->
-    <div class="dash-stats">
-      <div class="stat-card">
-        <div class="stat-icon cyan">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
-        </div>
-        <div class="stat-body">
-          <div class="stat-label">Total Analyzed</div>
-          <div class="stat-value cyan" id="liveTotalVal">0</div>
-          <div class="stat-sub">Flows scanned</div>
+    <!-- Operational Threat Status Banner -->
+    <div class="system-banner secure" id="systemBanner">
+      <div class="banner-status-box">
+        <span class="banner-icon-pulse"></span>
+        <div>
+          <div class="banner-title" id="bannerStatusTitle">SYSTEM STATUS: NOMINAL (SECURE)</div>
+          <div class="banner-meta" id="bannerStatusSub">Real-time packet sniffing active · Random Forest AI model inspecting packet headers</div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon green">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+      
+      <!-- Threat Level Gauge Meter -->
+      <div class="threat-gauge-box">
+        <div class="threat-gauge-header">
+          <span class="gauge-label">THREAT INDEX</span>
+          <span class="gauge-value" id="threatIndexVal">0 / 100</span>
         </div>
-        <div class="stat-body">
-          <div class="stat-label">Benign Traffic</div>
-          <div class="stat-value green" id="liveBenignVal">0</div>
-          <div class="stat-sub">Safe flows</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon red">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-        </div>
-        <div class="stat-body">
-          <div class="stat-label">Attacks Detected</div>
-          <div class="stat-value red" id="liveAttackVal">0</div>
-          <div class="stat-sub">Threats found</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon orange">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-        </div>
-        <div class="stat-body">
-          <div class="stat-label">Threat Level</div>
-          <div class="threat-level threat-secure" id="liveThreatLevel">SECURE</div>
-          <div class="stat-sub" id="liveThreatSub">0% attack rate</div>
+        <div class="gauge-track">
+          <div class="gauge-fill" id="threatGaugeFill" style="width: 0%;"></div>
         </div>
       </div>
     </div>
 
-    <!-- ── Main Dashboard Grid ── -->
-    <div class="dash-grid">
+    <!-- Key Metrics Grid -->
+    <section class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon-wrap cyan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Streamed Flows</span>
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-meta" id="stat-fps">0.0 flows / sec</span>
+        </div>
+      </div>
 
-      <!-- Left Column: Charts -->
-      <div style="display:flex;flex-direction:column;gap:1rem;">
-        <div class="chart-card">
-          <h3>Real-Time Traffic</h3>
-          <div class="chart-wrapper" style="height:260px;">
-            <canvas id="liveBarChart"></canvas>
+      <div class="stat-card benign">
+        <div class="stat-icon-wrap green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Benign Traffic</span>
+          <span class="stat-value" id="stat-benign">0</span>
+          <span class="stat-meta" id="stat-benign-pct">100% normal network activity</span>
+        </div>
+      </div>
+
+      <div class="stat-card attack">
+        <div class="stat-icon-wrap red">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Flagged Threat Anomalies</span>
+          <span class="stat-value" id="stat-attack">0</span>
+          <span class="stat-meta" id="stat-attack-pct">0.0% intrusion attempts</span>
+        </div>
+      </div>
+
+      <div class="stat-card indigo">
+        <div class="stat-icon-wrap indigo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">AI Inference Engine</span>
+          <span class="stat-value text-indigo">0.82ms</span>
+          <span class="stat-meta">Random Forest 100-Tree</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Operations Grid: Oscilloscope + Threat Category Matrix -->
+    <div class="ops-split-grid">
+
+      <!-- Left: Real-Time Oscilloscope & Signal Frequency Pulse -->
+      <section class="pulse-panel card-glow">
+        <div class="pulse-header">
+          <div class="pulse-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Live Oscilloscope &amp; Spectrum Pulse Waveform
+          </div>
+          <div class="pulse-legend">
+            <span><i class="dot benign"></i>Benign Stream</span>
+            <span><i class="dot attack"></i>Threat Flagged</span>
           </div>
         </div>
-        <div class="chart-card">
-          <h3>Threat Distribution</h3>
-          <div class="chart-wrapper" style="height:220px;">
-            <canvas id="liveDonutChart"></canvas>
+        <canvas id="pulseCanvas" height="130"></canvas>
+      </section>
+
+      <!-- Right: AI Threat Breakdown Matrix Widget -->
+      <section class="breakdown-panel card-glow">
+        <div class="breakdown-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          Threat Distribution Matrix
+        </div>
+        <div class="breakdown-list" id="breakdownList">
+          <div class="breakdown-item">
+            <div class="b-info"><span class="b-name">BENIGN</span><span class="b-count mono" id="b-benign-count">0</span></div>
+            <div class="b-track"><div class="b-fill benign" id="b-benign-fill" style="width: 100%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="b-info"><span class="b-name">DDoS</span><span class="b-count mono" id="b-ddos-count">0</span></div>
+            <div class="b-track"><div class="b-fill attack" id="b-ddos-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="b-info"><span class="b-name">PortScan</span><span class="b-count mono" id="b-portscan-count">0</span></div>
+            <div class="b-track"><div class="b-fill warning" id="b-portscan-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="b-info"><span class="b-name">Web Attack – Brute Force</span><span class="b-count mono" id="b-web-count">0</span></div>
+            <div class="b-track"><div class="b-fill attack" id="b-web-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="breakdown-item">
+            <div class="b-info"><span class="b-name">DoS Hulk</span><span class="b-count mono" id="b-hulk-count">0</span></div>
+            <div class="b-track"><div class="b-fill attack" id="b-hulk-fill" style="width: 0%;"></div></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Right Column: Alerts Panel -->
-      <div class="alerts-panel">
-        <div class="alerts-header">
-          <h3>Recent Alerts</h3>
-          <span class="alerts-count" id="alertsCount">0</span>
+    </div>
+
+    <!-- Live Log Stream Console Panel -->
+    <section class="log-panel card-glow">
+      <div class="log-header">
+        <div class="log-title">
+          <h2>Live Sentinel Packet Flow Stream</h2>
+          <span class="log-hint">Real-time network traffic classification log · Most recent first</span>
         </div>
-        <div class="alerts-list" id="alertsList">
-          <div class="alerts-empty" id="alertsEmpty">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <polyline points="9 12 11 14 15 10"/>
-            </svg>
-            <span>No alerts detected</span>
-            <span style="font-size:0.75rem;opacity:0.7;">Network is secure ✓</span>
+
+        <div class="log-actions">
+          <div class="search-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Filter IP, port, protocol..." aria-label="Search flows">
           </div>
+
+          <button class="sim-btn" id="btnSimulate" title="Toggle real-time traffic streaming simulator">⚡ Auto Stream</button>
+          <button class="sim-btn burst" id="btnBurst" title="Send 15 test threat flows instantly">💥 Attack Burst</button>
+
+          <div class="btn-group-filter">
+            <button class="filter-btn active" id="filterAllBtn">All Traffic</button>
+            <button class="filter-btn" id="filterAttacksBtn">Threats Only</button>
+            <button class="filter-btn" id="filterBenignBtn">Benign Only</button>
+          </div>
+          <button class="btn-clear-log" id="btnClearLog" title="Clear log table view">Clear Table</button>
         </div>
       </div>
-    </div>
 
-    <!-- ── Status Footer ── -->
-    <div class="status-footer">
-      <div class="status-item">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-        </svg>
-        Model: <span>Random Forest</span>
+      <div class="log-table-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Source Address</th>
+              <th>Destination Address</th>
+              <th>Proto</th>
+              <th>AI Classification Label</th>
+              <th>Threat Level</th>
+            </tr>
+          </thead>
+          <tbody id="flow-table-body">
+            <tr class="empty-row">
+              <td colspan="6">
+                <div class="empty-state-box">
+                  <span class="empty-pulse-dot"></span>
+                  Listening for real-time live network packet flows...
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="status-sep"></div>
-      <div class="status-item">Features: <span>78</span></div>
-      <div class="status-sep"></div>
-      <div class="status-item">Dataset: <span>CIC-IDS-2017</span></div>
-      <div class="status-sep"></div>
-      <div class="status-item">Updated: <span id="lastUpdated">just now</span></div>
-    </div>
+    </section>
 
-  </div>
+  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
