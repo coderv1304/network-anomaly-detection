@@ -27,7 +27,7 @@ GET  /api/stats               -> totals + breakdown by predicted label
 GET  /api/unmapped-features   -> debug helper, see feature_mapper.py
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, Response
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
@@ -49,6 +49,29 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///network_anomaly.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+@app.route('/service-worker.js')
+def service_worker():
+    response = send_from_directory('static', 'service-worker.js')
+    response.headers['Content-Type'] = 'application/javascript; charset=utf-8'
+    # Never let browsers/CDNs cache the SW file itself — it's how updates propagate.
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+ 
+ 
+@app.route('/manifest.json')
+def manifest_alias():
+    # Optional convenience alias so /manifest.json also works;
+    # the canonical file lives at /static/manifest.json.
+    response = send_from_directory('static', 'manifest.json')
+    response.headers['Content-Type'] = 'application/manifest+json'
+    return response
+ 
+ 
+@app.route('/offline.html')
+def offline_page():
+    return send_from_directory('static', 'offline.html')
+ 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 

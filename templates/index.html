@@ -6,6 +6,46 @@
   <meta name="description" content="NetShield AI — Advanced Machine Learning Network Traffic Anomaly Detection and Threat Analytics Platform.">
   <title>NETSHIELD AI — Network Traffic Anomaly Detection</title>
 
+  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+ 
+<!-- PWA: manifest + theme color (address bar / status bar tint) -->
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#0d1b2a">
+ 
+<!-- iOS: Safari doesn't fully support the manifest spec, these tags fill the gaps -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NetShield">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+ 
+<!-- Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+ 
+<!-- Existing + new stylesheets (order matters: responsive.css loads after style.css) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+ 
+ 
+<!--
+  Paste this near the end of <body>, in BOTH templates, alongside your existing
+  <script src=".../js/main.js"> or <script src=".../js/dashboard.js"> tags.
+  It should load after those (order doesn't matter much, but keep it last for clarity).
+-->
+<script src="{{ url_for('static', filename='js/pwa-register.js') }}" defer></script>
+ 
+<!-- Optional UI hooks pwa-register.js looks for — drop these wherever fits your layout -->
+<!-- Install button (hidden until the browser says the app is installable) -->
+<button id="pwa-install-btn" hidden>📲 Install App</button>
+ 
+<!-- Update-available toast (hidden until a new service worker is waiting) -->
+
+ 
+<!-- Online/offline status pill, e.g. in your navbar -->
+<span id="pwa-net-status"></span>
+ 
   <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
