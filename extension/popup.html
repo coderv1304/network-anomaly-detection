@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentinel AI — Network Security Sentinel</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="sentinel-app">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="shield-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SENTINEL AI</h1>
+          <span class="brand-subtitle">Enterprise Network Threat Engine</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="status-indicator online" id="statusPill">
+          <span class="pulse-dot"></span>
+          <span id="statusText">ONLINE</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- Threat Risk Level Gauge -->
+    <section class="risk-card">
+      <div class="risk-header">
+        <span class="risk-title">NETWORK THREAT LEVEL</span>
+        <span class="risk-badge safe" id="riskBadge">SAFE</span>
+      </div>
+      <div class="risk-meter-container">
+        <div class="risk-meter-bar" id="riskMeterBar" style="width: 5%;"></div>
+      </div>
+      <div class="risk-details">
+        <span class="risk-score" id="riskScore">Risk Index: 0 / 100</span>
+        <span class="active-iface-tag" id="activeIfaceTag">Adapter: Auto-Detecting...</span>
+      </div>
+    </section>
+
+    <!-- Key Metrics Grid -->
+    <section class="metrics-grid">
+      <div class="metric-box">
+        <span class="metric-label">TOTAL FLOWS</span>
+        <span class="metric-value" id="valTotal">0</span>
+      </div>
+      <div class="metric-box warning">
+        <span class="metric-label">ATTACKS DETECTED</span>
+        <span class="metric-value" id="valAttacks">0</span>
+      </div>
+      <div class="metric-box success">
+        <span class="metric-label">BENIGN FLOWS</span>
+        <span class="metric-value" id="valBenign">0</span>
+      </div>
+    </section>
+
+    <!-- Interface Selector -->
+    <section class="iface-section">
+      <label for="ifaceSelect" class="iface-label">Active Sniffing Network Adapter</label>
+      <select id="ifaceSelect" class="iface-dropdown">
+        <option value="auto">⚡ Auto-Detect Best Active Interface</option>
+      </select>
+    </section>
+
+    <!-- Controls -->
+    <section class="actions-grid">
+      <button class="btn btn-primary" id="btnToggleStream">
+        <span class="icon">⚡</span>
+        <span id="streamBtnText">Auto Stream</span>
+      </button>
+      <button class="btn btn-danger" id="btnAttackBurst">
+        <span class="icon">💥</span>
+        <span>Attack Burst</span>
+      </button>
+      <button class="btn btn-outline" id="btnOpenConsole">
+        <span class="icon">📊</span>
+        <span>Full Console</span>
+      </button>
+    </section>
+
+    <!-- Live Threat Stream Feed -->
+    <section class="feed-section">
+      <div class="feed-header">
+        <h2>LIVE THREAT AUDIT LOG</h2>
+        <span class="feed-count" id="feedCount">0 events</span>
+      </div>
+      <div class="threat-feed" id="threatFeed">
+        <div class="empty-feed">No network anomalies detected. System secure.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="serverUrlTag">Server: http://127.0.0.1:5000</span>
+      <span>v2.0 Enterprise</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
