@@ -1,9 +1,46 @@
+# Python & Virtual Environments
 venv/
+env/
+.venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Environment variables & local secrets
 .env
+.env.local
+
+# IDE & Editor artifacts
+.vscode/
+.idea/
 .hintrc
-*.log
-uploads/
 .netbeans-derby/
-data/
+.claude/
+
+# Application Runtime & Uploads
+uploads/*
+!uploads/.gitkeep
+instance/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Raw Data (large CIC-IDS-2017 files >100MB)
+data/*.csv
+data/*.pcap
+# Preserve sample evaluation datasets in git
+!data/samples/
+!data/samples/*.csv
+!data/samples/.gitkeep
+
+# Large ML Model Artifacts (Use Git LFS or GitHub Release Assets)
+# models/random_forest.pkl is ~73MB and should not be tracked directly in git history
+models/*.pkl
+models/*.onnx
+!models/README.md
+
+# OS Artifacts
+Thumbs.db
+Desktop.ini
+.DS_Store
