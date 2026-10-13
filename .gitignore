@@ -44,3 +44,4 @@ models/*.onnx
 Thumbs.db
 Desktop.ini
 .DS_Store
+data/
