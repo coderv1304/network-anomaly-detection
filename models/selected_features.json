@@ -1,0 +1,24 @@
+{
+  "selected_features": [
+    "Total Fwd Packets",
+    "Subflow Fwd Packets",
+    "Flow Bytes/s",
+    "Subflow Bwd Packets",
+    "Total Backward Packets",
+    "Bwd Packets/s",
+    "Flow Packets/s",
+    "Fwd Packets/s",
+    "Subflow Fwd Bytes",
+    "RST Flag Count",
+    "Total Length of Fwd Packets",
+    "Flow Duration",
+    "Subflow Bwd Bytes",
+    "SYN Flag Count",
+    "Active Std",
+    "Fwd IAT Total",
+    "Total Length of Bwd Packets",
+    "Active Max"
+  ],
+  "count": 18,
+  "generated_on": "2026-10-13T17:26:18.655884+00:00"
+}
