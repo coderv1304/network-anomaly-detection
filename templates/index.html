@@ -1,58 +1,35 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
   <meta name="description" content="NetShield AI — Advanced Machine Learning Network Traffic Anomaly Detection and Threat Analytics Platform.">
-  <title>NETSHIELD AI — Network Traffic Anomaly Detection</title>
+  <title>NetShield NDR | Batch Analyzer</title>
 
-  
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
- 
-<!-- PWA: manifest + theme color (address bar / status bar tint) -->
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#0d1b2a">
- 
-<!-- iOS: Safari doesn't fully support the manifest spec, these tags fill the gaps -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NetShield">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
- 
-<!-- Icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
- 
-<!-- Existing + new stylesheets (order matters: responsive.css loads after style.css) -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
- 
- 
-<!--
-  Paste this near the end of <body>, in BOTH templates, alongside your existing
-  <script src=".../js/main.js"> or <script src=".../js/dashboard.js"> tags.
-  It should load after those (order doesn't matter much, but keep it last for clarity).
--->
-<script src="{{ url_for('static', filename='js/pwa-register.js') }}" defer></script>
- 
-<!-- Optional UI hooks pwa-register.js looks for — drop these wherever fits your layout -->
-<!-- Install button (hidden until the browser says the app is installable) -->
-<button id="pwa-install-btn" hidden>📲 Install App</button>
- 
-<!-- Update-available toast (hidden until a new service worker is waiting) -->
+  <!-- PWA: manifest + theme color -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#101516">
 
- 
-<!-- Online/offline status pill, e.g. in your navbar -->
-<span id="pwa-net-status"></span>
- 
-  <!-- Typography & Icons -->
+  <!-- iOS PWA tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NetShield">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+
+  <!-- Typography: IBM Plex Sans + IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Stylesheets in cascading priority -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}?v=2.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}?v=2.5">
+
+  <!-- Theme Script -->
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
 <body>
@@ -88,6 +65,14 @@
     </div>
 
     <div class="topbar-right">
+      <button class="cmd-palette-btn" id="btnOpenCmdPalette" title="Open Command Palette (Ctrl+K)" aria-label="Open Command Palette">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Commands</span>
+        <kbd>Ctrl+K</kbd>
+      </button>
+
+      <span id="pwa-net-status" class="nav-tab" style="padding: 4px 10px; font-size: 0.75rem;"></span>
+      <button id="pwa-install-btn" class="btn-sample" style="padding: 4px 10px; font-size: 0.75rem;" hidden>📲 Install</button>
       <div class="clock" id="topbarClock">00:00:00</div>
       
       <!-- Theme Toggle -->
@@ -102,20 +87,130 @@
   <!-- ── Main Workspace ── -->
   <main class="page-container">
 
-    <!-- Hero Header -->
-    <section class="hero-section">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Random Forest Model · CIC-IDS-2017 Engine
+    <!-- Compact Operational Telemetry Header (Pillar 1) -->
+    <section class="hero-section hero-compact">
+      <div class="telemetry-status-strip">
+        <div class="telemetry-pill">
+          <span class="badge-dot"></span>
+          <strong>Classifier:</strong> Random Forest
+        </div>
+        <div class="telemetry-pill">
+          <strong>Inputs:</strong> Flow CSV · PCAP · PCAPNG
+        </div>
+        <div class="telemetry-pill">
+          <strong>Threat intel:</strong> AbuseIPDB optional
+        </div>
+        <div class="telemetry-pill pill-secure">
+          <strong>Response:</strong> Simulated playbooks
+        </div>
       </div>
-      <h1>Network Traffic <span>Anomaly Detection</span></h1>
-      <p class="hero-sub">Upload network packet capture logs or flow CSVs to detect intrusion attempts, port scans, and denial-of-service threats in real time.</p>
+      <h1 class="hero-title-compact">Network Detection &amp; <span>Response (NDR)</span></h1>
+      <p class="hero-sub hero-sub-compact">Inspect packet captures and flow exports, then classify extracted network telemetry for anomaly indicators.</p>
+
+      <!-- Multi-Probe Sensor Fleet Grid (Enterprise Feature) -->
+      <div class="sensor-fleet-strip">
+        <div class="sensor-fleet-header">
+          <div class="sensor-fleet-heading">
+            <div class="sensor-fleet-title">Sensor fleet</div>
+            <div class="sensor-fleet-caption">Illustrative probe telemetry</div>
+          </div>
+          <div class="sensor-fleet-meta">
+            <span class="sensor-demo-tag">DEMO DATA</span>
+            <span>Aggregate throughput <strong>4.34 Gbps</strong></span>
+            <span>Average packet loss <strong>0.001%</strong></span>
+          </div>
+        </div>
+        <div class="sensor-probes-grid">
+          <div class="sensor-probe-card">
+            <div class="probe-card-top">
+              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-us-east-aws</span></div>
+              <span class="probe-engine-tag">eBPF · 6.5</span>
+            </div>
+            <div class="probe-metrics-row">
+              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">1.42 Gbps</strong></div>
+              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.001%</strong></div>
+            </div>
+          </div>
+          <div class="sensor-probe-card">
+            <div class="probe-card-top">
+              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-eu-central-fra</span></div>
+              <span class="probe-engine-tag">DPDK · 23.11</span>
+            </div>
+            <div class="probe-metrics-row">
+              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">820 Mbps</strong></div>
+              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.000%</strong></div>
+            </div>
+          </div>
+          <div class="sensor-probe-card">
+            <div class="probe-card-top">
+              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-onprem-dc1</span></div>
+              <span class="probe-engine-tag">AF_PACKET · Ring</span>
+            </div>
+            <div class="probe-metrics-row">
+              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">2.10 Gbps</strong></div>
+              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.003%</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network Ingestion Vector & Topology Filter Bar -->
+    <section class="topology-selector-card card-glow">
+      <div class="topology-header">
+        <span class="topology-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          INGESTION TOPOLOGY &amp; CAPTURE VECTORS:
+        </span>
+        <span class="topology-hint">Filter flows by physical and virtual network interface primitives</span>
+      </div>
+      <div class="topology-nav-tabs" role="tablist">
+        <button type="button" class="topology-tab active" data-vector="all" id="tabVectorAll">
+          <span class="vector-icon">⚡</span>
+          <span>All Vectors (Global)</span>
+        </button>
+        <button type="button" class="topology-tab" data-vector="eth0" id="tabVectorEth">
+          <span class="vector-icon">🖧</span>
+          <span>10GbE Fiber Backbone (eth0)</span>
+        </button>
+        <button type="button" class="topology-tab" data-vector="wlan0" id="tabVectorWlan">
+          <span class="vector-icon">📶</span>
+          <span>Corporate WLAN 802.11 (wlan0)</span>
+        </button>
+        <button type="button" class="topology-tab" data-vector="wwan0" id="tabVectorWwan">
+          <span class="vector-icon">🛰</span>
+          <span>5G Cellular / Edge IoT (wwan0)</span>
+        </button>
+        <button type="button" class="topology-tab" data-vector="wg0" id="tabVectorWg">
+          <span class="vector-icon">🔒</span>
+          <span>Cloud VPC / Zero-Trust (wg0)</span>
+        </button>
+      </div>
+
+      <!-- Contextual Dynamic L2 Link Status -->
+      <div class="topology-status-banner" id="topologyStatusBanner">
+        <div class="top-status-item">
+          <span class="top-status-label">ACTIVE INTERFACE:</span>
+          <span class="top-status-val" id="topActiveIface">Global Multi-Vector Ingestion</span>
+        </div>
+        <div class="top-status-item">
+          <span class="top-status-label">PHYSICAL / L2 LINK:</span>
+          <span class="top-status-val" id="topActiveLink">Trunk Gi0/1 (VLAN 10, 20, 50) · Full Duplex 10Gbps</span>
+        </div>
+        <div class="top-status-item">
+          <span class="top-status-label">L2/L3 HEALTH:</span>
+          <span class="top-status-val green-text" id="topActiveHealth">ARP Cache Clean · Airspace Monitored · Zero-Trust Active</span>
+        </div>
+      </div>
     </section>
 
     <!-- Upload & Action Card -->
     <section class="action-card card-glow">
       <div class="action-header">
-        <h2>Ingest Traffic Data</h2>
+        <div>
+          <h2>Deep Packet Capture (PCAP/PCAPNG) &amp; NetFlow Ingestion</h2>
+          <span class="table-sub">Ingest tcpdump or Wireshark captures, or NetFlow v9/IPFIX CSV exports</span>
+        </div>
         <button type="button" class="btn-sample" id="btnSampleDemo">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           Quick Demo (Load Built-in Dataset)
@@ -123,8 +218,8 @@
       </div>
 
       <!-- Drag & Drop File Zone -->
-      <div class="upload-zone" id="dropZone" tabIndex="0" role="button" aria-label="Upload CSV File">
-        <input type="file" id="fileInput" name="file" accept=".csv" aria-label="Select CSV file">
+      <div class="upload-zone" id="dropZone" tabIndex="0" role="button" aria-label="Upload PCAP or Flow File">
+        <input type="file" id="fileInput" name="file" accept=".pcap,.pcapng,.csv" aria-label="Select packet capture or flow file">
         <div class="upload-icon-wrapper">
           <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -132,10 +227,33 @@
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
         </div>
-        <div class="upload-title">Drop your CSV flow log file here</div>
-        <div class="upload-sub">or <span class="browse-link">click to browse computer</span></div>
-        <div class="upload-hint">Supports CIC-IDS-2017 &amp; pyflowmeter CSV formats · Max 50 MB</div>
+        <div class="upload-title">Drop PCAP, PCAPNG, or Flow CSV</div>
+        <div class="upload-sub">or <span class="browse-link">click to browse storage / SPAN dump</span></div>
+        <div class="upload-hint">PCAP / PCAPNG (tcpdump · Wireshark) · NetFlow IPFIX · CIC-IDS CSV · Max 50 MB</div>
         <div class="upload-filename" id="uploadFilename"></div>
+      </div>
+
+      <!-- Multi-Stage Processing Pipeline (Pillar 4) -->
+      <div class="pipeline-progress" id="pipelineProgress" hidden>
+        <div class="pipeline-step" id="pipeStep1">
+          <span class="step-num">1</span>
+          <span class="step-text">Ingesting Flow Logs</span>
+        </div>
+        <div class="pipeline-divider"></div>
+        <div class="pipeline-step" id="pipeStep2">
+          <span class="step-num">2</span>
+          <span class="step-text">Extracting 78 Features</span>
+        </div>
+        <div class="pipeline-divider"></div>
+        <div class="pipeline-step" id="pipeStep3">
+          <span class="step-num">3</span>
+          <span class="step-text">RF Model Inference</span>
+        </div>
+        <div class="pipeline-divider"></div>
+        <div class="pipeline-step" id="pipeStep4">
+          <span class="step-num">4</span>
+          <span class="step-text">SHAP &amp; Analytics</span>
+        </div>
       </div>
 
       <!-- Error Feedback Card -->
@@ -168,7 +286,10 @@
           <span class="title-bar"></span>
           Threat Intelligence Summary
         </div>
-        <div class="results-timestamp" id="resultsTimestamp">Analyzed just now</div>
+        <div class="results-context">
+          <div class="ingestion-summary" id="ingestionSummary" hidden></div>
+          <div class="results-timestamp" id="resultsTimestamp">Analyzed just now</div>
+        </div>
       </div>
 
       <!-- Stat KPI Cards -->
@@ -282,31 +403,52 @@
         <div class="table-card-header toolbar-wrap">
           <div class="table-title">
             <h3>Flow Records Log (Sample View)</h3>
-            <span class="table-sub">First 150 flows analyzed</span>
+            <span class="table-sub">Click any flow to open the SHAP Explainability &amp; Telemetry Drawer</span>
           </div>
           <div class="table-toolbar">
+            <div class="density-group" role="group" aria-label="Table Density">
+              <button type="button" class="btn-tool active" data-density="standard" id="btnDensityStandard" title="Standard Density">Standard</button>
+              <button type="button" class="btn-tool" data-density="compact" id="btnDensityCompact" title="Compact Density">Compact</button>
+            </div>
+
             <div class="search-box">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="flowSearchInput" placeholder="Search IP, Port or Class..." aria-label="Search flows">
+              <input type="text" id="flowSearchInput" placeholder="Search IP, Port or Class (Press /)..." aria-label="Search flows">
             </div>
+
             <select id="flowFilterSelect" class="filter-select" aria-label="Filter flows by status">
               <option value="all">All Traffic</option>
               <option value="attacks">Threats Only</option>
               <option value="benign">Benign Only</option>
             </select>
+
+            <button type="button" class="btn-tool" id="btnExportCSV" title="Export Flows to CSV">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+            <button type="button" class="btn-tool" id="btnExportJSON" title="Export Telemetry to JSON">JSON</button>
           </div>
         </div>
 
+        <!-- Active Filter Chips Bar (Pillar 3) -->
+        <div class="active-filter-bar" id="activeFilterChips" hidden>
+          <span class="filter-bar-label">Active Filter:</span>
+          <div id="filterChipsList" class="filter-chips-list"></div>
+          <button type="button" class="btn-clear-filters" id="btnClearAllFilters">Clear Filter</button>
+        </div>
+
         <div class="table-responsive">
-          <table class="data-table flow-records-table">
+          <table class="data-table flow-records-table" id="flowSampleTable">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Source IP : Port</th>
-                <th>Destination IP : Port</th>
-                <th>Protocol</th>
-                <th>AI Classification</th>
-                <th>Status</th>
+                <th>Vector</th>
+                <th>Source Host (IP · ASN · Geo)</th>
+                <th>Target Host</th>
+                <th>Proto</th>
+                <th>Classification &amp; CVSS</th>
+                <th>Triage State</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="flowSampleTableBody">
@@ -320,8 +462,328 @@
 
   </main>
 
+  <!-- ── Flow Inspection SideSheet Drawer (Pillar 2 - P0) ── -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="inspector-drawer" id="flowDrawer" aria-label="Flow Telemetry &amp; SHAP Inspector" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <div class="drawer-badge-row">
+          <span class="drawer-flow-id" id="drawerFlowId">Flow #0</span>
+          <span class="badge" id="drawerThreatBadge">Analyzing</span>
+          <span class="cvss-pill" id="drawerCvssBadge">CVSS 9.8</span>
+        </div>
+        <div class="drawer-route-text" id="drawerRouteText">192.168.1.10:49152 → 10.0.0.1:80</div>
+        <div class="drawer-mitre" id="drawerMitre">MITRE ATT&amp;CK: T1498 · Network Denial of Service</div>
+      </div>
+      <button class="drawer-close-btn" id="btnCloseDrawer" aria-label="Close Inspector Drawer">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Incident Lifecycle Triage Bar (SOC Workflow) -->
+      <section class="drawer-section incident-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Incident Lifecycle &amp; SOC SLA Triage
+        </div>
+        <div class="incident-triage-bar">
+          <div class="triage-field">
+            <span class="triage-label">Triage State:</span>
+            <select id="drawerTriageStatus" class="triage-status-select" aria-label="Incident Triage Status">
+              <option value="New">● New Alert</option>
+              <option value="Investigating">● Investigating</option>
+              <option value="Suppressed">● Suppressed / False Positive</option>
+              <option value="Mitigated">● Mitigated / Closed</option>
+            </select>
+          </div>
+          <div class="triage-field">
+            <span class="triage-label">SLA Countdown:</span>
+            <span class="sla-badge" id="drawerSlaBadge">No active SLA</span>
+          </div>
+          <div class="triage-field">
+            <span class="triage-label">Assigned Tier:</span>
+            <span class="analyst-badge"><span class="analyst-avatar">🛡️</span> <span id="drawerAnalystName">SecOps Tier-2</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Threat Intelligence Attribution (ASN, GeoIP, Abuse Score) -->
+      <section class="drawer-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Threat Intelligence Attribution &amp; Origin
+        </div>
+        <div class="threat-intel-grid">
+          <div class="threat-cell">
+            <span class="threat-lbl">Autonomous System (ASN)</span>
+            <span class="threat-val" id="drawerThreatAsn">AS63949 Linode LLC</span>
+          </div>
+          <div class="threat-cell">
+            <span class="threat-lbl">GeoIP / Physical Origin</span>
+            <span class="threat-val" id="drawerThreatGeo">US 🇺🇸 Dallas, TX</span>
+          </div>
+          <div class="threat-cell">
+            <span class="threat-lbl">AbuseIPDB Confidence</span>
+            <span class="abuse-badge" id="drawerAbuseScore">Not queried</span>
+          </div>
+          <div class="threat-cell">
+            <span class="threat-lbl">Threat Category</span>
+            <span class="threat-val tag-val" id="drawerThreatTag">Tor Exit Node / Scanner</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="drawer-section packet-dissector-section" id="packetDissectorSection" hidden>
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+          Packet Dissector Header
+          <span class="dissector-source-tag">PCAP</span>
+        </div>
+        <p class="drawer-section-sub" id="packetDissectorSummary">First observed packet in this flow.</p>
+        <div class="dissector-layer-list" id="packetDissectorLayers" aria-label="Decoded protocol layers"></div>
+        <dl class="packet-dissector-grid" id="packetDissectorFields"></dl>
+      </section>
+
+      <!-- Layer-2 Ingress Vector & Physical Link Context -->
+      <section class="drawer-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          Layer-2 Ingress Vector &amp; Hardware Telemetry
+        </div>
+        <div class="l2-telemetry-grid">
+          <div class="l2-cell">
+            <span class="l2-lbl">Capture Interface</span>
+            <span class="l2-val mono" id="drawerL2Interface">eth0</span>
+          </div>
+          <div class="l2-cell">
+            <span class="l2-lbl">Link Architecture</span>
+            <span class="l2-val" id="drawerL2Vector">Ethernet 802.3</span>
+          </div>
+          <div class="l2-cell">
+            <span class="l2-lbl">Switch Port / SSID / Peer</span>
+            <span class="l2-val mono" id="drawerL2Port">Trunk Gi0/1 (VLAN 10)</span>
+          </div>
+          <div class="l2-cell">
+            <span class="l2-lbl">PHY / Link Status</span>
+            <span class="l2-val" id="drawerL2Signal">Full Duplex 10 Gbps</span>
+          </div>
+          <div class="l2-cell full-width">
+            <span class="l2-lbl">L2 Domain Health</span>
+            <span class="l2-val" id="drawerL2Health">ARP Table Verified · 0 Broadcast Storms</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHAP Explainability Waterfall -->
+      <section class="drawer-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          SHAP Model Feature Importance Contribution
+        </div>
+        <p class="drawer-section-sub">TreeSHAP breakdown of the top 5 network metrics triggering the model classification.</p>
+        <div class="shap-waterfall" id="drawerShapList">
+          <!-- Populated by main.js -->
+        </div>
+      </section>
+
+      <!-- Raw Flow Metrics -->
+      <section class="drawer-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Raw Flow Telemetry Vector
+        </div>
+        <div class="telemetry-grid">
+          <div class="telemetry-cell">
+            <span class="tel-label">Flow Duration</span>
+            <span class="tel-value" id="drawerTelDuration">0 µs</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="tel-label">Flow Throughput</span>
+            <span class="tel-value" id="drawerTelBytes">0 B/s</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="tel-label">Packet Velocity</span>
+            <span class="tel-value" id="drawerTelPkts">0 pkts/s</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="tel-label">Fwd / Bwd Packets</span>
+            <span class="tel-value" id="drawerTelPacketRatio">0 / 0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TCP Flags Breakdown -->
+      <section class="drawer-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          TCP Header Flags Inspection
+        </div>
+        <div class="flags-badge-group" id="drawerFlagsGroup">
+          <span class="flag-chip" id="flagSYN">SYN: 0</span>
+          <span class="flag-chip" id="flagACK">ACK: 0</span>
+          <span class="flag-chip" id="flagRST">RST: 0</span>
+          <span class="flag-chip" id="flagFIN">FIN: 0</span>
+        </div>
+      </section>
+
+      <!-- Automated SOAR Containment Playbooks (Enterprise Response) -->
+      <section class="drawer-section soar-section">
+        <div class="drawer-section-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Automated SOAR Containment Playbooks (One-Click Response)
+        </div>
+        <p class="drawer-section-sub">Execute active policy enforcement across enterprise firewalls, edge WAFs, and cloud security groups.</p>
+        
+        <div class="soar-btn-grid">
+          <button type="button" class="btn-soar btn-soar-danger" id="btnSoarIptables">
+            <span class="soar-icon">⚡</span>
+            <span class="soar-text">
+              <strong>iptables DROP Host</strong>
+              <small>Null-route on local Linux kernel</small>
+            </span>
+          </button>
+          
+          <button type="button" class="btn-soar btn-soar-warn" id="btnSoarCloudflare">
+            <span class="soar-icon">☁️</span>
+            <span class="soar-text">
+              <strong>Cloudflare Edge WAF Block</strong>
+              <small>Global anycast edge mitigation</small>
+            </span>
+          </button>
+          
+          <button type="button" class="btn-soar" id="btnSoarAwsSg">
+            <span class="soar-icon">🛡️</span>
+            <span class="soar-text">
+              <strong>Revoke AWS SecGroup Ingress</strong>
+              <small>VPC perimeter isolation</small>
+            </span>
+          </button>
+          
+          <button type="button" class="btn-soar" id="btnSoarStix">
+            <span class="soar-icon">📦</span>
+            <span class="soar-text">
+              <strong>Export STIX 2.1 Threat IoC</strong>
+              <small>Publish to MISP / TAXII feeds</small>
+            </span>
+          </button>
+
+          <button type="button" class="btn-soar" id="btnSoarSlack">
+            <span class="soar-icon">#</span>
+            <span class="soar-text">
+              <strong>Simulate Slack Alert</strong>
+              <small>Mock #soc-alerts webhook delivery</small>
+            </span>
+          </button>
+
+          <button type="button" class="btn-soar" id="btnSoarPagerDuty">
+            <span class="soar-icon">!</span>
+            <span class="soar-text">
+              <strong>Simulate PagerDuty Incident</strong>
+              <small>Mock on-call event dispatch</small>
+            </span>
+          </button>
+        </div>
+
+        <!-- Real-Time SOAR CLI Execution Terminal -->
+        <div class="soar-terminal-box">
+          <div class="terminal-bar">
+            <span class="term-dot dot-red"></span>
+            <span class="term-dot dot-yellow"></span>
+            <span class="term-dot dot-green"></span>
+            <span class="term-title">SOAR Engine Orchestration Terminal (v2.4)</span>
+          </div>
+          <div class="terminal-body" id="soarTerminalOutput">
+            <span class="term-prompt">soar@netshield:~$</span> Ready. Click any automated containment playbook above to dispatch security action.
+          </div>
+        </div>
+
+        <div class="triage-actions" style="margin-top:14px;">
+          <button type="button" class="btn-triage" id="btnDrawerCopyJson">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Flow JSON
+          </button>
+          <button type="button" class="btn-triage" id="btnDrawerFlagFP">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg>
+            Suppress / Mark False Positive
+          </button>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- ── Power-User Command Palette Modal (Pillar 5 - P4) ── -->
+  <div class="cmd-backdrop" id="cmdBackdrop"></div>
+  <div class="cmd-modal" id="cmdModal" role="dialog" aria-modal="true" aria-label="Command Palette">
+    <div class="cmd-search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="cmdInput" placeholder="Type a command or search action (e.g. demo, export, theme)..." autocomplete="off">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="cmd-list" id="cmdList">
+      <div class="cmd-group-label">Quick Actions</div>
+      <div class="cmd-item" data-action="load-demo" tabIndex="0">
+        <div class="cmd-item-icon">⚡</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Load Built-in Demo Dataset</div>
+          <div class="cmd-item-sub">Execute classification on 1,500 CIC-IDS-2017 test flows</div>
+        </div>
+        <kbd>↵ Enter</kbd>
+      </div>
+
+      <div class="cmd-item" data-action="goto-dashboard" tabIndex="0">
+        <div class="cmd-item-icon">🛰</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Open Live Sentinel Console</div>
+          <div class="cmd-item-sub">Switch to real-time network stream operations</div>
+        </div>
+        <kbd>G then D</kbd>
+      </div>
+
+      <div class="cmd-group-label">Analysis &amp; Reporting</div>
+      <div class="cmd-item" data-action="focus-search" tabIndex="0">
+        <div class="cmd-item-icon">🔍</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Filter Flow Records Table</div>
+          <div class="cmd-item-sub">Jump directly to the flow search box</div>
+        </div>
+        <kbd>/</kbd>
+      </div>
+
+      <div class="cmd-item" data-action="export-csv" tabIndex="0">
+        <div class="cmd-item-icon">📥</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Export Flows to CSV</div>
+          <div class="cmd-item-sub">Download analyzed sample flow dataset</div>
+        </div>
+        <kbd>C</kbd>
+      </div>
+
+      <div class="cmd-item" data-action="export-json" tabIndex="0">
+        <div class="cmd-item-icon">📋</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Export Full Report as JSON</div>
+          <div class="cmd-item-sub">Export complete model predictions and telemetry statistics</div>
+        </div>
+        <kbd>J</kbd>
+      </div>
+
+      <div class="cmd-group-label">System &amp; Theme</div>
+      <div class="cmd-item" data-action="toggle-theme" tabIndex="0">
+        <div class="cmd-item-icon">🌓</div>
+        <div class="cmd-item-info">
+          <div class="cmd-item-title">Toggle Dark / Light Theme</div>
+          <div class="cmd-item-sub">Switch between Deep Espresso and Café Crème palettes</div>
+        </div>
+        <kbd>T</kbd>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Interactive Toast Container ── -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
   <!-- External JS Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}?v=2.4"></script>
+  <script src="{{ url_for('static', filename='js/pwa-register.js') }}?v=2.8" defer></script>
 </body>
 </html>

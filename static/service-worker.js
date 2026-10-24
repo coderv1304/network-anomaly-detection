@@ -6,7 +6,7 @@
  * - NEVER caches /predict (file upload) or /socket.io/* (live WebSocket traffic)
  */
 
-const VERSION = 'v1.0.0';
+const VERSION = 'v2.8.0';
 const STATIC_CACHE = `netshield-static-${VERSION}`;
 const RUNTIME_CACHE = `netshield-runtime-${VERSION}`;
 
@@ -18,6 +18,7 @@ const APP_SHELL = [
   '/static/manifest.json',
   '/static/css/style.css',
   '/static/css/responsive.css',
+  '/static/css/design.css',
   '/static/js/main.js',
   '/static/js/dashboard.js',
   '/static/js/pwa-register.js',

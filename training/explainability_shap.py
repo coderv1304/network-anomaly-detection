@@ -9,18 +9,15 @@ Explainability & Reduced Feature Selection Engine:
 5. Generates detailed markdown report in docs/FEATURE_SELECTION_SHAP.md.
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
-import joblib
-import pandas as pd
-import numpy as np
-from datetime import datetime, timezone
-from typing import List, Dict, Any
+from datetime import UTC, datetime
 
+import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
 from sklearn.preprocessing import LabelEncoder
 
 try:
@@ -34,10 +31,10 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 try:
-    from training.preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
+    from training.preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
     from training.train_pipeline import load_split_data
 except ImportError:
-    from preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
+    from preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
     from train_pipeline import load_split_data
 
 # Network domain taxonomy for grouping CIC-IDS-2017 features
@@ -92,7 +89,7 @@ def run_feature_analysis(
 
     label_encoder = LabelEncoder()
     y_train = label_encoder.fit_transform(train_df["Label"])
-    y_test = label_encoder.transform(test_df["Label"])
+    label_encoder.transform(test_df["Label"])
 
     feature_cols = [c for c in train_df.columns if c not in IDENTIFIER_COLUMNS]
     X_train = train_df[feature_cols]
@@ -114,7 +111,6 @@ def run_feature_analysis(
     }).sort_values(by="Gini_Importance", ascending=False).reset_index(drop=True)
 
     # 2. SHAP Values (TreeSHAP) if installed
-    shap_top_ranked = []
     if HAS_SHAP:
         print("⚡ Computing TreeSHAP values on sample background...")
         try:
@@ -139,9 +135,8 @@ def run_feature_analysis(
             importance_df["SHAP_Mean_Abs"] = mean_abs_shap
             importance_df = importance_df.sort_values(by="SHAP_Mean_Abs", ascending=False).reset_index(drop=True)
             print("TreeSHAP analysis completed successfully.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Warning: TreeSHAP computation encountered: {e}. Falling back to MDI + Permutation.")
-            importance_df["SHAP_Mean_Abs"] = importance_df["Gini_Importance"]
     else:
         print("Note: 'shap' package not installed. Using MDI feature importance ranking.")
         importance_df["SHAP_Mean_Abs"] = importance_df["Gini_Importance"]
@@ -155,7 +150,7 @@ def run_feature_analysis(
         json.dump({
             "selected_features": top_features,
             "count": len(top_features),
-            "generated_on": datetime.now(timezone.utc).isoformat()
+            "generated_on": datetime.now(UTC).isoformat()
         }, f, indent=2)
     print(f"✅ Saved top {len(top_features)} selected features to: {output_json}")
 
@@ -163,7 +158,7 @@ def run_feature_analysis(
     lines = [
         "# Feature Selection & SHAP Explainability Report",
         "",
-        f"*Generated on: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
+        f"*Generated on: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
         "",
         "## 1. Selected Reduced Feature Set (15–20 Features for Go Pipeline)",
         "The following reduced feature set balances predictive discrimination with low real-time computational overhead in the Go packet assembler (`capture/`):",

@@ -5,8 +5,8 @@ Unit tests for feature_mapper.py ensuring snake_case normalization
 and mapping to model-expected CIC-IDS-2017 feature names.
 """
 
-import pytest
-from feature_mapper import _auto_normalize, normalize_flow_features, FEATURE_NAME_OVERRIDES
+from feature_mapper import _auto_normalize, normalize_flow_features
+
 
 def test_auto_normalize_common_abbreviations():
     assert _auto_normalize("tot_fwd_pkts") == "Total Fwd Packets"

@@ -15,12 +15,13 @@ Audits CIC-IDS-2017 files for:
 Outputs a structured audit report in markdown.
 """
 
-import os
-import glob
 import argparse
-import pandas as pd
+import glob
+import os
+from datetime import UTC, datetime
+
 import numpy as np
-from datetime import datetime, timezone
+import pandas as pd
 
 ENCODINGS = ["utf-8", "latin1", "ISO-8859-1"]
 
@@ -33,14 +34,15 @@ def audit_file(filepath: str) -> dict:
         try:
             df = pd.read_csv(filepath, encoding=enc, low_memory=False)
             break
-        except Exception:
+        except Exception as e:  # noqa: BLE001
+            print(f"CSV read error (encoding {enc}): {e}")
             continue
 
     if df is None:
         return {"filename": fname, "error": "Could not read CSV with standard encodings."}
 
     total_rows = len(df)
-    cols_raw = list(df.columns)
+    list(df.columns)
     df.columns = df.columns.str.strip()
 
     # 1. Duplicate check
@@ -100,7 +102,7 @@ def run_audit(target_dir: str, output_report: str):
     lines = [
         "# CIC-IDS-2017 Dataset Audit Report",
         "",
-        f"*Generated on: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
+        f"*Generated on: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
         "",
         "## 1. Overview & Context",
         "This audit verifies data hygiene and known artifact flaws documented by **Engelen et al. (2021)** in *Computers & Security*. It checks for duplicate flows, infinite values, invalid flow durations, and label anomalies.",
@@ -127,7 +129,7 @@ def run_audit(target_dir: str, output_report: str):
     ])
 
     for r in results:
-        if "label_counts" in r and r["label_counts"]:
+        if r.get("label_counts"):
             lines.append(f"### `{r['filename']}`")
             lines.append("| Label | Count | Proportion |")
             lines.append("| :--- | :--- | :--- |")

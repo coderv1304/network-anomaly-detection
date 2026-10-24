@@ -1,6 +1,7 @@
 import os
-import zlib
 import struct
+import zlib
+
 
 def make_png(width, height, red, green, blue):
     # PNG signature

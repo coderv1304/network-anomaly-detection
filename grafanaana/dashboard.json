@@ -1,0 +1,28 @@
+{
+  "dashboard": {
+    "title": "Network Anomaly Detection",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Packets per second",
+        "targets": [{ "expr": "rate(packets_total[1m])" }]
+      },
+      {
+        "type": "graph",
+        "title": "Active flows",
+        "targets": [{ "expr": "active_flows" }]
+      },
+      {
+        "type": "graph",
+        "title": "Inference latency (95th pct)",
+        "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(inference_latency_seconds_bucket[5m])) by (le)" }]
+      },
+      {
+        "type": "graph",
+        "title": "Dropped packets",
+        "targets": [{ "expr": "dropped_packets" }]
+      }
+    ]
+  },
+  "overwrite": true
+}

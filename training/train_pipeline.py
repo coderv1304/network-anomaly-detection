@@ -11,16 +11,14 @@ Features:
 5. Saves unified pipeline (models/pipeline.pkl) and exports legacy components for app.py compatibility.
 """
 
+import argparse
+import glob
+import json
 import os
 import sys
-import glob
-import argparse
+
 import joblib
-import json
 import pandas as pd
-import numpy as np
-from datetime import datetime, timezone
-from typing import Optional
 
 # Ensure project root is in sys.path when executed directly as python training/train_pipeline.py
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -29,15 +27,19 @@ if PROJECT_ROOT not in sys.path:
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
 try:
-    from training.preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
-    from training.evaluate import evaluate_predictions, format_evaluation_summary, CIC_DAYS
+    from training.evaluate import (
+        CIC_DAYS,
+        evaluate_predictions,
+        format_evaluation_summary,
+    )
+    from training.preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
 except ImportError:
-    from preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
-    from evaluate import evaluate_predictions, format_evaluation_summary, CIC_DAYS
+    from evaluate import CIC_DAYS, evaluate_predictions, format_evaluation_summary
+    from preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
 
 DEFAULT_DATA_DIR = "data"
 DEFAULT_OUTPUT_DIR = "models"
@@ -91,7 +93,7 @@ def load_split_data(data_dir: str, split_mode: str = "random", test_size: float 
         )
         return train_df, test_df
 
-def _read_csv_safe(filepath: str) -> Optional[pd.DataFrame]:
+def _read_csv_safe(filepath: str) -> pd.DataFrame | None:
     if not os.path.exists(filepath):
         return None
     for enc in ENCODINGS:
@@ -99,7 +101,8 @@ def _read_csv_safe(filepath: str) -> Optional[pd.DataFrame]:
             df = pd.read_csv(filepath, encoding=enc, low_memory=False)
             df.columns = df.columns.str.strip()
             return df
-        except Exception:
+        except Exception as e:  # noqa: BLE001
+            print(f"CSV read error: {e}")
             continue
     return None
 
@@ -173,8 +176,8 @@ def run_training(
     if hasattr(pipeline, "predict_proba"):
         try:
             y_prob = pipeline.predict_proba(X_test)
-        except Exception:
-            pass
+        except Exception as e:  # noqa: BLE001
+            print(f"Warning: Prediction probability computation failed: {e}")
 
     metrics = evaluate_predictions(
         y_true=y_test,

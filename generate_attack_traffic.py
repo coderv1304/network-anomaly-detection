@@ -30,8 +30,9 @@ watch the dashboard.
 import socket
 import threading
 import time
-import requests
 from concurrent.futures import ThreadPoolExecutor
+
+import requests
 
 # ---------------- SAFETY GUARD — do not change this ----------------
 TARGET_HOST = "127.0.0.1"

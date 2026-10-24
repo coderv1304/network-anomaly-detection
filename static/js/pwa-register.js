@@ -16,6 +16,7 @@
       .register('/service-worker.js', { scope: '/' })
       .then((registration) => {
         console.log('[PWA] Service worker registered', registration.scope);
+        registration.update().catch((err) => console.warn('[PWA] Update check failed:', err));
 
         // Detect a waiting worker (new version deployed) and prompt to refresh.
         registration.addEventListener('updatefound', () => {

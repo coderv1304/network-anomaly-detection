@@ -7,10 +7,11 @@ Usage:
     python training/create_samples.py --output data/samples/sample_test.csv --samples-per-class 5000
 """
 
-import os
 import argparse
-import pandas as pd
+import os
+
 import numpy as np
+import pandas as pd
 
 DEFAULT_RAW_DIR = "data"
 DEFAULT_OUTPUT_DIR = os.path.join("data", "samples")
@@ -41,7 +42,8 @@ def load_and_sample(raw_dir=DEFAULT_RAW_DIR, output_dir=DEFAULT_OUTPUT_DIR, n_pe
             try:
                 df = pd.read_csv(filepath, encoding=enc, low_memory=False)
                 break
-            except Exception:
+            except Exception as e:  # noqa: BLE001
+                print(f"CSV read error (encoding {enc}): {e}")
                 continue
 
         if df is None:

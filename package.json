@@ -1,0 +1,12 @@
+{
+  "name": "network-anomaly-detection",
+  "version": "1.0.0",
+  "description": "NetShield AI UI snapshot and accessibility testing suite",
+  "scripts": {
+    "test": "jest",
+    "test:snapshot": "jest -u"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

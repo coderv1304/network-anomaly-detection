@@ -4,8 +4,8 @@ tests/test_explainability.py
 Unit tests for feature taxonomy and domain grouping.
 """
 
-import pytest
-from training.explainability_shap import identify_feature_group, FEATURE_GROUPS
+from training.explainability_shap import identify_feature_group
+
 
 def test_identify_feature_group_timing():
     assert identify_feature_group("Flow Duration") == "Timing & Inter-Arrival"

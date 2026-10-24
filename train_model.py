@@ -5,14 +5,14 @@ Supports multiple CSV files and memory‑efficient processing.
 Handles non‑UTF‑8 encoding and column name inconsistencies.
 """
 
-import pandas as pd
+import os
+
+import joblib
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-import joblib
-import os
-import glob
 
 # -------------------------------
 # CONFIGURATION - EDIT THESE PATHS
@@ -72,7 +72,7 @@ def load_data(file_list, folder):
                 break
             except UnicodeDecodeError:
                 continue
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"   → Error with {enc}: {e}")
                 continue
 

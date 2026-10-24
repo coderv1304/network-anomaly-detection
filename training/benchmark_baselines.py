@@ -9,20 +9,18 @@ Multi-model baseline benchmark for Network Anomaly Detection:
 5. Saves comparative results to docs/BENCHMARK_RESULTS.md.
 """
 
+import argparse
 import os
 import sys
 import time
-import argparse
-import json
-import pandas as pd
-import numpy as np
-from datetime import datetime, timezone
-from typing import Dict, List, Any
+from datetime import UTC, datetime
+from typing import Any
 
-from sklearn.ensemble import RandomForestClassifier, IsolationForest
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import f1_score
 
 try:
     import lightgbm as lgb
@@ -35,18 +33,18 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 try:
-    from training.preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
     from training.evaluate import evaluate_predictions
+    from training.preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
     from training.train_pipeline import load_split_data
 except ImportError:
-    from preprocessor import build_leak_free_pipeline, IDENTIFIER_COLUMNS
     from evaluate import evaluate_predictions
+    from preprocessor import IDENTIFIER_COLUMNS, build_leak_free_pipeline
     from train_pipeline import load_split_data
 
 DEFAULT_DATA_DIR = "data/samples"
 DEFAULT_OUTPUT = "docs/BENCHMARK_RESULTS.md"
 
-def evaluate_model_seed(model_name: str, X_train, y_train, X_test, y_test, seed: int, classes: List[str]) -> Dict[str, Any]:
+def evaluate_model_seed(model_name: str, X_train, y_train, X_test, y_test, seed: int, classes: list[str]) -> dict[str, Any]:
     start_train = time.perf_counter()
 
     if model_name == "Logistic Regression":
@@ -139,7 +137,7 @@ def run_benchmarks(data_dir: str = DEFAULT_DATA_DIR, output_path: str = DEFAULT_
     lines = [
         "# Model Baseline Benchmark Results",
         "",
-        f"*Generated on: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
+        f"*Generated on: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}*",
         f"*Evaluated across {n_seeds} random seeds with 95% confidence / standard deviations.*",
         "",
         "## 1. Summary Comparison Table",

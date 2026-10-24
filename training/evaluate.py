@@ -9,19 +9,17 @@ Evaluation engine for Intrusion Detection:
 5. Supports Day-based evaluation splits for CIC-IDS-2017.
 """
 
+from typing import Any
+
 import numpy as np
-import pandas as pd
-from typing import Dict, Any, List, Optional
 from sklearn.metrics import (
-    classification_report,
-    f1_score,
-    precision_score,
-    recall_score,
-    confusion_matrix,
-    precision_recall_curve,
-    roc_curve,
     auc,
-    roc_auc_score
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_recall_curve,
+    roc_auc_score,
+    roc_curve,
 )
 
 # CIC-IDS-2017 Day Groupings
@@ -45,7 +43,7 @@ def calculate_fpr_at_fixed_tpr(y_true_binary: np.ndarray, y_score: np.ndarray, t
     Computes the False Positive Rate (FPR) at a fixed True Positive Rate (target_tpr, e.g. 0.95).
     FPR = FP / (FP + TN)
     """
-    fpr, tpr, thresholds = roc_curve(y_true_binary, y_score)
+    fpr, tpr, _thresholds = roc_curve(y_true_binary, y_score)
     # Find the smallest FPR where TPR >= target_tpr
     eligible_indices = np.where(tpr >= target_tpr)[0]
     if len(eligible_indices) == 0:
@@ -56,10 +54,10 @@ def calculate_fpr_at_fixed_tpr(y_true_binary: np.ndarray, y_score: np.ndarray, t
 def evaluate_predictions(
     y_true: np.ndarray,
     y_pred: np.ndarray,
-    y_prob: Optional[np.ndarray] = None,
-    classes: Optional[List[str]] = None,
+    y_prob: np.ndarray | None = None,
+    classes: list[str] | None = None,
     benign_label: str = "BENIGN"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Compute comprehensive IDS evaluation metrics.
     """
@@ -108,7 +106,7 @@ def evaluate_predictions(
         **binary_metrics
     }
 
-def format_evaluation_summary(metrics: Dict[str, Any]) -> str:
+def format_evaluation_summary(metrics: dict[str, Any]) -> str:
     """Format metrics into a clean markdown summary."""
     lines = [
         "### 📊 Evaluation Summary",

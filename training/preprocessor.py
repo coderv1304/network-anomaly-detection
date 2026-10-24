@@ -11,13 +11,13 @@ Guarantees:
 4. Maintains deterministic feature ordering.
 """
 
+
 import numpy as np
 import pandas as pd
-from typing import List, Tuple, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import RobustScaler, StandardScaler
 
 # Non-feature identifiers that cause data leakage / overfitting if left in features
 IDENTIFIER_COLUMNS = [
@@ -36,7 +36,7 @@ class FlowSanitizer(BaseEstimator, TransformerMixin):
     Cleans column names, handles non-finite values (Inf/-Inf -> NaN),
     and enforces deterministic feature ordering.
     """
-    def __init__(self, expected_features: Optional[List[str]] = None):
+    def __init__(self, expected_features: list[str] | None = None):
         self.expected_features = expected_features
 
     def fit(self, X: pd.DataFrame, y=None):
@@ -81,7 +81,7 @@ class FlowSanitizer(BaseEstimator, TransformerMixin):
 def build_leak_free_pipeline(
     classifier,
     scaler_type: str = "standard",
-    expected_features: Optional[List[str]] = None
+    expected_features: list[str] | None = None
 ) -> Pipeline:
     """
     Construct an sklearn Pipeline with:

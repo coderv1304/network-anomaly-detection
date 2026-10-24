@@ -5,14 +5,13 @@ Unit tests for leak-free sklearn pipeline construction,
 FlowSanitizer transformer, and evaluation metrics.
 """
 
-import pytest
 import numpy as np
 import pandas as pd
 from sklearn.dummy import DummyClassifier
-from sklearn.linear_model import LogisticRegression
 
+from training.evaluate import calculate_fpr_at_fixed_tpr, evaluate_predictions
 from training.preprocessor import FlowSanitizer, build_leak_free_pipeline
-from training.evaluate import evaluate_predictions, calculate_fpr_at_fixed_tpr
+
 
 def test_flow_sanitizer_drops_identifiers():
     df = pd.DataFrame({

@@ -47,8 +47,8 @@
 }
 
 .system-banner.secure {
-  border-color: rgba(46, 213, 115, 0.35);
-  background: linear-gradient(135deg, rgba(46, 213, 115, 0.08) 0%, rgba(21, 27, 44, 0.95) 100%);
+  border-color: rgba(72, 187, 120, 0.35);
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.08) 0%, var(--surface) 100%);
 }
 
 .system-banner.secure .banner-title {
@@ -56,8 +56,8 @@
 }
 
 .system-banner.alert {
-  border-color: rgba(255, 71, 87, 0.6);
-  background: linear-gradient(135deg, rgba(255, 71, 87, 0.12) 0%, rgba(21, 27, 44, 0.95) 100%);
+  border-color: rgba(245, 101, 101, 0.6);
+  background: linear-gradient(135deg, rgba(245, 101, 101, 0.12) 0%, var(--surface) 100%);
   animation: banner-pulse 2s ease-in-out infinite;
 }
 

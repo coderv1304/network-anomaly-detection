@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  nd:
+    image: nd_inference:latest
+    container_name: nd_inference
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"   # Flask API
+      - "8000:8000"   # optional metrics endpoint (if exposed)
+    environment:
+      - API_TOKEN=changeme
+      - LIVE_CAPTURE_API_KEY=dev-only-change-me
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    network_mode: host
+    restart: unless-stopped
+    # The container's default CMD (supervisord) runs both Flask and the capture binary.

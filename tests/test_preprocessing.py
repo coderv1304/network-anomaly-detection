@@ -3,10 +3,11 @@ tests/test_preprocessing.py
 Unit tests for data sanitization, NaN/Inf handling, and column stripping.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from feature_mapper import normalize_flow_features
+
 
 def test_clean_inf_and_nan():
     data = {

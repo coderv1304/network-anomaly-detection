@@ -1,61 +1,35 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
   <meta name="description" content="NetShield AI — Real-Time SOC Sentinel Network Threat Intelligence Console.">
-  <title>NETSHIELD AI — Live Sentinel Operations Console</title>
+  <title>NetShield NDR | Live Console</title>
 
-  
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
- 
-<!-- PWA: manifest + theme color (address bar / status bar tint) -->
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#0d1b2a">
- 
-<!-- iOS: Safari doesn't fully support the manifest spec, these tags fill the gaps -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NetShield">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
- 
-<!-- Icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
- 
-<!-- Existing + new stylesheets (order matters: responsive.css loads after style.css) -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
- 
- 
-<!--
-  Paste this near the end of <body>, in BOTH templates, alongside your existing
-  <script src=".../js/main.js"> or <script src=".../js/dashboard.js"> tags.
-  It should load after those (order doesn't matter much, but keep it last for clarity).
--->
-<script src="{{ url_for('static', filename='js/pwa-register.js') }}" defer></script>
- 
-<!-- Optional UI hooks pwa-register.js looks for — drop these wherever fits your layout -->
-<!-- Install button (hidden until the browser says the app is installable) -->
-<button id="pwa-install-btn" hidden>📲 Install App</button>
- 
-<!-- Update-available toast (hidden until a new service worker is waiting) -->
+  <!-- PWA: manifest + theme color -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#101516">
 
- 
-<!-- Online/offline status pill, e.g. in your navbar -->
-<span id="pwa-net-status"></span>
- 
-  <!-- Typography & Icons -->
+  <!-- iOS PWA tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NetShield">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+
+  <!-- Typography: IBM Plex Sans + IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <!-- Core & Operations Stylesheets (design.css loads last for design-system priority) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}?v=2.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}?v=2.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}?v=2.5">
 
-  <!-- Core & Dashboard Stylesheets -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
 <body>
@@ -93,9 +67,9 @@
 
     <div class="topbar-right">
       <!-- Live Socket Connection Status -->
-      <div id="status-dot" class="status online">
+      <div id="status-dot" class="status offline" role="status" aria-live="polite">
         <span class="status-dot-icon"></span>
-        <span class="status-label">LIVE SENTINEL CONNECTED</span>
+        <span class="status-label">CONNECTING TO BACKEND</span>
       </div>
 
       <div class="clock" id="clock">00:00:00</div>
@@ -112,13 +86,69 @@
   <!-- ── Main Operations Console ── -->
   <main class="console">
 
+    <!-- Distributed Sensor Fleet Status Bar -->
+    <div class="sensor-fleet-strip" style="margin-bottom:16px;">
+      <div class="sensor-fleet-header">
+        <div class="sensor-fleet-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <h3>DISTRIBUTED SENSOR FLEET</h3>
+          <span class="sensor-probe-count">3 / 3 ONLINE</span>
+        </div>
+        <span class="sensor-fleet-meta">Aggregated Wire: <strong style="color:var(--text-hi)">4.34 Gbps</strong> · Avg Pkt Loss: <strong style="color:var(--green)">0.001%</strong></span>
+      </div>
+      <div class="sensor-fleet-grid">
+        <div class="sensor-probe-card">
+          <div class="probe-top">
+            <div class="probe-identity">
+              <span class="probe-dot online"></span>
+              <span class="probe-name">probe-us-east-aws</span>
+              <span class="probe-engine-tag">eBPF Kernel 6.5</span>
+            </div>
+          </div>
+          <div class="probe-metrics-row">
+            <span>Throughput: <span class="probe-metric-val">1.42 Gbps</span></span>
+            <span>Drop Rate: <span class="probe-metric-val green-text">0.001%</span></span>
+            <span>Interface: <span class="probe-metric-val mono">eth0 (SPAN)</span></span>
+          </div>
+        </div>
+        <div class="sensor-probe-card">
+          <div class="probe-top">
+            <div class="probe-identity">
+              <span class="probe-dot online"></span>
+              <span class="probe-name">probe-eu-central-fra</span>
+              <span class="probe-engine-tag">DPDK v23.11</span>
+            </div>
+          </div>
+          <div class="probe-metrics-row">
+            <span>Throughput: <span class="probe-metric-val">820 Mbps</span></span>
+            <span>Drop Rate: <span class="probe-metric-val green-text">0.000%</span></span>
+            <span>Interface: <span class="probe-metric-val mono">enp3s0</span></span>
+          </div>
+        </div>
+        <div class="sensor-probe-card">
+          <div class="probe-top">
+            <div class="probe-identity">
+              <span class="probe-dot online"></span>
+              <span class="probe-name">probe-onprem-dc1</span>
+              <span class="probe-engine-tag">AF_PACKET Ring</span>
+            </div>
+          </div>
+          <div class="probe-metrics-row">
+            <span>Throughput: <span class="probe-metric-val">2.10 Gbps</span></span>
+            <span>Drop Rate: <span class="probe-metric-val green-text">0.003%</span></span>
+            <span>Interface: <span class="probe-metric-val mono">eth1 (TAP)</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Operational Threat Status Banner -->
     <div class="system-banner secure" id="systemBanner">
       <div class="banner-status-box">
         <span class="banner-icon-pulse"></span>
         <div>
           <div class="banner-title" id="bannerStatusTitle">SYSTEM STATUS: NOMINAL (SECURE)</div>
-          <div class="banner-meta" id="bannerStatusSub">Real-time packet sniffing active · Random Forest AI model inspecting packet headers</div>
+          <div class="banner-meta" id="bannerStatusSub">Checking packet-capture status...</div>
         </div>
       </div>
       
@@ -176,10 +206,38 @@
         <div class="stat-info">
           <span class="stat-label">AI Inference Engine</span>
           <span class="stat-value text-indigo">0.82ms</span>
-          <span class="stat-meta">Random Forest 100-Tree</span>
+          <span class="stat-meta">Heuristic + IsoForest + RF Ensemble</span>
         </div>
       </div>
     </section>
+
+    <!-- Live Ingestion Topology Filter -->
+    <div class="topology-selector-card" style="margin-bottom:16px;">
+      <div class="topology-header">
+        <div class="topology-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <h3>LIVE INGESTION VECTOR FILTER:</h3>
+        </div>
+        <span class="topology-subtitle">Filter live stream by physical / virtual interface primitive</span>
+      </div>
+      <div class="topology-tab-strip" role="tablist" id="dashTopoStrip">
+        <button type="button" class="topology-tab active" data-iface="all">
+          <span class="topology-tab-icon">⚡</span> All Interfaces (Global)
+        </button>
+        <button type="button" class="topology-tab" data-iface="eth0">
+          <span class="topology-tab-icon">🖧</span> 10GbE Core (eth0)
+        </button>
+        <button type="button" class="topology-tab" data-iface="wlan0">
+          <span class="topology-tab-icon">📶</span> Corp WLAN 802.11 (wlan0)
+        </button>
+        <button type="button" class="topology-tab" data-iface="wwan0">
+          <span class="topology-tab-icon">🛰</span> 5G Edge / IoT (wwan0)
+        </button>
+        <button type="button" class="topology-tab" data-iface="wg0">
+          <span class="topology-tab-icon">🔒</span> Zero-Trust VPN (wg0)
+        </button>
+      </div>
+    </div>
 
     <!-- Visual Operations Grid: Oscilloscope + Threat Category Matrix -->
     <div class="ops-split-grid">
@@ -262,16 +320,17 @@
           <thead>
             <tr>
               <th>Timestamp</th>
-              <th>Source Address</th>
-              <th>Destination Address</th>
+              <th>Vector</th>
+              <th>Source Host (IP · ASN · Geo)</th>
+              <th>Destination</th>
               <th>Proto</th>
-              <th>AI Classification Label</th>
+              <th>AI Classification</th>
               <th>Threat Level</th>
             </tr>
           </thead>
           <tbody id="flow-table-body">
             <tr class="empty-row">
-              <td colspan="6">
+              <td colspan="7">
                 <div class="empty-state-box">
                   <span class="empty-pulse-dot"></span>
                   Listening for real-time live network packet flows...
@@ -285,6 +344,7 @@
 
   </main>
 
-  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}?v=2.8"></script>
+  <script src="{{ url_for('static', filename='js/pwa-register.js') }}?v=2.8" defer></script>
 </body>
 </html>

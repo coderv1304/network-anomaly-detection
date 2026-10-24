@@ -1,4 +1,5 @@
 import os
+
 try:
     from PIL import Image, ImageDraw
 except ImportError:
@@ -11,7 +12,7 @@ def create_shield_icon(size):
     draw = ImageDraw.Draw(img)
     
     padding = max(2, size // 10)
-    w = size - 2 * padding
+    size - 2 * padding
     h = size - 2 * padding
     
     # Shield points
