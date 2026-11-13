@@ -1,0 +1,23 @@
+{
+  "active": {
+    "model_id": "netshield-flow",
+    "version": "serving-rf-day-based-seed42-v1"
+  },
+  "approved_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+  "calibration_version": "uncalibrated",
+  "feature_schema_sha256": "45cd75ce849b005c854ef8190a1cbe14d0d1a22daa6aa10e05e767ec6a757be6",
+  "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+  "ok": true,
+  "registry_path": "models\\registry\\registry.json",
+  "serving_path": "models/model_bundle_rf_day_based_seed42.pkl",
+  "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+  "signature_algorithm": null,
+  "threshold_policy": {
+    "decision": "attack_score >= threshold",
+    "max_fpr": 0.01,
+    "name": "global_validation_max_fpr",
+    "score": "1 - P(BENIGN)",
+    "selected_on": "validation",
+    "threshold": 0.002515048908954043
+  }
+}

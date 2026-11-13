@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-11-13T06:19:20.816195+00:00",
+  "passed": true,
+  "critical": [],
+  "fixable": [],
+  "unfixed_baseline": {
+    "os-pkgs:HIGH": 47,
+    "os-pkgs:LOW": 65,
+    "os-pkgs:MEDIUM": 74
+  },
+  "unfixed_baseline_total": 186,
+  "secrets": [],
+  "misconfigurations": []
+}

@@ -1,0 +1,156 @@
+{
+  "checks": [
+    {
+      "detail": "Failed D9 checks: fpr_every_day_seed, alert_rate, bot_recall, calibration, external_dataset, prospective_pilot, site_cost_model",
+      "id": "detection_gate",
+      "observed": "FAIL",
+      "pass": false,
+      "remediation": "Resolve the failed D9 checks in docs/COST_MODEL_AND_RELEASE_GATE.md. Do not raise the detection score until they pass.",
+      "requirement": "The D9 cost-sensitive detection gate must pass on every check.",
+      "source": "docs/COST_SENSITIVE_RESULTS.json",
+      "status": "fail"
+    },
+    {
+      "detail": "Serving hash, registry entry, and evaluated artifact agree.",
+      "id": "artifact_identity",
+      "observed": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+      "pass": true,
+      "remediation": "Serve, evaluate, and gate the same artifact before any release claim.",
+      "requirement": "The served artifact must be the artifact that was evaluated and gated, and the deployment hash check must pass.",
+      "source": "scripts/deployment_check.py + docs/COST_SENSITIVE_RESULTS.json",
+      "status": "pass"
+    },
+    {
+      "detail": "The security gate passes. Unfixed base-image advisories remain accepted risk.",
+      "id": "security_gate",
+      "observed": {
+        "critical": 0,
+        "fixable": 0,
+        "misconfigurations": 0,
+        "secrets": 0,
+        "unfixed_baseline_total": 186
+      },
+      "pass": true,
+      "remediation": "Fix every actionable finding and rebuild the image.",
+      "requirement": "No critical, fixable, secret, or failed-misconfiguration findings.",
+      "source": "docs/security_gate.json",
+      "status": "pass"
+    },
+    {
+      "detail": "No secrets detected in git-visible files.",
+      "id": "secret_scan",
+      "observed": {
+        "files_scanned": 281,
+        "finding_count": 0,
+        "tracked_files_scanned": 83,
+        "untracked_files_scanned": 198
+      },
+      "pass": true,
+      "remediation": "Remove and rotate every detected credential, then rescan.",
+      "requirement": "The git-visible working tree must contain no detected secrets.",
+      "source": "docs/secret_scan.json",
+      "status": "pass"
+    },
+    {
+      "detail": "The external review is not complete or has open critical/high findings.",
+      "id": "external_review",
+      "observed": {
+        "critical_open": 0,
+        "high_open": 0,
+        "report": null,
+        "reviewer": null,
+        "status": "not_commissioned"
+      },
+      "pass": false,
+      "remediation": "Track every finding to closure and publish the signed review report.",
+      "requirement": "An external security and readiness review must be completed and critical/high findings closed.",
+      "source": "docs/s8_external_review.json",
+      "status": "blocked"
+    },
+    {
+      "detail": "No real pilot result exists. Synthetic self-tests are not evidence.",
+      "id": "prospective_pilot",
+      "observed": "missing evidence file",
+      "pass": false,
+      "remediation": "Recruit a consenting design partner and run the pre-registered pilot.",
+      "requirement": "A real human-review pilot must be completed against predeclared criteria.",
+      "source": "docs/s7_pilot_analysis.json",
+      "status": "blocked"
+    },
+    {
+      "detail": "The measured ingest SLO is met.",
+      "id": "slo_compliance",
+      "observed": {
+        "declared_flow_rate": 20.0,
+        "p95_ms": 164.9,
+        "success_ratio": 1.0
+      },
+      "pass": true,
+      "remediation": "Fix persistence latency and backpressure before claiming production readiness.",
+      "requirement": "Measured ingest p95 must be <= 250 ms at 20 flows/s with >= 99.5% success.",
+      "source": "docs/load_test_results.json",
+      "status": "pass"
+    },
+    {
+      "detail": "The local and encrypted backup/restore drills pass. Operated off-host durability and site RPO/RTO remain unproven.",
+      "id": "backup_restore",
+      "observed": {
+        "encrypted_checks": {
+          "backup_counts_match_source": true,
+          "backup_integrity_ok": true,
+          "ciphertext_is_not_plaintext": true,
+          "decrypted_hash_matches_backup": true,
+          "key_not_embedded": true,
+          "offsite_hash_matches": true,
+          "restored_counts_match_backup": true,
+          "restored_integrity_ok": true,
+          "source_integrity_ok": true
+        },
+        "encrypted_status": "pass",
+        "local_checks": {
+          "backup_counts_match_source": true,
+          "backup_integrity_ok": true,
+          "damage_removed_flows": true,
+          "fresh_restore_count_matches": true,
+          "fresh_restore_hash_matches_backup": true,
+          "fresh_restore_integrity_ok": true,
+          "restore_counts_match_backup": true,
+          "restore_integrity_ok": true,
+          "restore_logical_sha256_matches_backup": true
+        },
+        "local_status": "pass"
+      },
+      "pass": true,
+      "remediation": "Fix the restore path. Production also needs operated off-host storage and measured RPO/RTO.",
+      "requirement": "Local and encrypted backup/restore drills must pass with integrity and count checks.",
+      "source": "docs/backup_restore_drill.json; docs/encrypted_backup_drill.json",
+      "status": "pass"
+    },
+    {
+      "detail": "SBOM present with components.",
+      "id": "sbom",
+      "observed": {
+        "bomFormat": "CycloneDX",
+        "components": 29
+      },
+      "pass": true,
+      "remediation": "Regenerate the SBOM from the built image.",
+      "requirement": "A CycloneDX SBOM must exist and contain components.",
+      "source": "docs/sbom.cdx.json",
+      "status": "pass"
+    }
+  ],
+  "consequence": "No 9/10 detection or SaaS readiness claim is allowed. Keep detection at 4/10 and production SaaS at 3/10 until every check passes.",
+  "counts": {
+    "blocked": 2,
+    "checks": 9,
+    "fail": 1,
+    "pass": 6
+  },
+  "gate": "9/10 detection and SaaS readiness claim",
+  "generated_at": "2026-11-13T06:15:04.374529+00:00",
+  "passed": false,
+  "phase": "S8",
+  "repo_root": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection",
+  "verdict": "FAIL"
+}

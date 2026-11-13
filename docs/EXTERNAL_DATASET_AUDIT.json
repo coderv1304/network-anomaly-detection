@@ -1,0 +1,2262 @@
+{
+  "artifact_version": "external-dataset-audit-v1",
+  "method": "external_dataset_ingestion_and_coverage_audit",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope.",
+  "datasets": {
+    "unsw_nb15": {
+      "status": "coverage_pass",
+      "provenance": {
+        "directory": "C:\\Users\\varun\\Downloads\\UNSW_NB15",
+        "files": [
+          {
+            "path": "C:\\Users\\varun\\Downloads\\UNSW_NB15\\unsw_train_official.csv",
+            "sha256": "bec7dd5ec88dc2a0ccc7a07879d338395ed7421750f675fd0339e07dfe0648fa",
+            "bytes": 32293018,
+            "rows": 175341,
+            "columns": 45
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\UNSW_NB15\\unsw_test_official.csv",
+            "sha256": "734fe6642edf758f7c94d7d9149426b49d202fe8e7bf0bef47392489c3c0a559",
+            "bytes": 15380800,
+            "rows": 82332,
+            "columns": 45
+          }
+        ],
+        "official_split": {
+          "train_rows": 175341,
+          "test_rows": 82332,
+          "matches_known_split": true
+        },
+        "filename_swap_corrected": false,
+        "id_note": "The id column restarts at 1 in the official test set and is a row index, not a stable flow key. It is excluded from the feature hash and must not be used for grouping or leakage detection.",
+        "source_note": "Local download. Record the official source URL, citation, and licence before publication.",
+        "official_source": "https://research.unsw.edu.au/projects/unsw-nb15-dataset",
+        "licence_status": "not recorded; verify the official terms and citation before publication"
+      },
+      "label_policy": {
+        "positive_labels": [
+          "DoS",
+          "Reconnaissance"
+        ],
+        "negative_labels": [
+          "Normal"
+        ],
+        "excluded_labels": {
+          "Analysis": "excluded; analysis attack",
+          "Backdoor": "excluded; backdoor",
+          "Exploits": "excluded; exploit",
+          "Fuzzers": "excluded; fuzzing",
+          "Generic": "excluded; generic attack",
+          "Shellcode": "excluded; shellcode",
+          "Worms": "excluded; worm"
+        },
+        "label_mismatches": 0
+      },
+      "duplicates": {
+        "raw_rows": {
+          "train": 175341,
+          "test": 82332
+        },
+        "conflicting_groups": {
+          "train": 1772,
+          "test": 575
+        },
+        "conflicting_rows": {
+          "train": 30528,
+          "test": 8809
+        },
+        "unique_feature_rows": {
+          "train": 99268,
+          "test": 53371
+        },
+        "duplicate_rows_within": {
+          "train": 45545,
+          "test": 20152
+        },
+        "leakage_removed_from_test": 953
+      },
+      "group_split": {
+        "method": "sha256(feature_hash) mod 100; buckets 0-69 train, 70-99 validation; test is the official test set after removing train groups",
+        "train_fraction": 0.7
+      },
+      "partitions": {
+        "train": {
+          "rows": 69077,
+          "label_counts": {
+            "Analysis": 279,
+            "Backdoor": 266,
+            "DoS": 1710,
+            "Exploits": 12741,
+            "Fuzzers": 10183,
+            "Generic": 2735,
+            "Normal": 35932,
+            "Reconnaissance": 4379,
+            "Shellcode": 773,
+            "Worms": 79
+          },
+          "positive_rows": 6089,
+          "positive_families": [
+            "DoS",
+            "Reconnaissance"
+          ]
+        },
+        "validation": {
+          "rows": 30191,
+          "label_counts": {
+            "Analysis": 114,
+            "Backdoor": 137,
+            "DoS": 767,
+            "Exploits": 5676,
+            "Fuzzers": 4419,
+            "Generic": 1169,
+            "Normal": 15729,
+            "Reconnaissance": 1830,
+            "Shellcode": 312,
+            "Worms": 38
+          },
+          "positive_rows": 2597,
+          "positive_families": [
+            "DoS",
+            "Reconnaissance"
+          ]
+        },
+        "test": {
+          "rows": 52418,
+          "label_counts": {
+            "Analysis": 58,
+            "Backdoor": 57,
+            "DoS": 1163,
+            "Exploits": 7041,
+            "Fuzzers": 4321,
+            "Generic": 3399,
+            "Normal": 33756,
+            "Reconnaissance": 2215,
+            "Shellcode": 365,
+            "Worms": 43
+          },
+          "positive_rows": 3378,
+          "positive_families": [
+            "DoS",
+            "Reconnaissance"
+          ]
+        }
+      },
+      "family_partition_matrix": {
+        "partitions": {
+          "train": {
+            "label_counts": {
+              "Analysis": 279,
+              "Backdoor": 266,
+              "DoS": 1710,
+              "Exploits": 12741,
+              "Fuzzers": 10183,
+              "Generic": 2735,
+              "Normal": 35932,
+              "Reconnaissance": 4379,
+              "Shellcode": 773,
+              "Worms": 79
+            },
+            "primary_positives": 6089,
+            "primary_positive_families": [
+              "DoS",
+              "Reconnaissance"
+            ]
+          },
+          "validation": {
+            "label_counts": {
+              "Analysis": 114,
+              "Backdoor": 137,
+              "DoS": 767,
+              "Exploits": 5676,
+              "Fuzzers": 4419,
+              "Generic": 1169,
+              "Normal": 15729,
+              "Reconnaissance": 1830,
+              "Shellcode": 312,
+              "Worms": 38
+            },
+            "primary_positives": 2597,
+            "primary_positive_families": [
+              "DoS",
+              "Reconnaissance"
+            ]
+          },
+          "test": {
+            "label_counts": {
+              "Analysis": 58,
+              "Backdoor": 57,
+              "DoS": 1163,
+              "Exploits": 7041,
+              "Fuzzers": 4321,
+              "Generic": 3399,
+              "Normal": 33756,
+              "Reconnaissance": 2215,
+              "Shellcode": 365,
+              "Worms": 43
+            },
+            "primary_positives": 3378,
+            "primary_positive_families": [
+              "DoS",
+              "Reconnaissance"
+            ]
+          }
+        },
+        "train_validation_overlap": [
+          "DoS",
+          "Reconnaissance"
+        ],
+        "train_test_overlap": [
+          "DoS",
+          "Reconnaissance"
+        ],
+        "validation_test_overlap": [
+          "DoS",
+          "Reconnaissance"
+        ],
+        "validation_test_disjoint": false,
+        "train_has_primary_positives": true
+      },
+      "coverage_gate": {
+        "minimums": {
+          "train": 1,
+          "validation": 1,
+          "test": 1
+        },
+        "families": {
+          "DoS": {
+            "train": 1710,
+            "validation": 767,
+            "test": 1163,
+            "observed": true,
+            "required": false,
+            "pass": true
+          },
+          "Reconnaissance": {
+            "train": 4379,
+            "validation": 1830,
+            "test": 2215,
+            "observed": true,
+            "required": false,
+            "pass": true
+          }
+        },
+        "missing_required": [],
+        "overall_pass": true,
+        "reason": "Every positive family is present in train, validation, and test, and validation/test families overlap."
+      },
+      "schema": {
+        "features": {
+          "flow_duration": {
+            "status": "rename",
+            "source_column": "dur",
+            "present": true,
+            "note": "seconds; multiply by 1e6 for microseconds"
+          },
+          "total_fwd_packets": {
+            "status": "rename",
+            "source_column": "spkts",
+            "present": true,
+            "note": ""
+          },
+          "total_backward_packets": {
+            "status": "rename",
+            "source_column": "dpkts",
+            "present": true,
+            "note": ""
+          },
+          "total_length_of_fwd_packets": {
+            "status": "rename",
+            "source_column": "sbytes",
+            "present": true,
+            "note": ""
+          },
+          "total_length_of_bwd_packets": {
+            "status": "rename",
+            "source_column": "dbytes",
+            "present": true,
+            "note": ""
+          },
+          "flow_packets_s": {
+            "status": "derive",
+            "source_column": null,
+            "present": false,
+            "note": "(spkts + dpkts) / dur; dur > 0"
+          },
+          "flow_bytes_s": {
+            "status": "derive",
+            "source_column": null,
+            "present": false,
+            "note": "(sbytes + dbytes) / dur; dur > 0"
+          },
+          "packet_length_mean": {
+            "status": "derive",
+            "source_column": null,
+            "present": false,
+            "note": "(sbytes + dbytes) / (spkts + dpkts); zero packets -> 0"
+          },
+          "packet_length_max": {
+            "status": "missing",
+            "source_column": null,
+            "present": false,
+            "note": "no max packet length column"
+          },
+          "syn_flag_count": {
+            "status": "missing",
+            "source_column": null,
+            "present": false,
+            "note": "no flag-count column"
+          },
+          "fin_flag_count": {
+            "status": "missing",
+            "source_column": null,
+            "present": false,
+            "note": "no flag-count column"
+          },
+          "rst_flag_count": {
+            "status": "missing",
+            "source_column": null,
+            "present": false,
+            "note": "no flag-count column"
+          }
+        },
+        "available": 8,
+        "missing": 4,
+        "total": 12
+      }
+    },
+    "cic_ids_2018": {
+      "status": "coverage_fail",
+      "provenance": {
+        "directory": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete",
+        "files": [
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-14-2018.csv",
+            "sha256": "acff8bc61376ee031d80878ee6099e0b1a87a1bd711d8068298421418c9f8147",
+            "bytes": 358223333,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 373767,
+            "unique_rows": 674808,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-15-2018.csv",
+            "sha256": "fa2947a8256d81ee9103ae16139d62d0e17aa23e696ee80d9e76fb51c01c9c4b",
+            "bytes": 375945899,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 163917,
+            "unique_rows": 884658,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-16-2018.csv",
+            "sha256": "1a4919faa0c49c7af97230b0c2d076eba23ee6dd81103a3801d51ac316355d8b",
+            "bytes": 333723605,
+            "raw_rows": 1048575,
+            "header_rows": 1,
+            "duplicate_rows": 421727,
+            "unique_rows": 626847,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-20-2018.csv",
+            "sha256": "7287a4d7740a1dddbf330ceb2beb6a4889d33ba63674558a68b5eb50d16711df",
+            "bytes": 4054925350,
+            "raw_rows": 7948748,
+            "header_rows": 0,
+            "duplicate_rows": 1828198,
+            "unique_rows": 6120550,
+            "column_count": 84,
+            "possible_row_cap": false
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-21-2018.csv",
+            "sha256": "a5f4a1c2689e0aa6566c03a58466de9c407c0be0cbd3cc69306544026611be04",
+            "bytes": 328893673,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 487170,
+            "unique_rows": 561405,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-22-2018.csv",
+            "sha256": "da33c927018274f9d49b145baa00e4ce0526c25b3b890b34c489e247b5e24544",
+            "bytes": 382636202,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 141652,
+            "unique_rows": 906923,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-23-2018.csv",
+            "sha256": "d0a7f5059d9823b6e9b392b759e306481a3502d190dea7a1b5502ae079ea069b",
+            "bytes": 382840456,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 137917,
+            "unique_rows": 910658,
+            "column_count": 80,
+            "possible_row_cap": true
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-28-2018.csv",
+            "sha256": "f15e2a12304446058a0186c8ad67de2bd15735a9ba5c70c9a1f4c4242ab06771",
+            "bytes": 209249758,
+            "raw_rows": 613104,
+            "header_rows": 33,
+            "duplicate_rows": 104291,
+            "unique_rows": 508780,
+            "column_count": 80,
+            "possible_row_cap": false
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\03-01-2018.csv",
+            "sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+            "bytes": 107842858,
+            "raw_rows": 331125,
+            "header_rows": 25,
+            "duplicate_rows": 48444,
+            "unique_rows": 282656,
+            "column_count": 80,
+            "possible_row_cap": false
+          },
+          {
+            "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\03-02-2018.csv",
+            "sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+            "bytes": 352368373,
+            "raw_rows": 1048575,
+            "header_rows": 0,
+            "duplicate_rows": 224843,
+            "unique_rows": 823732,
+            "column_count": 80,
+            "possible_row_cap": true
+          }
+        ],
+        "source_note": "Local download of the per-day CIC-IDS-2018 CSVs. Record the official source URL, citation, and licence before publication.",
+        "official_source": "https://www.unsw.ca/cic/datasets/ids-2018.html",
+        "licence_status": "not recorded; verify the official terms and citation before publication"
+      },
+      "label_policy": {
+        "positive_labels": [
+          "DDoS",
+          "DoS"
+        ],
+        "negative_labels": [
+          "Benign"
+        ],
+        "required_families": [
+          "DDoS",
+          "DoS",
+          "PortScan"
+        ],
+        "missing_required_families": [
+          "PortScan"
+        ],
+        "family_mapping": {
+          "DDoS": "label starts with 'DDoS'",
+          "DoS": "label starts with 'DoS'",
+          "PortScan": "label starts with 'PortScan'",
+          "Benign": "label equals 'Benign'",
+          "excluded": "everything else (web attack, brute force, bot, infiltration)"
+        },
+        "excluded_labels": {
+          "Bot": "excluded; outside volumetric/scanning scope",
+          "Brute Force -Web": "excluded; outside volumetric/scanning scope",
+          "Brute Force -XSS": "excluded; outside volumetric/scanning scope",
+          "FTP-BruteForce": "excluded; outside volumetric/scanning scope",
+          "Infilteration": "excluded; outside volumetric/scanning scope",
+          "SQL Injection": "excluded; outside volumetric/scanning scope",
+          "SSH-Bruteforce": "excluded; outside volumetric/scanning scope"
+        }
+      },
+      "rows": {
+        "raw": 16233002,
+        "header_rows_removed": 59,
+        "duplicate_within_file": 3931926,
+        "cross_file_duplicates": 221597,
+        "unique": 12079420,
+        "malformed_timestamps": 0,
+        "suspicious_timestamps": 14,
+        "possible_row_cap": true
+      },
+      "raw_label_counts": {
+        "Benign": 13484708,
+        "Bot": 286191,
+        "Brute Force -Web": 611,
+        "Brute Force -XSS": 230,
+        "DDOS attack-HOIC": 686012,
+        "DDOS attack-LOIC-UDP": 1730,
+        "DDoS attacks-LOIC-HTTP": 576191,
+        "DoS attacks-GoldenEye": 41508,
+        "DoS attacks-Hulk": 461912,
+        "DoS attacks-SlowHTTPTest": 139890,
+        "DoS attacks-Slowloris": 10990,
+        "FTP-BruteForce": 193360,
+        "Infilteration": 161934,
+        "SQL Injection": 87,
+        "SSH-Bruteforce": 187589
+      },
+      "unique_label_counts": {
+        "Benign": 10704397,
+        "Bot": 144535,
+        "Brute Force -Web": 553,
+        "Brute Force -XSS": 226,
+        "DDOS attack-HOIC": 198861,
+        "DDOS attack-LOIC-UDP": 1730,
+        "DDoS attacks-LOIC-HTTP": 575364,
+        "DoS attacks-GoldenEye": 41406,
+        "DoS attacks-Hulk": 180129,
+        "DoS attacks-SlowHTTPTest": 43,
+        "DoS attacks-Slowloris": 9908,
+        "FTP-BruteForce": 54,
+        "Infilteration": 128095,
+        "SQL Injection": 78,
+        "SSH-Bruteforce": 94041
+      },
+      "family_counts": {
+        "Benign": 10704397,
+        "DoS": 231486,
+        "DDoS": 775955
+      },
+      "day_family_counts": {
+        "1970-01-05": {
+          "Benign": 1
+        },
+        "1970-01-08": {
+          "Benign": 1
+        },
+        "1970-01-10": {
+          "Benign": 1
+        },
+        "1970-01-11": {
+          "Benign": 3
+        },
+        "1970-01-12": {
+          "Benign": 8
+        },
+        "2018-02-14": {
+          "Benign": 580708
+        },
+        "2018-02-15": {
+          "Benign": 787380,
+          "DoS": 51314
+        },
+        "2018-02-16": {
+          "Benign": 446663,
+          "DoS": 180172
+        },
+        "2018-02-20": {
+          "Benign": 5543362,
+          "DDoS": 575364
+        },
+        "2018-02-21": {
+          "Benign": 360809,
+          "DDoS": 200591
+        },
+        "2018-02-22": {
+          "Benign": 837509
+        },
+        "2018-02-23": {
+          "Benign": 826257
+        },
+        "2018-02-28": {
+          "Benign": 453811
+        },
+        "2018-03-01": {
+          "Benign": 191071
+        },
+        "2018-03-02": {
+          "Benign": 676813
+        }
+      },
+      "capture_days": [
+        "2018-02-14",
+        "2018-02-15",
+        "2018-02-16",
+        "2018-02-20",
+        "2018-02-21",
+        "2018-02-22",
+        "2018-02-23",
+        "2018-02-28",
+        "2018-03-01",
+        "2018-03-02"
+      ],
+      "suspicious_days": [
+        "1970-01-05",
+        "1970-01-08",
+        "1970-01-10",
+        "1970-01-11",
+        "1970-01-12"
+      ],
+      "day_label_counts": {
+        "1970-01-05": {
+          "Benign": 1
+        },
+        "1970-01-08": {
+          "Benign": 1
+        },
+        "1970-01-10": {
+          "Benign": 1
+        },
+        "1970-01-11": {
+          "Benign": 3
+        },
+        "1970-01-12": {
+          "Benign": 8
+        },
+        "2018-02-14": {
+          "Benign": 580708,
+          "FTP-BruteForce": 54,
+          "SSH-Bruteforce": 94041
+        },
+        "2018-02-15": {
+          "Benign": 833344,
+          "DoS attacks-GoldenEye": 41406,
+          "DoS attacks-Slowloris": 9908
+        },
+        "2018-02-16": {
+          "Benign": 446663,
+          "DoS attacks-Hulk": 180129,
+          "DoS attacks-SlowHTTPTest": 55
+        },
+        "2018-02-20": {
+          "Benign": 5545186,
+          "DDoS attacks-LOIC-HTTP": 575364
+        },
+        "2018-02-21": {
+          "Benign": 360814,
+          "DDOS attack-HOIC": 198861,
+          "DDOS attack-LOIC-UDP": 1730
+        },
+        "2018-02-22": {
+          "Benign": 906576,
+          "Brute Force -Web": 228,
+          "Brute Force -XSS": 79,
+          "SQL Injection": 31
+        },
+        "2018-02-23": {
+          "Benign": 910117,
+          "Brute Force -Web": 342,
+          "Brute Force -XSS": 150,
+          "SQL Injection": 49
+        },
+        "2018-02-28": {
+          "Benign": 453811,
+          "Infilteration": 54969
+        },
+        "2018-03-01": {
+          "Benign": 205965,
+          "Infilteration": 76691
+        },
+        "2018-03-02": {
+          "Benign": 679197,
+          "Bot": 144535
+        }
+      },
+      "conflicting_duplicate_groups": 0,
+      "temporal_split": {
+        "method": "temporal_day_split: sorted capture days, 60/20/20 by day; a whole day stays in one partition",
+        "partitions": {
+          "train": {
+            "rows": 9658305,
+            "label_counts": {
+              "Benign": 8556431,
+              "DDoS": 775955,
+              "DoS": 231486
+            },
+            "positive_rows": 1007441
+          },
+          "validation": {
+            "rows": 1335556,
+            "label_counts": {
+              "Benign": 1280068
+            },
+            "positive_rows": 0
+          },
+          "test": {
+            "rows": 1085545,
+            "label_counts": {
+              "Benign": 867884
+            },
+            "positive_rows": 0
+          }
+        },
+        "family_partition_matrix": {
+          "partitions": {
+            "train": {
+              "label_counts": {
+                "Benign": 8556431,
+                "DDoS": 775955,
+                "DoS": 231486
+              },
+              "primary_positives": 1007441,
+              "primary_positive_families": [
+                "DDoS",
+                "DoS"
+              ]
+            },
+            "validation": {
+              "label_counts": {
+                "Benign": 1280068
+              },
+              "primary_positives": 0,
+              "primary_positive_families": []
+            },
+            "test": {
+              "label_counts": {
+                "Benign": 867884
+              },
+              "primary_positives": 0,
+              "primary_positive_families": []
+            }
+          },
+          "train_validation_overlap": [],
+          "train_test_overlap": [],
+          "validation_test_overlap": [],
+          "validation_test_disjoint": true,
+          "train_has_primary_positives": true
+        },
+        "coverage_gate": {
+          "minimums": {
+            "train": 1,
+            "validation": 1,
+            "test": 1
+          },
+          "families": {
+            "DDoS": {
+              "train": 775955,
+              "validation": 0,
+              "test": 0,
+              "observed": true,
+              "required": true,
+              "pass": false
+            },
+            "DoS": {
+              "train": 231486,
+              "validation": 0,
+              "test": 0,
+              "observed": true,
+              "required": true,
+              "pass": false
+            },
+            "PortScan": {
+              "train": 0,
+              "validation": 0,
+              "test": 0,
+              "observed": false,
+              "required": true,
+              "pass": false
+            }
+          },
+          "missing_required": [
+            "PortScan"
+          ],
+          "overall_pass": false,
+          "reason": "Required families are absent from the dataset: PortScan. Families absent from at least one partition: DDoS, DoS. Validation and test positive families do not overlap."
+        },
+        "status": "coverage_fail",
+        "day_split": {
+          "2018-02-14": "train",
+          "2018-02-15": "train",
+          "2018-02-16": "train",
+          "2018-02-20": "train",
+          "2018-02-21": "train",
+          "2018-02-22": "train",
+          "2018-02-23": "validation",
+          "2018-02-28": "validation",
+          "2018-03-01": "test",
+          "2018-03-02": "test"
+        }
+      },
+      "group_split": {
+        "method": "group_hash_split: sha256-free uint64 feature hash mod 100; buckets 0-69 train, 70-84 validation, 85-99 test",
+        "partitions": {
+          "train": {
+            "rows": 8457261,
+            "label_counts": {
+              "Benign": 7495180,
+              "DDoS": 542897,
+              "DoS": 161943
+            },
+            "positive_rows": 704840
+          },
+          "validation": {
+            "rows": 1810652,
+            "label_counts": {
+              "Benign": 1605266,
+              "DDoS": 115741,
+              "DoS": 34507
+            },
+            "positive_rows": 150248
+          },
+          "test": {
+            "rows": 1811507,
+            "label_counts": {
+              "Benign": 1603951,
+              "DDoS": 117317,
+              "DoS": 35036
+            },
+            "positive_rows": 152353
+          }
+        },
+        "family_partition_matrix": {
+          "partitions": {
+            "train": {
+              "label_counts": {
+                "Benign": 7495180,
+                "DDoS": 542897,
+                "DoS": 161943
+              },
+              "primary_positives": 704840,
+              "primary_positive_families": [
+                "DDoS",
+                "DoS"
+              ]
+            },
+            "validation": {
+              "label_counts": {
+                "Benign": 1605266,
+                "DDoS": 115741,
+                "DoS": 34507
+              },
+              "primary_positives": 150248,
+              "primary_positive_families": [
+                "DDoS",
+                "DoS"
+              ]
+            },
+            "test": {
+              "label_counts": {
+                "Benign": 1603951,
+                "DDoS": 117317,
+                "DoS": 35036
+              },
+              "primary_positives": 152353,
+              "primary_positive_families": [
+                "DDoS",
+                "DoS"
+              ]
+            }
+          },
+          "train_validation_overlap": [
+            "DDoS",
+            "DoS"
+          ],
+          "train_test_overlap": [
+            "DDoS",
+            "DoS"
+          ],
+          "validation_test_overlap": [
+            "DDoS",
+            "DoS"
+          ],
+          "validation_test_disjoint": false,
+          "train_has_primary_positives": true
+        },
+        "coverage_gate": {
+          "minimums": {
+            "train": 1,
+            "validation": 1,
+            "test": 1
+          },
+          "families": {
+            "DDoS": {
+              "train": 542897,
+              "validation": 115741,
+              "test": 117317,
+              "observed": true,
+              "required": true,
+              "pass": true
+            },
+            "DoS": {
+              "train": 161943,
+              "validation": 34507,
+              "test": 35036,
+              "observed": true,
+              "required": true,
+              "pass": true
+            },
+            "PortScan": {
+              "train": 0,
+              "validation": 0,
+              "test": 0,
+              "observed": false,
+              "required": true,
+              "pass": false
+            }
+          },
+          "missing_required": [
+            "PortScan"
+          ],
+          "overall_pass": false,
+          "reason": "Required families are absent from the dataset: PortScan."
+        },
+        "status": "coverage_fail"
+      },
+      "schema": {
+        "features": {
+          "flow_duration": {
+            "status": "rename",
+            "source_column": "Flow Duration",
+            "present": true,
+            "note": ""
+          },
+          "total_fwd_packets": {
+            "status": "rename",
+            "source_column": "Tot Fwd Pkts",
+            "present": true,
+            "note": ""
+          },
+          "total_backward_packets": {
+            "status": "rename",
+            "source_column": "Tot Bwd Pkts",
+            "present": true,
+            "note": ""
+          },
+          "total_length_of_fwd_packets": {
+            "status": "rename",
+            "source_column": "TotLen Fwd Pkts",
+            "present": true,
+            "note": ""
+          },
+          "total_length_of_bwd_packets": {
+            "status": "rename",
+            "source_column": "TotLen Bwd Pkts",
+            "present": true,
+            "note": ""
+          },
+          "flow_packets_s": {
+            "status": "rename",
+            "source_column": "Flow Pkts/s",
+            "present": true,
+            "note": ""
+          },
+          "flow_bytes_s": {
+            "status": "rename",
+            "source_column": "Flow Byts/s",
+            "present": true,
+            "note": ""
+          },
+          "packet_length_mean": {
+            "status": "rename",
+            "source_column": "Pkt Len Mean",
+            "present": true,
+            "note": ""
+          },
+          "packet_length_max": {
+            "status": "rename",
+            "source_column": "Pkt Len Max",
+            "present": true,
+            "note": ""
+          },
+          "syn_flag_count": {
+            "status": "rename",
+            "source_column": "SYN Flag Cnt",
+            "present": true,
+            "note": ""
+          },
+          "fin_flag_count": {
+            "status": "rename",
+            "source_column": "FIN Flag Cnt",
+            "present": true,
+            "note": ""
+          },
+          "rst_flag_count": {
+            "status": "rename",
+            "source_column": "RST Flag Cnt",
+            "present": true,
+            "note": ""
+          }
+        },
+        "available": 12,
+        "missing": 0,
+        "total": 12
+      },
+      "per_file": [
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-14-2018.csv",
+          "sha256": "acff8bc61376ee031d80878ee6099e0b1a87a1bd711d8068298421418c9f8147",
+          "bytes": 358223333,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 373767,
+          "unique_rows": 674808,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 667626,
+            "FTP-BruteForce": 193360,
+            "SSH-Bruteforce": 187589
+          },
+          "unique_label_counts": {
+            "Benign": 580713,
+            "FTP-BruteForce": 54,
+            "SSH-Bruteforce": 94041
+          },
+          "day_label_counts": {
+            "1970-01-05": {
+              "Benign": 1
+            },
+            "1970-01-08": {
+              "Benign": 1
+            },
+            "1970-01-12": {
+              "Benign": 3
+            },
+            "2018-02-14": {
+              "Benign": 580708,
+              "FTP-BruteForce": 54,
+              "SSH-Bruteforce": 94041
+            }
+          },
+          "family_counts": {
+            "Benign": 580713
+          },
+          "day_family_counts": {
+            "2018-02-14": {
+              "Benign": 580708
+            },
+            "1970-01-05": {
+              "Benign": 1
+            },
+            "1970-01-08": {
+              "Benign": 1
+            },
+            "1970-01-12": {
+              "Benign": 3
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 5,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-15-2018.csv",
+          "sha256": "fa2947a8256d81ee9103ae16139d62d0e17aa23e696ee80d9e76fb51c01c9c4b",
+          "bytes": 375945899,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 163917,
+          "unique_rows": 884658,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 996077,
+            "DoS attacks-GoldenEye": 41508,
+            "DoS attacks-Slowloris": 10990
+          },
+          "unique_label_counts": {
+            "Benign": 833344,
+            "DoS attacks-GoldenEye": 41406,
+            "DoS attacks-Slowloris": 9908
+          },
+          "day_label_counts": {
+            "2018-02-15": {
+              "Benign": 833344,
+              "DoS attacks-GoldenEye": 41406,
+              "DoS attacks-Slowloris": 9908
+            }
+          },
+          "family_counts": {
+            "Benign": 833344,
+            "DoS": 51314
+          },
+          "day_family_counts": {
+            "2018-02-15": {
+              "Benign": 833344,
+              "DoS": 51314
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-16-2018.csv",
+          "sha256": "1a4919faa0c49c7af97230b0c2d076eba23ee6dd81103a3801d51ac316355d8b",
+          "bytes": 333723605,
+          "raw_rows": 1048575,
+          "header_rows": 1,
+          "duplicate_rows": 421727,
+          "unique_rows": 626847,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 446772,
+            "DoS attacks-Hulk": 461912,
+            "DoS attacks-SlowHTTPTest": 139890
+          },
+          "unique_label_counts": {
+            "Benign": 446663,
+            "DoS attacks-Hulk": 180129,
+            "DoS attacks-SlowHTTPTest": 55
+          },
+          "day_label_counts": {
+            "2018-02-16": {
+              "Benign": 446663,
+              "DoS attacks-Hulk": 180129,
+              "DoS attacks-SlowHTTPTest": 55
+            }
+          },
+          "family_counts": {
+            "Benign": 446663,
+            "DoS": 180184
+          },
+          "day_family_counts": {
+            "2018-02-16": {
+              "Benign": 446663,
+              "DoS": 180184
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-20-2018.csv",
+          "sha256": "7287a4d7740a1dddbf330ceb2beb6a4889d33ba63674558a68b5eb50d16711df",
+          "bytes": 4054925350,
+          "raw_rows": 7948748,
+          "header_rows": 0,
+          "duplicate_rows": 1828198,
+          "unique_rows": 6120550,
+          "columns": [
+            "Flow ID",
+            "Src IP",
+            "Src Port",
+            "Dst IP",
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 84,
+          "raw_label_counts": {
+            "Benign": 7372557,
+            "DDoS attacks-LOIC-HTTP": 576191
+          },
+          "unique_label_counts": {
+            "Benign": 5545186,
+            "DDoS attacks-LOIC-HTTP": 575364
+          },
+          "day_label_counts": {
+            "2018-02-20": {
+              "Benign": 5545186,
+              "DDoS attacks-LOIC-HTTP": 575364
+            }
+          },
+          "family_counts": {
+            "Benign": 5545186,
+            "DDoS": 575364
+          },
+          "day_family_counts": {
+            "2018-02-20": {
+              "Benign": 5545186,
+              "DDoS": 575364
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": false
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-21-2018.csv",
+          "sha256": "a5f4a1c2689e0aa6566c03a58466de9c407c0be0cbd3cc69306544026611be04",
+          "bytes": 328893673,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 487170,
+          "unique_rows": 561405,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 360833,
+            "DDOS attack-HOIC": 686012,
+            "DDOS attack-LOIC-UDP": 1730
+          },
+          "unique_label_counts": {
+            "Benign": 360814,
+            "DDOS attack-HOIC": 198861,
+            "DDOS attack-LOIC-UDP": 1730
+          },
+          "day_label_counts": {
+            "2018-02-21": {
+              "Benign": 360814,
+              "DDOS attack-HOIC": 198861,
+              "DDOS attack-LOIC-UDP": 1730
+            }
+          },
+          "family_counts": {
+            "Benign": 360814,
+            "DDoS": 200591
+          },
+          "day_family_counts": {
+            "2018-02-21": {
+              "Benign": 360814,
+              "DDoS": 200591
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-22-2018.csv",
+          "sha256": "da33c927018274f9d49b145baa00e4ce0526c25b3b890b34c489e247b5e24544",
+          "bytes": 382636202,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 141652,
+          "unique_rows": 906923,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 1048213,
+            "Brute Force -Web": 249,
+            "Brute Force -XSS": 79,
+            "SQL Injection": 34
+          },
+          "unique_label_counts": {
+            "Benign": 906585,
+            "Brute Force -Web": 228,
+            "Brute Force -XSS": 79,
+            "SQL Injection": 31
+          },
+          "day_label_counts": {
+            "1970-01-10": {
+              "Benign": 1
+            },
+            "1970-01-11": {
+              "Benign": 3
+            },
+            "1970-01-12": {
+              "Benign": 5
+            },
+            "2018-02-22": {
+              "Benign": 906576,
+              "Brute Force -Web": 228,
+              "Brute Force -XSS": 79,
+              "SQL Injection": 31
+            }
+          },
+          "family_counts": {
+            "Benign": 906585
+          },
+          "day_family_counts": {
+            "1970-01-10": {
+              "Benign": 1
+            },
+            "1970-01-11": {
+              "Benign": 3
+            },
+            "1970-01-12": {
+              "Benign": 5
+            },
+            "2018-02-22": {
+              "Benign": 906576
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 9,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-23-2018.csv",
+          "sha256": "d0a7f5059d9823b6e9b392b759e306481a3502d190dea7a1b5502ae079ea069b",
+          "bytes": 382840456,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 137917,
+          "unique_rows": 910658,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 1048009,
+            "Brute Force -Web": 362,
+            "Brute Force -XSS": 151,
+            "SQL Injection": 53
+          },
+          "unique_label_counts": {
+            "Benign": 910117,
+            "Brute Force -Web": 342,
+            "Brute Force -XSS": 150,
+            "SQL Injection": 49
+          },
+          "day_label_counts": {
+            "2018-02-23": {
+              "Benign": 910117,
+              "Brute Force -Web": 342,
+              "Brute Force -XSS": 150,
+              "SQL Injection": 49
+            }
+          },
+          "family_counts": {
+            "Benign": 910117
+          },
+          "day_family_counts": {
+            "2018-02-23": {
+              "Benign": 910117
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": true
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\02-28-2018.csv",
+          "sha256": "f15e2a12304446058a0186c8ad67de2bd15735a9ba5c70c9a1f4c4242ab06771",
+          "bytes": 209249758,
+          "raw_rows": 613104,
+          "header_rows": 33,
+          "duplicate_rows": 104291,
+          "unique_rows": 508780,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 544200,
+            "Infilteration": 68871
+          },
+          "unique_label_counts": {
+            "Benign": 453811,
+            "Infilteration": 54969
+          },
+          "day_label_counts": {
+            "2018-02-28": {
+              "Benign": 453811,
+              "Infilteration": 54969
+            }
+          },
+          "family_counts": {
+            "Benign": 453811
+          },
+          "day_family_counts": {
+            "2018-02-28": {
+              "Benign": 453811
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": false
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\03-01-2018.csv",
+          "sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+          "bytes": 107842858,
+          "raw_rows": 331125,
+          "header_rows": 25,
+          "duplicate_rows": 48444,
+          "unique_rows": 282656,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 238037,
+            "Infilteration": 93063
+          },
+          "unique_label_counts": {
+            "Benign": 205965,
+            "Infilteration": 76691
+          },
+          "day_label_counts": {
+            "2018-03-01": {
+              "Benign": 205965,
+              "Infilteration": 76691
+            }
+          },
+          "family_counts": {
+            "Benign": 205965
+          },
+          "day_family_counts": {
+            "2018-03-01": {
+              "Benign": 205965
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": false
+        },
+        {
+          "path": "C:\\Users\\varun\\Downloads\\CIC IDS 2018 Complete\\03-02-2018.csv",
+          "sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+          "bytes": 352368373,
+          "raw_rows": 1048575,
+          "header_rows": 0,
+          "duplicate_rows": 224843,
+          "unique_rows": 823732,
+          "columns": [
+            "Dst Port",
+            "Protocol",
+            "Timestamp",
+            "Flow Duration",
+            "Tot Fwd Pkts",
+            "Tot Bwd Pkts",
+            "TotLen Fwd Pkts",
+            "TotLen Bwd Pkts",
+            "Fwd Pkt Len Max",
+            "Fwd Pkt Len Min",
+            "Fwd Pkt Len Mean",
+            "Fwd Pkt Len Std",
+            "Bwd Pkt Len Max",
+            "Bwd Pkt Len Min",
+            "Bwd Pkt Len Mean",
+            "Bwd Pkt Len Std",
+            "Flow Byts/s",
+            "Flow Pkts/s",
+            "Flow IAT Mean",
+            "Flow IAT Std",
+            "Flow IAT Max",
+            "Flow IAT Min",
+            "Fwd IAT Tot",
+            "Fwd IAT Mean",
+            "Fwd IAT Std",
+            "Fwd IAT Max",
+            "Fwd IAT Min",
+            "Bwd IAT Tot",
+            "Bwd IAT Mean",
+            "Bwd IAT Std",
+            "Bwd IAT Max",
+            "Bwd IAT Min",
+            "Fwd PSH Flags",
+            "Bwd PSH Flags",
+            "Fwd URG Flags",
+            "Bwd URG Flags",
+            "Fwd Header Len",
+            "Bwd Header Len",
+            "Fwd Pkts/s",
+            "Bwd Pkts/s",
+            "Pkt Len Min",
+            "Pkt Len Max",
+            "Pkt Len Mean",
+            "Pkt Len Std",
+            "Pkt Len Var",
+            "FIN Flag Cnt",
+            "SYN Flag Cnt",
+            "RST Flag Cnt",
+            "PSH Flag Cnt",
+            "ACK Flag Cnt",
+            "URG Flag Cnt",
+            "CWE Flag Count",
+            "ECE Flag Cnt",
+            "Down/Up Ratio",
+            "Pkt Size Avg",
+            "Fwd Seg Size Avg",
+            "Bwd Seg Size Avg",
+            "Fwd Byts/b Avg",
+            "Fwd Pkts/b Avg",
+            "Fwd Blk Rate Avg",
+            "Bwd Byts/b Avg",
+            "Bwd Pkts/b Avg",
+            "Bwd Blk Rate Avg",
+            "Subflow Fwd Pkts",
+            "Subflow Fwd Byts",
+            "Subflow Bwd Pkts",
+            "Subflow Bwd Byts",
+            "Init Fwd Win Byts",
+            "Init Bwd Win Byts",
+            "Fwd Act Data Pkts",
+            "Fwd Seg Size Min",
+            "Active Mean",
+            "Active Std",
+            "Active Max",
+            "Active Min",
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min",
+            "Label"
+          ],
+          "column_count": 80,
+          "raw_label_counts": {
+            "Benign": 762384,
+            "Bot": 286191
+          },
+          "unique_label_counts": {
+            "Benign": 679197,
+            "Bot": 144535
+          },
+          "day_label_counts": {
+            "2018-03-02": {
+              "Benign": 679197,
+              "Bot": 144535
+            }
+          },
+          "family_counts": {
+            "Benign": 679197
+          },
+          "day_family_counts": {
+            "2018-03-02": {
+              "Benign": 679197
+            }
+          },
+          "malformed_timestamps": 0,
+          "suspicious_timestamps": 0,
+          "possible_row_cap": true
+        }
+      ]
+    }
+  },
+  "decision": {
+    "p2b_status": "blocked",
+    "unsw_nb15_verdict": "usable for a leakage-safe, random-split coverage study, but not as a direct external validation of the CIC-trained model because 4 Tier A features are missing",
+    "cic_ids_2018_verdict": "contains DoS and DDoS across several days but no PortScan at all. A day-based split fails the coverage gate because the positives are concentrated in the early days; a group-hash split can cover DoS and DDoS only. It cannot close A4 for a claim that includes PortScan.",
+    "training_authorized": false,
+    "reason": "No dataset currently provides a validated, schema-compatible split that covers every required family in train, validation, and test. The audit records feasibility; it does not authorize a fit."
+  },
+  "artifact_identity": {
+    "serving_artifact": "models/model_bundle_rf_day_based_seed42.pkl",
+    "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "pandas_version": "2.2.3"
+  },
+  "notes": [
+    "No model is trained, no registry row is written, and the serving artifact is untouched.",
+    "UNSW-NB15 has no timestamp, so its split is a deterministic group-hash split, not a temporal split.",
+    "UNSW-NB15 duplicate groups are keyed on the 42 non-metadata feature columns.",
+    "CIC-IDS-2018 is a day-scheduled dataset. The audit reports a temporal day split and a group-hash split separately; only the group split can cover DoS and DDoS in all partitions.",
+    "CIC-IDS-2018 has no PortScan family, so any claim that includes PortScan remains blocked on data.",
+    "CIC-IDS-2018 duplicates are grouped on flow features after dropping direct identifiers (Flow ID, Src IP, Src Port, Dst IP).",
+    "The audit reads local downloads only; source URLs and licences must be recorded separately."
+  ],
+  "findings": [
+    "UNSW-NB15: the official split is 175,341 train / 82,332 test. The local filenames match the official split.",
+    "UNSW-NB15: DoS (volumetric) and Reconnaissance (scanning) are the only in-scope positive families. Both appear in all three proposed partitions, so the coverage gate is PASS.",
+    "UNSW-NB15: feature-identical rows are pervasive. The audit removed 45,545 duplicate train rows, 20,152 duplicate test rows, and 953 test rows that duplicated a train group. It also excluded 1,772 train groups (30,528 rows) and 575 test groups (8,809 rows) whose feature-identical rows had inconsistent labels. A random split without this grouping would leak near-identical flows.",
+    "UNSW-NB15: only 8/12 Tier A features are available. 4 are missing (packet_length_max and the three flag counts). The CIC-trained serving model cannot be applied directly; a UNSW-specific model or a new feature adapter would be required.",
+    "CIC-IDS-2018: the complete local set contains 10 capture day(s) (2018-02-14, 2018-02-15, 2018-02-16, 2018-02-20, 2018-02-21, 2018-02-22, 2018-02-23, 2018-02-28, 2018-03-01, 2018-03-02) and 12,079,420 unique feature-identical flows after removing 3,931,926 within-file and 221,597 cross-file duplicate rows. Observed volumetric families are DDoS, DoS; required families missing from the whole set: PortScan.",
+    "CIC-IDS-2018: the day-based temporal split FAILS the coverage gate. All DoS and DDoS positives fall in the early capture days, so a 60/20/20 day split leaves validation and test with no volumetric positives. A day split is therefore a family split.",
+    "CIC-IDS-2018: a deterministic group-hash split FAILS the coverage gate. It can place DoS and DDoS in all three partitions, but it cannot manufacture a PortScan family that the dataset does not contain, and it is a random split, not a temporal one.",
+    "CIC-IDS-2018: all 12 Tier A features are present under CICFlowMeter-2018 names, and the 84-column 02-20 export reduces to the same 80-column schema after dropping `Flow ID`, `Src IP`, `Src Port`, and `Dst IP`.",
+    "CIC-IDS-2018: data-quality warnings remain. 59 repeated header rows were removed; 14 rows carry pre-2000 (mostly 1970) timestamps; 7 files have exactly 1,048,575 rows, consistent with a 1,000,000-row cap above the header. The 4 GB 02-20 file is not capped and is the only 7.9M-row day."
+  ]
+}

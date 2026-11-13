@@ -1,789 +1,1197 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
-  <meta name="description" content="NetShield AI — Advanced Machine Learning Network Traffic Anomaly Detection and Threat Analytics Platform.">
-  <title>NetShield NDR | Batch Analyzer</title>
-
-  <!-- PWA: manifest + theme color -->
-  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-  <meta name="theme-color" content="#101516">
-
-  <!-- iOS PWA tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NetShield">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
-
-  <!-- Icons -->
-  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-  <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
-
-  <!-- Typography: IBM Plex Sans + IBM Plex Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Stylesheets in cascading priority -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.5">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}?v=2.5">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}?v=2.5">
-
-  <!-- Theme Script -->
-  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <meta charset="utf-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NetShield research workbench: temporal evaluation, alert budgets, failure modes, and provenance for a CIC-IDS-2017 flow classifier.">
+  <title>NetShield | Research Workbench</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/workbench.css') }}?v=2">
+  <script src="{{ url_for('static', filename='js/theme.js') }}?v=4"></script>
 </head>
 <body>
+{% macro pair(values) -%}
+{%- if values and values[0] is not none -%}{{ "%.4f"|format(values[0]) }} &plusmn; {{ "%.4f"|format(values[1] or 0) }}{%- else -%}not available{%- endif -%}
+{%- endmacro %}
+{% macro pct(value, digits=2) -%}
+{%- if value is not none -%}{{ ("%." ~ digits ~ "f")|format(value * 100) }}%{%- else -%}not available{%- endif -%}
+{%- endmacro %}
 
-  <!-- Ambient Scanline Overlay -->
-  <div class="scanlines" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ── Top Navigation Bar ── -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <a href="/" class="brand">
-        <span class="brand-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="m9 12 2 2 4-4"/>
-          </svg>
-        </span>
-        <span class="brand-name">NETSHIELD <span class="accent-text">AI</span></span>
-      </a>
-
-      <!-- Page Switcher Tabs -->
-      <nav class="nav-tabs" aria-label="Main Navigation">
-        <a href="/" class="nav-tab active">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-          Batch Analyzer
-        </a>
-        <a href="/dashboard" class="nav-tab">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Live Sentinel Console
-          <span class="live-pill">LIVE</span>
-        </a>
-      </nav>
-    </div>
-
-    <div class="topbar-right">
-      <button class="cmd-palette-btn" id="btnOpenCmdPalette" title="Open Command Palette (Ctrl+K)" aria-label="Open Command Palette">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Commands</span>
-        <kbd>Ctrl+K</kbd>
-      </button>
-
-      <span id="pwa-net-status" class="nav-tab" style="padding: 4px 10px; font-size: 0.75rem;"></span>
-      <button id="pwa-install-btn" class="btn-sample" style="padding: 4px 10px; font-size: 0.75rem;" hidden>📲 Install</button>
-      <div class="clock" id="topbarClock">00:00:00</div>
-      
-      <!-- Theme Toggle -->
-      <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
-        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- ── Main Workspace ── -->
-  <main class="page-container">
-
-    <!-- Compact Operational Telemetry Header (Pillar 1) -->
-    <section class="hero-section hero-compact">
-      <div class="telemetry-status-strip">
-        <div class="telemetry-pill">
-          <span class="badge-dot"></span>
-          <strong>Classifier:</strong> Random Forest
-        </div>
-        <div class="telemetry-pill">
-          <strong>Inputs:</strong> Flow CSV · PCAP · PCAPNG
-        </div>
-        <div class="telemetry-pill">
-          <strong>Threat intel:</strong> AbuseIPDB optional
-        </div>
-        <div class="telemetry-pill pill-secure">
-          <strong>Response:</strong> Simulated playbooks
-        </div>
-      </div>
-      <h1 class="hero-title-compact">Network Detection &amp; <span>Response (NDR)</span></h1>
-      <p class="hero-sub hero-sub-compact">Inspect packet captures and flow exports, then classify extracted network telemetry for anomaly indicators.</p>
-
-      <!-- Multi-Probe Sensor Fleet Grid (Enterprise Feature) -->
-      <div class="sensor-fleet-strip">
-        <div class="sensor-fleet-header">
-          <div class="sensor-fleet-heading">
-            <div class="sensor-fleet-title">Sensor fleet</div>
-            <div class="sensor-fleet-caption">Illustrative probe telemetry</div>
-          </div>
-          <div class="sensor-fleet-meta">
-            <span class="sensor-demo-tag">DEMO DATA</span>
-            <span>Aggregate throughput <strong>4.34 Gbps</strong></span>
-            <span>Average packet loss <strong>0.001%</strong></span>
-          </div>
-        </div>
-        <div class="sensor-probes-grid">
-          <div class="sensor-probe-card">
-            <div class="probe-card-top">
-              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-us-east-aws</span></div>
-              <span class="probe-engine-tag">eBPF · 6.5</span>
-            </div>
-            <div class="probe-metrics-row">
-              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">1.42 Gbps</strong></div>
-              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.001%</strong></div>
-            </div>
-          </div>
-          <div class="sensor-probe-card">
-            <div class="probe-card-top">
-              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-eu-central-fra</span></div>
-              <span class="probe-engine-tag">DPDK · 23.11</span>
-            </div>
-            <div class="probe-metrics-row">
-              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">820 Mbps</strong></div>
-              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.000%</strong></div>
-            </div>
-          </div>
-          <div class="sensor-probe-card">
-            <div class="probe-card-top">
-              <div class="probe-identity"><span class="probe-dot online"></span><span class="probe-name">probe-onprem-dc1</span></div>
-              <span class="probe-engine-tag">AF_PACKET · Ring</span>
-            </div>
-            <div class="probe-metrics-row">
-              <div class="probe-metric"><span>Throughput</span><strong class="probe-metric-val">2.10 Gbps</strong></div>
-              <div class="probe-metric"><span>Packet loss</span><strong class="probe-metric-val">0.003%</strong></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Network Ingestion Vector & Topology Filter Bar -->
-    <section class="topology-selector-card card-glow">
-      <div class="topology-header">
-        <span class="topology-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          INGESTION TOPOLOGY &amp; CAPTURE VECTORS:
-        </span>
-        <span class="topology-hint">Filter flows by physical and virtual network interface primitives</span>
-      </div>
-      <div class="topology-nav-tabs" role="tablist">
-        <button type="button" class="topology-tab active" data-vector="all" id="tabVectorAll">
-          <span class="vector-icon">⚡</span>
-          <span>All Vectors (Global)</span>
-        </button>
-        <button type="button" class="topology-tab" data-vector="eth0" id="tabVectorEth">
-          <span class="vector-icon">🖧</span>
-          <span>10GbE Fiber Backbone (eth0)</span>
-        </button>
-        <button type="button" class="topology-tab" data-vector="wlan0" id="tabVectorWlan">
-          <span class="vector-icon">📶</span>
-          <span>Corporate WLAN 802.11 (wlan0)</span>
-        </button>
-        <button type="button" class="topology-tab" data-vector="wwan0" id="tabVectorWwan">
-          <span class="vector-icon">🛰</span>
-          <span>5G Cellular / Edge IoT (wwan0)</span>
-        </button>
-        <button type="button" class="topology-tab" data-vector="wg0" id="tabVectorWg">
-          <span class="vector-icon">🔒</span>
-          <span>Cloud VPC / Zero-Trust (wg0)</span>
-        </button>
-      </div>
-
-      <!-- Contextual Dynamic L2 Link Status -->
-      <div class="topology-status-banner" id="topologyStatusBanner">
-        <div class="top-status-item">
-          <span class="top-status-label">ACTIVE INTERFACE:</span>
-          <span class="top-status-val" id="topActiveIface">Global Multi-Vector Ingestion</span>
-        </div>
-        <div class="top-status-item">
-          <span class="top-status-label">PHYSICAL / L2 LINK:</span>
-          <span class="top-status-val" id="topActiveLink">Trunk Gi0/1 (VLAN 10, 20, 50) · Full Duplex 10Gbps</span>
-        </div>
-        <div class="top-status-item">
-          <span class="top-status-label">L2/L3 HEALTH:</span>
-          <span class="top-status-val green-text" id="topActiveHealth">ARP Cache Clean · Airspace Monitored · Zero-Trust Active</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Upload & Action Card -->
-    <section class="action-card card-glow">
-      <div class="action-header">
-        <div>
-          <h2>Deep Packet Capture (PCAP/PCAPNG) &amp; NetFlow Ingestion</h2>
-          <span class="table-sub">Ingest tcpdump or Wireshark captures, or NetFlow v9/IPFIX CSV exports</span>
-        </div>
-        <button type="button" class="btn-sample" id="btnSampleDemo">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Quick Demo (Load Built-in Dataset)
-        </button>
-      </div>
-
-      <!-- Drag & Drop File Zone -->
-      <div class="upload-zone" id="dropZone" tabIndex="0" role="button" aria-label="Upload PCAP or Flow File">
-        <input type="file" id="fileInput" name="file" accept=".pcap,.pcapng,.csv" aria-label="Select packet capture or flow file">
-        <div class="upload-icon-wrapper">
-          <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        </div>
-        <div class="upload-title">Drop PCAP, PCAPNG, or Flow CSV</div>
-        <div class="upload-sub">or <span class="browse-link">click to browse storage / SPAN dump</span></div>
-        <div class="upload-hint">PCAP / PCAPNG (tcpdump · Wireshark) · NetFlow IPFIX · CIC-IDS CSV · Max 50 MB</div>
-        <div class="upload-filename" id="uploadFilename"></div>
-      </div>
-
-      <!-- Multi-Stage Processing Pipeline (Pillar 4) -->
-      <div class="pipeline-progress" id="pipelineProgress" hidden>
-        <div class="pipeline-step" id="pipeStep1">
-          <span class="step-num">1</span>
-          <span class="step-text">Ingesting Flow Logs</span>
-        </div>
-        <div class="pipeline-divider"></div>
-        <div class="pipeline-step" id="pipeStep2">
-          <span class="step-num">2</span>
-          <span class="step-text">Extracting 78 Features</span>
-        </div>
-        <div class="pipeline-divider"></div>
-        <div class="pipeline-step" id="pipeStep3">
-          <span class="step-num">3</span>
-          <span class="step-text">RF Model Inference</span>
-        </div>
-        <div class="pipeline-divider"></div>
-        <div class="pipeline-step" id="pipeStep4">
-          <span class="step-num">4</span>
-          <span class="step-text">SHAP &amp; Analytics</span>
-        </div>
-      </div>
-
-      <!-- Error Feedback Card -->
-      <div class="error-card" id="errorCard" role="alert">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <div class="error-content">
-          <div class="error-title">Processing Error</div>
-          <div id="errorText">An error occurred during analysis.</div>
-        </div>
-      </div>
-
-      <!-- Action Button -->
-      <button class="btn-analyze" id="analyzeBtn" disabled>
-        <span id="btnIcon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </span>
-        <span id="btnText">Execute AI Classification</span>
-      </button>
-    </section>
-
-    <!-- ── Results Section ── -->
-    <section class="results-section" id="resultsSection" aria-live="polite">
-
-      <div class="results-header">
-        <div class="section-title">
-          <span class="title-bar"></span>
-          Threat Intelligence Summary
-        </div>
-        <div class="results-context">
-          <div class="ingestion-summary" id="ingestionSummary" hidden></div>
-          <div class="results-timestamp" id="resultsTimestamp">Analyzed just now</div>
-        </div>
-      </div>
-
-      <!-- Stat KPI Cards -->
-      <div class="stat-cards">
-        <div class="stat-card">
-          <div class="stat-icon cyan">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-          </div>
-          <div class="stat-body">
-            <div class="stat-label">Total Flows</div>
-            <div class="stat-value cyan" id="statTotal">0</div>
-            <div class="stat-sub">Evaluated records</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon green">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-          </div>
-          <div class="stat-body">
-            <div class="stat-label">Benign Traffic</div>
-            <div class="stat-value green" id="statBenign">0</div>
-            <div class="stat-sub" id="statBenignPct">0.0% safe</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon red">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <div class="stat-body">
-            <div class="stat-label">Malicious Threats</div>
-            <div class="stat-value red" id="statAttack">0</div>
-            <div class="stat-sub" id="statAttackPct">0.0% anomalies</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon orange">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-              <polyline points="2 17 12 22 22 17"/>
-              <polyline points="2 12 12 17 22 12"/>
-            </svg>
-          </div>
-          <div class="stat-body">
-            <div class="stat-label">Distinct Vector Classes</div>
-            <div class="stat-value orange" id="statClassesCount">0</div>
-            <div class="stat-sub">Attack categories</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Grid -->
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>Traffic Distribution Ratio</h3>
-            <span class="chart-tag">Doughnut</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="donutChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>Attack Vectors Breakdown</h3>
-            <span class="chart-tag">Frequency</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="barChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Attack Breakdown Table Card -->
-      <div class="table-card">
-        <div class="table-card-header">
-          <div class="table-title">
-            <h3>Detected Attack Vector Details</h3>
-            <span class="table-count-badge" id="tableCountBadge">0 vector types</span>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Attack Vector Class</th>
-                <th>Flow Count</th>
-                <th>% of Total</th>
-                <th>Threat Severity</th>
-              </tr>
-            </thead>
-            <tbody id="attackTableBody">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Sample Flow Records Data Table -->
-      <div class="table-card" id="flowSampleCard">
-        <div class="table-card-header toolbar-wrap">
-          <div class="table-title">
-            <h3>Flow Records Log (Sample View)</h3>
-            <span class="table-sub">Click any flow to open the SHAP Explainability &amp; Telemetry Drawer</span>
-          </div>
-          <div class="table-toolbar">
-            <div class="density-group" role="group" aria-label="Table Density">
-              <button type="button" class="btn-tool active" data-density="standard" id="btnDensityStandard" title="Standard Density">Standard</button>
-              <button type="button" class="btn-tool" data-density="compact" id="btnDensityCompact" title="Compact Density">Compact</button>
-            </div>
-
-            <div class="search-box">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="flowSearchInput" placeholder="Search IP, Port or Class (Press /)..." aria-label="Search flows">
-            </div>
-
-            <select id="flowFilterSelect" class="filter-select" aria-label="Filter flows by status">
-              <option value="all">All Traffic</option>
-              <option value="attacks">Threats Only</option>
-              <option value="benign">Benign Only</option>
-            </select>
-
-            <button type="button" class="btn-tool" id="btnExportCSV" title="Export Flows to CSV">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Export CSV
-            </button>
-            <button type="button" class="btn-tool" id="btnExportJSON" title="Export Telemetry to JSON">JSON</button>
-          </div>
-        </div>
-
-        <!-- Active Filter Chips Bar (Pillar 3) -->
-        <div class="active-filter-bar" id="activeFilterChips" hidden>
-          <span class="filter-bar-label">Active Filter:</span>
-          <div id="filterChipsList" class="filter-chips-list"></div>
-          <button type="button" class="btn-clear-filters" id="btnClearAllFilters">Clear Filter</button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="data-table flow-records-table" id="flowSampleTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Vector</th>
-                <th>Source Host (IP · ASN · Geo)</th>
-                <th>Target Host</th>
-                <th>Proto</th>
-                <th>Classification &amp; CVSS</th>
-                <th>Triage State</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="flowSampleTableBody">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- ── Flow Inspection SideSheet Drawer (Pillar 2 - P0) ── -->
-  <div class="drawer-backdrop" id="drawerBackdrop"></div>
-  <aside class="inspector-drawer" id="flowDrawer" aria-label="Flow Telemetry &amp; SHAP Inspector" aria-hidden="true">
-    <div class="drawer-header">
-      <div class="drawer-title-group">
-        <div class="drawer-badge-row">
-          <span class="drawer-flow-id" id="drawerFlowId">Flow #0</span>
-          <span class="badge" id="drawerThreatBadge">Analyzing</span>
-          <span class="cvss-pill" id="drawerCvssBadge">CVSS 9.8</span>
-        </div>
-        <div class="drawer-route-text" id="drawerRouteText">192.168.1.10:49152 → 10.0.0.1:80</div>
-        <div class="drawer-mitre" id="drawerMitre">MITRE ATT&amp;CK: T1498 · Network Denial of Service</div>
-      </div>
-      <button class="drawer-close-btn" id="btnCloseDrawer" aria-label="Close Inspector Drawer">✕</button>
-    </div>
-
-    <div class="drawer-body">
-      <!-- Incident Lifecycle Triage Bar (SOC Workflow) -->
-      <section class="drawer-section incident-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Incident Lifecycle &amp; SOC SLA Triage
-        </div>
-        <div class="incident-triage-bar">
-          <div class="triage-field">
-            <span class="triage-label">Triage State:</span>
-            <select id="drawerTriageStatus" class="triage-status-select" aria-label="Incident Triage Status">
-              <option value="New">● New Alert</option>
-              <option value="Investigating">● Investigating</option>
-              <option value="Suppressed">● Suppressed / False Positive</option>
-              <option value="Mitigated">● Mitigated / Closed</option>
-            </select>
-          </div>
-          <div class="triage-field">
-            <span class="triage-label">SLA Countdown:</span>
-            <span class="sla-badge" id="drawerSlaBadge">No active SLA</span>
-          </div>
-          <div class="triage-field">
-            <span class="triage-label">Assigned Tier:</span>
-            <span class="analyst-badge"><span class="analyst-avatar">🛡️</span> <span id="drawerAnalystName">SecOps Tier-2</span></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Threat Intelligence Attribution (ASN, GeoIP, Abuse Score) -->
-      <section class="drawer-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          Threat Intelligence Attribution &amp; Origin
-        </div>
-        <div class="threat-intel-grid">
-          <div class="threat-cell">
-            <span class="threat-lbl">Autonomous System (ASN)</span>
-            <span class="threat-val" id="drawerThreatAsn">AS63949 Linode LLC</span>
-          </div>
-          <div class="threat-cell">
-            <span class="threat-lbl">GeoIP / Physical Origin</span>
-            <span class="threat-val" id="drawerThreatGeo">US 🇺🇸 Dallas, TX</span>
-          </div>
-          <div class="threat-cell">
-            <span class="threat-lbl">AbuseIPDB Confidence</span>
-            <span class="abuse-badge" id="drawerAbuseScore">Not queried</span>
-          </div>
-          <div class="threat-cell">
-            <span class="threat-lbl">Threat Category</span>
-            <span class="threat-val tag-val" id="drawerThreatTag">Tor Exit Node / Scanner</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="drawer-section packet-dissector-section" id="packetDissectorSection" hidden>
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
-          Packet Dissector Header
-          <span class="dissector-source-tag">PCAP</span>
-        </div>
-        <p class="drawer-section-sub" id="packetDissectorSummary">First observed packet in this flow.</p>
-        <div class="dissector-layer-list" id="packetDissectorLayers" aria-label="Decoded protocol layers"></div>
-        <dl class="packet-dissector-grid" id="packetDissectorFields"></dl>
-      </section>
-
-      <!-- Layer-2 Ingress Vector & Physical Link Context -->
-      <section class="drawer-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-          Layer-2 Ingress Vector &amp; Hardware Telemetry
-        </div>
-        <div class="l2-telemetry-grid">
-          <div class="l2-cell">
-            <span class="l2-lbl">Capture Interface</span>
-            <span class="l2-val mono" id="drawerL2Interface">eth0</span>
-          </div>
-          <div class="l2-cell">
-            <span class="l2-lbl">Link Architecture</span>
-            <span class="l2-val" id="drawerL2Vector">Ethernet 802.3</span>
-          </div>
-          <div class="l2-cell">
-            <span class="l2-lbl">Switch Port / SSID / Peer</span>
-            <span class="l2-val mono" id="drawerL2Port">Trunk Gi0/1 (VLAN 10)</span>
-          </div>
-          <div class="l2-cell">
-            <span class="l2-lbl">PHY / Link Status</span>
-            <span class="l2-val" id="drawerL2Signal">Full Duplex 10 Gbps</span>
-          </div>
-          <div class="l2-cell full-width">
-            <span class="l2-lbl">L2 Domain Health</span>
-            <span class="l2-val" id="drawerL2Health">ARP Table Verified · 0 Broadcast Storms</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- SHAP Explainability Waterfall -->
-      <section class="drawer-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          SHAP Model Feature Importance Contribution
-        </div>
-        <p class="drawer-section-sub">TreeSHAP breakdown of the top 5 network metrics triggering the model classification.</p>
-        <div class="shap-waterfall" id="drawerShapList">
-          <!-- Populated by main.js -->
-        </div>
-      </section>
-
-      <!-- Raw Flow Metrics -->
-      <section class="drawer-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Raw Flow Telemetry Vector
-        </div>
-        <div class="telemetry-grid">
-          <div class="telemetry-cell">
-            <span class="tel-label">Flow Duration</span>
-            <span class="tel-value" id="drawerTelDuration">0 µs</span>
-          </div>
-          <div class="telemetry-cell">
-            <span class="tel-label">Flow Throughput</span>
-            <span class="tel-value" id="drawerTelBytes">0 B/s</span>
-          </div>
-          <div class="telemetry-cell">
-            <span class="tel-label">Packet Velocity</span>
-            <span class="tel-value" id="drawerTelPkts">0 pkts/s</span>
-          </div>
-          <div class="telemetry-cell">
-            <span class="tel-label">Fwd / Bwd Packets</span>
-            <span class="tel-value" id="drawerTelPacketRatio">0 / 0</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- TCP Flags Breakdown -->
-      <section class="drawer-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          TCP Header Flags Inspection
-        </div>
-        <div class="flags-badge-group" id="drawerFlagsGroup">
-          <span class="flag-chip" id="flagSYN">SYN: 0</span>
-          <span class="flag-chip" id="flagACK">ACK: 0</span>
-          <span class="flag-chip" id="flagRST">RST: 0</span>
-          <span class="flag-chip" id="flagFIN">FIN: 0</span>
-        </div>
-      </section>
-
-      <!-- Automated SOAR Containment Playbooks (Enterprise Response) -->
-      <section class="drawer-section soar-section">
-        <div class="drawer-section-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Automated SOAR Containment Playbooks (One-Click Response)
-        </div>
-        <p class="drawer-section-sub">Execute active policy enforcement across enterprise firewalls, edge WAFs, and cloud security groups.</p>
-        
-        <div class="soar-btn-grid">
-          <button type="button" class="btn-soar btn-soar-danger" id="btnSoarIptables">
-            <span class="soar-icon">⚡</span>
-            <span class="soar-text">
-              <strong>iptables DROP Host</strong>
-              <small>Null-route on local Linux kernel</small>
-            </span>
-          </button>
-          
-          <button type="button" class="btn-soar btn-soar-warn" id="btnSoarCloudflare">
-            <span class="soar-icon">☁️</span>
-            <span class="soar-text">
-              <strong>Cloudflare Edge WAF Block</strong>
-              <small>Global anycast edge mitigation</small>
-            </span>
-          </button>
-          
-          <button type="button" class="btn-soar" id="btnSoarAwsSg">
-            <span class="soar-icon">🛡️</span>
-            <span class="soar-text">
-              <strong>Revoke AWS SecGroup Ingress</strong>
-              <small>VPC perimeter isolation</small>
-            </span>
-          </button>
-          
-          <button type="button" class="btn-soar" id="btnSoarStix">
-            <span class="soar-icon">📦</span>
-            <span class="soar-text">
-              <strong>Export STIX 2.1 Threat IoC</strong>
-              <small>Publish to MISP / TAXII feeds</small>
-            </span>
-          </button>
-
-          <button type="button" class="btn-soar" id="btnSoarSlack">
-            <span class="soar-icon">#</span>
-            <span class="soar-text">
-              <strong>Simulate Slack Alert</strong>
-              <small>Mock #soc-alerts webhook delivery</small>
-            </span>
-          </button>
-
-          <button type="button" class="btn-soar" id="btnSoarPagerDuty">
-            <span class="soar-icon">!</span>
-            <span class="soar-text">
-              <strong>Simulate PagerDuty Incident</strong>
-              <small>Mock on-call event dispatch</small>
-            </span>
-          </button>
-        </div>
-
-        <!-- Real-Time SOAR CLI Execution Terminal -->
-        <div class="soar-terminal-box">
-          <div class="terminal-bar">
-            <span class="term-dot dot-red"></span>
-            <span class="term-dot dot-yellow"></span>
-            <span class="term-dot dot-green"></span>
-            <span class="term-title">SOAR Engine Orchestration Terminal (v2.4)</span>
-          </div>
-          <div class="terminal-body" id="soarTerminalOutput">
-            <span class="term-prompt">soar@netshield:~$</span> Ready. Click any automated containment playbook above to dispatch security action.
-          </div>
-        </div>
-
-        <div class="triage-actions" style="margin-top:14px;">
-          <button type="button" class="btn-triage" id="btnDrawerCopyJson">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy Flow JSON
-          </button>
-          <button type="button" class="btn-triage" id="btnDrawerFlagFP">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg>
-            Suppress / Mark False Positive
-          </button>
-        </div>
-      </section>
-    </div>
-  </aside>
-
-  <!-- ── Power-User Command Palette Modal (Pillar 5 - P4) ── -->
-  <div class="cmd-backdrop" id="cmdBackdrop"></div>
-  <div class="cmd-modal" id="cmdModal" role="dialog" aria-modal="true" aria-label="Command Palette">
-    <div class="cmd-search-wrap">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="cmdInput" placeholder="Type a command or search action (e.g. demo, export, theme)..." autocomplete="off">
-      <kbd>ESC</kbd>
-    </div>
-    <div class="cmd-list" id="cmdList">
-      <div class="cmd-group-label">Quick Actions</div>
-      <div class="cmd-item" data-action="load-demo" tabIndex="0">
-        <div class="cmd-item-icon">⚡</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Load Built-in Demo Dataset</div>
-          <div class="cmd-item-sub">Execute classification on 1,500 CIC-IDS-2017 test flows</div>
-        </div>
-        <kbd>↵ Enter</kbd>
-      </div>
-
-      <div class="cmd-item" data-action="goto-dashboard" tabIndex="0">
-        <div class="cmd-item-icon">🛰</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Open Live Sentinel Console</div>
-          <div class="cmd-item-sub">Switch to real-time network stream operations</div>
-        </div>
-        <kbd>G then D</kbd>
-      </div>
-
-      <div class="cmd-group-label">Analysis &amp; Reporting</div>
-      <div class="cmd-item" data-action="focus-search" tabIndex="0">
-        <div class="cmd-item-icon">🔍</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Filter Flow Records Table</div>
-          <div class="cmd-item-sub">Jump directly to the flow search box</div>
-        </div>
-        <kbd>/</kbd>
-      </div>
-
-      <div class="cmd-item" data-action="export-csv" tabIndex="0">
-        <div class="cmd-item-icon">📥</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Export Flows to CSV</div>
-          <div class="cmd-item-sub">Download analyzed sample flow dataset</div>
-        </div>
-        <kbd>C</kbd>
-      </div>
-
-      <div class="cmd-item" data-action="export-json" tabIndex="0">
-        <div class="cmd-item-icon">📋</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Export Full Report as JSON</div>
-          <div class="cmd-item-sub">Export complete model predictions and telemetry statistics</div>
-        </div>
-        <kbd>J</kbd>
-      </div>
-
-      <div class="cmd-group-label">System &amp; Theme</div>
-      <div class="cmd-item" data-action="toggle-theme" tabIndex="0">
-        <div class="cmd-item-icon">🌓</div>
-        <div class="cmd-item-info">
-          <div class="cmd-item-title">Toggle Dark / Light Theme</div>
-          <div class="cmd-item-sub">Switch between Deep Espresso and Café Crème palettes</div>
-        </div>
-        <kbd>T</kbd>
-      </div>
-    </div>
+<header class="topbar">
+  <a class="brand" href="/research">
+    <strong>NetShield</strong>
+    <span>Research workbench</span>
+  </a>
+  <div class="topbar-meta">
+    <span class="meta-pill"><strong>CIC-IDS-2017</strong> day-based split</span>
+    <span class="meta-pill">Model <strong>Random Forest, seed 42</strong></span>
+    <a class="topbar-link" href="/">Live console</a>
+    <a class="topbar-link" href="/account">Account</a>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle colour theme">
+      <span id="themeLabel">Theme: dark</span>
+    </button>
   </div>
+</header>
 
-  <!-- ── Interactive Toast Container ── -->
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+<div class="scope-ribbon" role="note">
+  <span class="scope-ribbon-tag">Scope</span>
+  <span class="scope-ribbon-copy">Volumetric &amp; scan scope &middot; {{ scope_artifact_hash_prefix }} &middot; evidence {{ scope_evidence_date }} &middot; unvalidated prototype</span>
+  <a href="#view-limitations">Limitations</a>
+</div>
 
-  <!-- External JS Dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{{ url_for('static', filename='js/main.js') }}?v=2.4"></script>
-  <script src="{{ url_for('static', filename='js/pwa-register.js') }}?v=2.8" defer></script>
+<div class="shell">
+  <nav class="rail" aria-label="Workbench sections">
+    <div class="rail-label">Views</div>
+    <div class="rail-group">
+      <button class="rail-item" type="button" data-view="view-overview" aria-current="page">
+        <span class="rail-index">01</span> Overview
+      </button>
+      <button class="rail-item" type="button" data-view="view-analyze">
+        <span class="rail-index">02</span> Analyze flows
+      </button>
+      <button class="rail-item" type="button" data-view="view-protocol">
+        <span class="rail-index">03</span> Protocol and baselines
+      </button>
+      <button class="rail-item" type="button" data-view="view-budget">
+        <span class="rail-index">04</span> Alert budget
+      </button>
+      <button class="rail-item" type="button" data-view="view-prevalence">
+        <span class="rail-index">05</span> Prevalence
+      </button>
+      <button class="rail-item" type="button" data-view="view-provenance">
+        <span class="rail-index">06</span> Model and provenance
+      </button>
+      <button class="rail-item" type="button" data-view="view-limitations">
+        <span class="rail-index">07</span> Limitations
+      </button>
+    </div>
+    <div class="rail-group">
+      <div class="rail-label">Other</div>
+      <a class="rail-item" href="/">
+        <span class="rail-index">08</span> Live console
+      </a>
+    </div>
+    <p class="rail-note">
+      <strong>Data rule.</strong> Every metric on this page is loaded from a frozen JSON artifact in <code>models/</code> or <code>docs/</code>. The interface does not retrain, re-tune, or invent values.
+    </p>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- ============================== OVERVIEW ============================== -->
+    <section class="view" id="view-overview">
+      <div class="view-head">
+        <p class="eyebrow">Evidence overview</p>
+        <h1>How much precision survives realistic attack prevalence?</h1>
+        <p class="lede">
+          This workbench reports one bounded experiment on CIC-IDS-2017: a Random Forest trained on Monday and Tuesday, thresholded on Wednesday, and scored once on Thursday and Friday. It shows the result, the failure modes, and the provenance behind every number, and it frames the open question as precision under realistic attack prevalence rather than benchmark accuracy.
+        </p>
+      </div>
+
+      <div class="callout caution">
+        <strong>Development evidence, not a blind confirmatory test</strong>
+        The weekday results were inspected during development. They are useful for debugging and comparison, but they are not a preregistered confirmatory evaluation. The project does not claim deployment readiness, novel-attack detection, or live-capture efficacy.
+      </div>
+
+      <dl class="evidence-strip" aria-label="Headline evidence">
+        <div class="evidence-item">
+          <dt>Dataset flows</dt>
+          <dd>{{ "{:,}".format(research.dataset.total_flows) }}</dd>
+          <span>CIC-IDS-2017, {{ research.dataset.features }} features</span>
+        </div>
+        <div class="evidence-item">
+          <dt>Held-out test flows</dt>
+          <dd>{{ "{:,}".format(research.splits.test.flows) }}</dd>
+          <span>Thursday and Friday, never used for fitting</span>
+        </div>
+        <div class="evidence-item">
+          <dt>RF PR-AUC, 5 seeds</dt>
+          <dd>{{ pair(research.baselines[0].pr_auc) }}</dd>
+          <span>Binary attack versus benign</span>
+        </div>
+        <div class="evidence-item">
+          <dt>RF recall, frozen threshold</dt>
+          <dd>{{ pair(research.baselines[0].recall) }}</dd>
+          <span>Mean and standard deviation across seeds 42 to 46</span>
+        </div>
+      </dl>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Six questions this workbench answers</h2>
+          <span class="section-note">Each answer links to a view with the full evidence</span>
+        </div>
+        <div class="answer-grid">
+          <article class="answer">
+            <h3>1. What data, and which split?</h3>
+            <p>
+              CIC-IDS-2017, an academic dataset captured in a controlled laboratory VLAN. Training uses Monday and Tuesday ({{ "{:,}".format(research.splits.train.flows) }} flows). Wednesday is validation ({{ "{:,}".format(research.splits.validation.flows) }}). Thursday and Friday are the held-out test partition ({{ "{:,}".format(research.splits.test.flows) }}). The split is by day, not random, to avoid temporal leakage.
+            </p>
+          </article>
+          <article class="answer">
+            <h3>2. Which attack families were in training?</h3>
+            <p>
+              Only three labels: BENIGN, FTP-Patator, and SSH-Patator. Seven test families never appear in the training partition: Bot, DDoS, Infiltration, PortScan, and three Web Attack variants. Multiclass scores therefore collapse, and the binary attack score is the useful output.
+            </p>
+          </article>
+          <article class="answer">
+            <h3>3. What does the selected alert budget mean?</h3>
+            <p>
+              A budget is a review capacity, not a probability threshold. The model ranks flows by attack score and an analyst sees the top K. Fixed budgets cap alerts per interval; rate budgets set alerts per 10,000 flows. The alert budget view explains every predeclared budget and its measured precision and recall.
+            </p>
+          </article>
+          <article class="answer">
+            <h3>4. Where does the model fail?</h3>
+            <p>
+              It misses most Botnet flows ({{ pct(research.families[0].recall) }} at the frozen threshold), and its recall is uneven across families. PortScan is {{ pct(85286/158930) }}, DDoS is {{ pct(81380/128027) }}, and Infiltration is {{ pct(20/36) }} on only 36 flows. Multiclass macro-F1 is {{ "%.4f"|format(research.model.macro_f1) }}.
+            </p>
+          </article>
+          <article class="answer">
+            <h3>5. Is this real, sample, or prediction?</h3>
+            <p>
+              The dataset records are real labelled flows from a laboratory capture. The built-in samples are 1,500-row slices of that dataset. The flow table shows model predictions, not ground truth. The feedback experiment uses simulated labels, not human analysts. Live packet capture remains unvalidated.
+            </p>
+          </article>
+          <article class="answer">
+            <h3>6. Which model and features produced this?</h3>
+            <p>
+              Random Forest, seed 42, 80 CICFlowMeter features, scikit-learn {{ research.model.sklearn }} on Python {{ research.model.python }}. The model hash is recorded in the manifest. The Scapy upload parser now produces all 80 features. The PyFlowMeter live path maps all 80 names but dropped 2 of 6 fixture flows (ICMP and IPv6).
+            </p>
+          </article>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Headline results</h2>
+          <span class="section-note">Seeds 42 to 46, frozen threshold, held-out test partition</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th class="num">PR-AUC</th>
+                  <th class="num">ROC-AUC</th>
+                  <th class="num">Recall at frozen threshold</th>
+                  <th class="num">Test FPR</th>
+                  <th class="num">Alert rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for model in research.baselines %}
+                <tr>
+                  <td class="name">{{ model.name }}<span class="sub">{{ 'Supervised' if model.id == 'rf' else ('Linear' if model.id == 'lr' else 'Unsupervised') }}</span></td>
+                  <td class="num">{{ pair(model.pr_auc) }}</td>
+                  <td class="num">{{ pair(model.roc_auc) }}</td>
+                  <td class="num">{{ pair(model.recall) }}</td>
+                  <td class="num">{{ pair(model.fpr) }}</td>
+                  <td class="num">{{ pair(model.alert_rate) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Mean &plusmn; standard deviation across five seeds. Threshold frozen on Wednesday validation at maximum FPR 1%. Test FPR is measured after the threshold is frozen, so it can exceed the validation target.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Negative results that matter</h2>
+        </div>
+        <ul class="check-list">
+          <li class="risk"><strong>Simulated feedback did not improve aggregate Friday detection.</strong> The no-feedback mean PR-AUC is {{ "%.4f"|format(research.feedback_named.none_0.pr_auc[0]) }}. Uncertainty sampling at B=100 reaches {{ "%.4f"|format(research.feedback_named.uncertainty_100.pr_auc[0]) }}, a difference smaller than the reported spread. Uncertainty sampling at B=250 falls to {{ "%.4f"|format(research.feedback_named.uncertainty_250.pr_auc[0]) }}.</li>
+          <li class="risk"><strong>Botnet remains effectively undetected.</strong> Across the main policy and budget grid, Botnet recall stays near 1% except one high-variance cell. No policy fixes the feature-space gap.</li>
+          <li class="warn"><strong>Thresholds slip under day shift.</strong> The RF mean test FPR across five seeds is {{ pair(research.baselines[0].fpr) }}, above the 1% validation target. Seed 42 alone is {{ pct(research.model.test.fpr) }}, so the outcome varies sharply by seed.</li>
+          <li class="warn"><strong>Live capture is not validated.</strong> {{ research.parity.missing_features }} of 80 training features are missing from the live parser, and {{ research.parity.dummy_features }} are constants. Live predictions are a research demo only.</li>
+        </ul>
+      </div>
+
+      <div class="callout danger">
+        <strong>What this workbench does not show</strong>
+        It does not show deployment readiness, real-time blocking ability, novel-attack detection, or effectiveness on production enterprise traffic. It does not show a successful human-in-the-loop study. It does not establish that the live capture path reproduces offline features.
+      </div>
+    </section>
+
+    <!-- ============================== ANALYZE ============================== -->
+    <section class="view" id="view-analyze" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Flow analysis</p>
+        <h1>Score a flow file or a labelled sample</h1>
+        <p class="lede">
+          Upload a CICFlowMeter CSV, a PCAP, or a PCAPNG file. The server maps recognized columns to the 80 model features, imputes missing values, and returns predicted labels. Nothing is written to the stored flow database from this page.
+        </p>
+      </div>
+
+      <div class="callout">
+        <strong>Predictions are not ground truth</strong>
+        The table shows what the model predicted for each row. For labelled samples, the file's true label is not used by the scoring path. Do not read the predicted label as a confirmed attack.
+      </div>
+
+      <div class="callout caution">
+        <strong>Serving and research now use the same artifact bytes</strong>
+        This endpoint scores with <code>{{ research.serving.file }}</code>, a {{ research.serving.algorithm or 'model' }} with {{ research.serving.classes|length }} output classes: {{ research.serving.classes|join(', ') }}. It applies the recorded attack-score threshold ({{ research.serving.threshold_policy.threshold if research.serving.threshold_policy else research.serving.threshold }}). The registry-active artifact hash matches the evaluated Random Forest seed 42 manifest, so the per-family and threshold results elsewhere in this workbench describe the served bytes. The model still cannot emit DDoS, PortScan, Bot, Infiltration, or web-attack labels, and it is uncalibrated. A low non-benign count on the diverse sample is a serving-model limitation, not evidence that the sample is benign.
+      </div>
+
+      <div class="upload-panel">
+        <div class="upload-head">
+          <div>
+            <h2>Input</h2>
+            <p class="small">CSV, PCAP, or PCAPNG. Maximum 50 MB and 250,000 CSV rows.</p>
+          </div>
+          <span class="badge">Batch, offline</span>
+        </div>
+        <div class="upload-body">
+          <div class="sample-row">
+            <label for="sampleSelect">Built-in sample</label>
+            <select id="sampleSelect">
+              <option value="heldout">Held-out Friday sample, first 1,500 of 5,204 rows, 99.9% benign</option>
+              <option value="diverse">Diverse labelled sample, first 1,500 of 15,000 rows</option>
+            </select>
+            <button class="btn" type="button" id="btnLoadSample">Load sample and score</button>
+          </div>
+
+          <label class="dropzone" id="dropZone" for="fileInput">
+            <input type="file" id="fileInput" accept=".csv,.pcap,.pcapng" aria-label="Choose a flow file">
+            <strong>Drop a file here, or choose from disk</strong>
+            <span>CICFlowMeter CSV, Wireshark PCAP, or PCAPNG</span>
+            <span class="file-name" id="uploadFilename"></span>
+          </label>
+
+          <div class="upload-actions">
+            <p class="small" id="uploadHint">The model has no probability calibration in this view. Only the predicted label is shown.</p>
+            <button class="btn primary" type="button" id="analyzeBtn" disabled>
+              <span id="btnText">Run flow classification</span>
+            </button>
+          </div>
+
+          <div class="progress" id="progress" hidden>
+            <ol class="progress-steps">
+              <li id="progressStep1" data-step="1">Read input</li>
+              <li id="progressStep2" data-step="2">Map features</li>
+              <li id="progressStep3" data-step="3">Score rows</li>
+              <li id="progressStep4" data-step="4">Summarize</li>
+            </ol>
+          </div>
+
+          <div class="error-box" id="errorCard" role="alert" hidden>
+            <strong>Analysis failed.</strong>
+            <span id="errorText"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="resultsSection" hidden>
+        <div class="provenance-line" id="ingestionSummary">
+          Results will appear here after a run.
+        </div>
+
+        <dl class="summary-strip" aria-label="Batch result summary">
+          <div class="summary-item">
+            <dt>Rows scored</dt>
+            <dd id="statTotal">0</dd>
+            <span>Complete batch</span>
+          </div>
+          <div class="summary-item">
+            <dt>Predicted benign</dt>
+            <dd id="statBenign">0</dd>
+            <span id="statBenignPct">0.0% of batch</span>
+          </div>
+          <div class="summary-item">
+            <dt>Predicted non-benign</dt>
+            <dd id="statAttack">0</dd>
+            <span id="statAttackPct">0.0% of batch</span>
+          </div>
+          <div class="summary-item">
+            <dt>Distinct predicted labels</dt>
+            <dd id="statClasses">0</dd>
+            <span>Includes BENIGN</span>
+          </div>
+        </dl>
+
+        <div class="section">
+          <div class="section-head">
+            <h2>Predicted label distribution</h2>
+            <span class="section-note">Bars are scaled to the largest predicted label count</span>
+          </div>
+          <div class="table-wrap">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Predicted label</th>
+                    <th class="num">Rows</th>
+                    <th class="num">Share</th>
+                    <th>Distribution</th>
+                  </tr>
+                </thead>
+                <tbody id="attackTableBody">
+                  <tr><td colspan="4" class="small">No predictions yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h2>Scored flow records</h2>
+            <span class="section-note">Up to 150 rows are returned by the API</span>
+          </div>
+          <div class="flow-split" id="flowSplit">
+            <div class="flow-table" id="flowTableCard">
+              <div class="flow-toolbar">
+                <input class="grow" type="search" id="flowSearchInput" placeholder="Search source, destination, protocol, or predicted label" aria-label="Search scored flows">
+                <select id="flowFilterSelect" aria-label="Filter scored flows">
+                  <option value="all">All predictions</option>
+                  <option value="attacks">Predicted non-benign only</option>
+                  <option value="benign">Predicted benign only</option>
+                </select>
+                <button class="btn small" type="button" id="btnDensityStandard" aria-pressed="true">Standard</button>
+                <button class="btn small" type="button" id="btnDensityCompact" aria-pressed="false">Compact</button>
+                <button class="btn small" type="button" id="btnExportCSV">Export CSV</button>
+                <button class="btn small" type="button" id="btnExportJSON">Export JSON</button>
+              </div>
+              <div class="table-scroll">
+                <table id="flowSampleTable">
+                  <thead>
+                    <tr>
+                      <th>Row</th>
+                      <th>Source</th>
+                      <th>Destination</th>
+                      <th>Protocol</th>
+                      <th>Predicted label</th>
+                    </tr>
+                  </thead>
+                  <tbody id="flowSampleTableBody">
+                    <tr><td colspan="5" class="small">No rows match the current filter.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-foot" id="flowTableFoot">Select a row to open its details.</div>
+            </div>
+
+            <aside class="detail-panel" id="detailPanel" aria-label="Selected flow details">
+              <div class="detail-head">
+                <h3 id="detailTitle">Flow details</h3>
+                <button class="detail-close" type="button" id="btnCloseDetail" aria-label="Close flow details">Close</button>
+              </div>
+              <div class="detail-body">
+                <div class="detail-group">
+                  <div class="detail-label">Prediction</div>
+                  <div class="detail-value" id="detailLabel">No row selected</div>
+                </div>
+                <div class="detail-group">
+                  <div class="detail-label">Route</div>
+                  <div class="detail-value mono" id="detailRoute">Not available</div>
+                </div>
+                <div class="detail-group">
+                  <div class="detail-label">Provenance</div>
+                  <div class="detail-value" id="detailSource">Not available</div>
+                </div>
+                <div class="detail-group">
+                  <div class="detail-label">Flow telemetry</div>
+                  <div class="detail-grid">
+                    <div><div class="detail-label">Duration</div><div class="detail-value" id="detailDuration">0</div></div>
+                    <div><div class="detail-label">Bytes per second</div><div class="detail-value" id="detailBytes">0</div></div>
+                    <div><div class="detail-label">Packets per second</div><div class="detail-value" id="detailPkts">0</div></div>
+                    <div><div class="detail-label">Forward and backward packets</div><div class="detail-value" id="detailRatio">0 / 0</div></div>
+                  </div>
+                </div>
+                <div class="detail-group">
+                  <div class="detail-label">TCP flags</div>
+                  <div class="flag-row">
+                    <span class="flag" id="detailSyn">SYN 0</span>
+                    <span class="flag" id="detailAck">ACK 0</span>
+                    <span class="flag" id="detailRst">RST 0</span>
+                    <span class="flag" id="detailFin">FIN 0</span>
+                  </div>
+                </div>
+                <div class="detail-group">
+                  <button class="btn small" type="button" id="btnCopyJson">Copy row JSON</button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== PROTOCOL ============================== -->
+    <section class="view" id="view-protocol" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Protocol and baselines</p>
+        <h1>Temporal split, seen families, and controlled baselines</h1>
+        <p class="lede">
+          The evaluation uses a day-based partition. This view records the partition sizes, the labels available in each partition, the frozen threshold procedure, and the five-seed baseline results.
+        </p>
+      </div>
+
+      <div class="callout caution">
+        <strong>Status of this evidence</strong>
+        These weekday results are development evidence. The protocol document was drafted before the feedback simulation, and the current scores are not a blind confirmatory test. Treat them as a reproducible baseline for further work.
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Partition sizes</h2>
+          <span class="section-note">Flows counted after cleaning</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Partition</th>
+                  <th>Days</th>
+                  <th class="num">Flows</th>
+                  <th>Labels present</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for key in ['train', 'validation', 'test', 'review', 'evaluation'] %}
+                {% set split = research.splits[key] %}
+                <tr>
+                  <td class="name">{{ split.label }}</td>
+                  <td>{{ split.days }}</td>
+                  <td class="num">{{ "{:,}".format(split.flows) }}</td>
+                  <td>{{ split.labels }}</td>
+                  <td>
+                    {% if key == 'train' %}Fit model and label vocabulary
+                    {% elif key == 'validation' %}Freeze threshold at maximum FPR 1%
+                    {% elif key == 'test' %}One-time held-out scoring
+                    {% elif key == 'review' %}Simulated feedback selection only
+                    {% else %}Untouched Friday evaluation{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            The test partition contains {{ "{:,}".format(research.splits.test.flows) }} flows, including {{ "{:,}".format(research.splits.unseen_test_rows) }} flows from labels that never appear in training.
+          </div>
+        </div>
+      </div>
+
+      <div class="section two-col">
+        <div>
+          <div class="section-head"><h2>Labels in training</h2></div>
+          <ul class="check-list">
+            {% for label in research.model.trained_classes %}
+            <li><strong>{{ label }}</strong></li>
+            {% endfor %}
+          </ul>
+          <p class="caption">The label vocabulary is fit on the training partition only. No Thursday or Friday labels are used for fitting.</p>
+        </div>
+        <div>
+          <div class="section-head"><h2>Labels absent from training</h2></div>
+          <ul class="check-list">
+            {% for label in research.model.unseen_labels %}
+            <li class="warn"><strong>{{ label }}</strong></li>
+            {% endfor %}
+          </ul>
+          <p class="caption">A supervised classifier cannot assign a correct multiclass label to a family it never saw. Binary attack scoring is the only meaningful output for these families.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Controlled baseline results</h2>
+          <span class="section-note">Seeds 42 to 46, mean &plusmn; standard deviation</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th class="num">PR-AUC</th>
+                  <th class="num">ROC-AUC</th>
+                  <th class="num">Recall at frozen threshold</th>
+                  <th class="num">Test FPR</th>
+                  <th class="num">Alert rate</th>
+                  <th class="num">Fit seconds</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for model in research.baselines %}
+                <tr>
+                  <td class="name">{{ model.name }}</td>
+                  <td class="num">{{ pair(model.pr_auc) }}</td>
+                  <td class="num">{{ pair(model.roc_auc) }}</td>
+                  <td class="num">{{ pair(model.recall) }}</td>
+                  <td class="num">{{ pair(model.fpr) }}</td>
+                  <td class="num">{{ pair(model.alert_rate) }}</td>
+                  <td class="num">{{ pair(model.fit_seconds) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Random Forest is the strongest baseline by PR-AUC. Logistic Regression and Isolation Forest are retained as controlled comparisons, not as recommended detectors.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Frozen threshold procedure</h2>
+        </div>
+        <dl class="kv-list">
+          <div class="kv-row"><dt>Selected on</dt><dd>Wednesday validation partition only</dd></div>
+          <div class="kv-row"><dt>Selection rule</dt><dd>Maximum threshold whose validation FPR is at most 1%</dd></div>
+          <div class="kv-row"><dt>Frozen threshold</dt><dd class="mono">{{ research.model.threshold }}</dd></div>
+          <div class="kv-row"><dt>Validation FPR</dt><dd>{{ pct(research.model.validation_fpr) }}</dd></div>
+          <div class="kv-row"><dt>Validation recall</dt><dd>{{ pct(research.model.validation_tpr) }}</dd></div>
+          <div class="kv-row"><dt>Test FPR at seed 42</dt><dd>{{ pct(research.model.test.fpr) }}</dd></div>
+          <div class="kv-row"><dt>Test recall at seed 42</dt><dd>{{ pct(research.model.test.recall) }}</dd></div>
+          <div class="kv-row"><dt>Test precision at seed 42</dt><dd>{{ pct(research.model.test.precision) }}</dd></div>
+        </dl>
+      </div>
+
+      <div class="callout danger">
+        <strong>Threshold brittleness is a result, not a footnote</strong>
+        Across five seeds the RF mean test FPR is {{ pair(research.baselines[0].fpr) }}, above the 1% validation target. Seed 42 alone is {{ pct(research.model.test.fpr) }}, while the highest seed in the set reaches 7.85%. A threshold selected on one day does not guarantee a false-alarm bound on later days.
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Per-family recall at the frozen threshold</h2>
+          <span class="section-note">Random Forest seed 42, held-out test partition</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Attack family</th>
+                  <th class="num">Support</th>
+                  <th class="num">Detected</th>
+                  <th class="num">Recall</th>
+                  <th>Seen in training</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for family in research.families %}
+                <tr>
+                  <td class="name">{{ family.name }}</td>
+                  <td class="num">{{ "{:,}".format(family.support) }}</td>
+                  <td class="num">{{ "{:,}".format(family.detected) }}</td>
+                  <td class="num">{{ pct(family.recall) }}</td>
+                  <td>{% if family.seen_in_training %}<span class="badge ok">Yes</span>{% else %}<span class="badge warn">No</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Infiltration has only 36 flows, so its recall estimate is unstable. Botnet recall is {{ pct(research.families[0].recall) }} on {{ "{:,}".format(research.families[0].support) }} flows.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== BUDGET ============================== -->
+    <section class="view" id="view-budget" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Alert budget</p>
+        <h1>What an analyst can review, and what the queue misses</h1>
+        <p class="lede">
+          A budget converts a score into a triage queue. The model ranks flows by attack score and the analyst reviews the top K. This view shows the seven predeclared budgets, then the simulated feedback experiment that tried to improve Friday detection.
+        </p>
+      </div>
+
+      <div class="callout">
+        <strong>Budget is capacity, not a probability cut-off</strong>
+        A fixed budget caps the number of alerts in an interval. A rate budget sets alerts per 10,000 flows. Neither is the same as the frozen probability threshold used in the baseline table.
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Choose a budget</h2>
+          <span class="section-note">All values are from the seed 42 no-feedback run on Friday</span>
+        </div>
+        <div class="budget-layout">
+          <div class="budget-list" id="budgetList" role="group" aria-label="Predeclared alert budgets">
+            {% for budget in research.budgets %}
+            <button class="budget-option" type="button" data-budget-index="{{ loop.index0 }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+              <span>
+                {{ budget.label }}
+                <span class="kind">{{ budget.kind }}</span>
+              </span>
+              <span class="k">K {{ "{:,}".format(budget.k) }}</span>
+            </button>
+            {% endfor %}
+          </div>
+
+          <div class="budget-detail">
+            <div class="budget-detail-head">
+              <div>
+                <h3 id="budgetTitle">{{ research.budgets[0].label }}</h3>
+                <p class="small" id="budgetKind">{{ research.budgets[0].kind }}</p>
+              </div>
+              <span class="badge teal">Selected budget</span>
+            </div>
+            <dl class="budget-metrics">
+              <div class="budget-metric"><dt>Alerts K</dt><dd id="budgetK">{{ "{:,}".format(research.budgets[0].k) }}</dd></div>
+              <div class="budget-metric"><dt>Threshold</dt><dd id="budgetThreshold">{{ "%.4f"|format(research.budgets[0].threshold) }}</dd></div>
+              <div class="budget-metric"><dt>Precision</dt><dd id="budgetPrecision">{{ pct(research.budgets[0].precision) }}</dd></div>
+              <div class="budget-metric"><dt>Attack recall</dt><dd id="budgetRecall">{{ pct(research.budgets[0].recall, 3) }}</dd></div>
+            </dl>
+            <p class="small" id="budgetExplain">
+              {{ "{:,}".format(research.budgets[0].k) }} highest-scoring flows are reviewed. Of those, {{ pct(research.budgets[0].precision) }} are attacks. The queue captures {{ pct(research.budgets[0].recall, 3) }} of all Friday attacks.
+            </p>
+            <div class="section" style="margin-top:16px;">
+              <h3 style="margin-bottom:8px;">Family recall inside this queue</h3>
+              <dl class="kv-list">
+                <div class="kv-row"><dt>Botnet</dt><dd id="budgetBot">{{ pct(research.budgets[0].families.get('Bot', 0)) }}</dd></div>
+                <div class="kv-row"><dt>DDoS</dt><dd id="budgetDdos">{{ pct(research.budgets[0].families.get('DDoS', 0)) }}</dd></div>
+                <div class="kv-row"><dt>PortScan</dt><dd id="budgetPortscan">{{ pct(research.budgets[0].families.get('PortScan', 0)) }}</dd></div>
+              </dl>
+              <p class="caption">False positives per 10,000 benign flows: <span class="mono" id="budgetFp">{{ "%.2f"|format(research.budgets[0].fp_per_10k) }}</span>. Friday contains {{ "{:,}".format(research.splits.friday_attacks) }} attacks and {{ "{:,}".format(research.splits.friday_benign) }} benign flows.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>All predeclared budgets</h2>
+          <span class="section-note">Random Forest seed 42, Friday partition</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Budget</th>
+                  <th class="num">K</th>
+                  <th class="num">Threshold</th>
+                  <th class="num">Precision</th>
+                  <th class="num">Attack recall</th>
+                  <th class="num">FP per 10k benign</th>
+                  <th class="num">Botnet recall</th>
+                  <th class="num">DDoS recall</th>
+                  <th class="num">PortScan recall</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for budget in research.budgets %}
+                <tr>
+                  <td class="name">{{ budget.label }}<span class="sub">{{ budget.kind }}</span></td>
+                  <td class="num">{{ "{:,}".format(budget.k) }}</td>
+                  <td class="num">{{ "%.4f"|format(budget.threshold) }}</td>
+                  <td class="num">{{ pct(budget.precision) }}</td>
+                  <td class="num">{{ pct(budget.recall, 3) }}</td>
+                  <td class="num">{{ "%.2f"|format(budget.fp_per_10k) }}</td>
+                  <td class="num">{{ pct(budget.families.get('Bot', 0)) }}</td>
+                  <td class="num">{{ pct(budget.families.get('DDoS', 0)) }}</td>
+                  <td class="num">{{ pct(budget.families.get('PortScan', 0)) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Precision stays above 97% because the top of the ranking is dominated by high-confidence DDoS and PortScan flows. Attack recall stays low because those families contain many flows and Botnet is ranked below them.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Simulated feedback experiment</h2>
+          <span class="section-note">{{ research.feedback_meta.total_runs }} runs across seeds {{ research.feedback_meta.seeds|join(', ') }}</span>
+        </div>
+        <div class="callout caution">
+          <strong>Simulated labels, not a human study</strong>
+          The experiment assumes every selected Thursday flow is labelled instantly and correctly. Real analysts face ambiguous telemetry, delay, label noise, and fatigue. These results are not evidence of human-in-the-loop effectiveness.
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Policy</th>
+                  <th class="num">Budget B</th>
+                  <th class="num">Friday PR-AUC</th>
+                  <th class="num">Recall at frozen threshold</th>
+                  <th class="num">Test FPR</th>
+                  <th class="num">Test precision</th>
+                  <th class="num">Botnet recall</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in research.feedback %}
+                <tr>
+                  <td class="name">{{ row.policy_label }}</td>
+                  <td class="num">{{ row.budget }}</td>
+                  <td class="num">{{ pair(row.pr_auc) }}</td>
+                  <td class="num">{{ pair(row.recall) }}</td>
+                  <td class="num">{{ pair(row.fpr) }}</td>
+                  <td class="num">{{ pair(row.precision) }}</td>
+                  <td class="num">{{ pair(row.bot_recall) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Mean &plusmn; standard deviation across five seeds. The no-feedback row is the reference. A higher mean is not automatically an improvement if the difference is smaller than the spread.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>What the feedback experiment actually found</h2>
+        </div>
+        <ul class="check-list">
+          <li class="risk"><strong>No policy beats the no-feedback reference by a clear margin.</strong> No feedback: {{ "%.4f"|format(research.feedback_named.none_0.pr_auc[0]) }}. Best mean in the grid: uncertainty sampling at B=100 with {{ "%.4f"|format(research.feedback_named.uncertainty_100.pr_auc[0]) }}. The difference is within the reported variation.</li>
+          <li class="risk"><strong>Uncertainty sampling at B=250 is worse than no feedback.</strong> PR-AUC {{ "%.4f"|format(research.feedback_named.uncertainty_250.pr_auc[0]) }} versus {{ "%.4f"|format(research.feedback_named.none_0.pr_auc[0]) }}, and Botnet recall is {{ pct(research.feedback_named.uncertainty_250.bot_recall[0]) }}.</li>
+          <li class="warn"><strong>One top-alert cell is a high-variance outlier.</strong> Top-alert at B=250 reports Botnet recall {{ pct(research.feedback_named.top_alert_250.bot_recall[0]) }}, but its PR-AUC is {{ "%.4f"|format(research.feedback_named.top_alert_250.pr_auc[0]) }} with a large spread. It is not a reliable improvement.</li>
+          <li class="warn"><strong>Thursday feedback does not transfer to Friday families.</strong> Thursday contains Web Attacks and Infiltration; Friday contains Botnet, PortScan, and DDoS. Revealing Thursday labels gives few examples of the families that dominate Friday errors.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================== PREVALENCE ============================== -->
+    <section class="view" id="view-prevalence" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Prevalence</p>
+        <h1>How much precision survives realistic attack prevalence?</h1>
+        <p class="lede">
+          This view reads one frozen JSON artifact, <code>docs/PREVALENCE_EVAL.json</code>. It holds the model's held-out test operating point fixed and recomputes precision, alert volume, and break-even cost at lower attack prevalence. It adds no new detection evidence.
+        </p>
+      </div>
+
+      {% if research.prevalence.available %}
+      <div class="callout caution">
+        <strong>The same detector, two honest answers</strong>
+        At the dataset's benchmark prevalence of {{ pct(research.prevalence.benchmark, 2) }}, seed 42 precision is
+        {% for row in research.prevalence.rows %}{% if loop.last %}{{ pct(row.ppv, 2) }}{% endif %}{% endfor %}.
+        At {{ pct(research.prevalence.rows[1].p, 4) }} prevalence it is {{ pct(research.prevalence.rows[1].ppv, 2) }}.
+        Neither number is wrong. They answer different questions.
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Seed 42 at the frozen threshold</h2>
+          <span class="section-note">Method {{ research.prevalence.method }}, bootstrap seed {{ research.prevalence.seed }}, 10,000 draws</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="num">Prevalence</th>
+                  <th class="num">PPV</th>
+                  <th class="num">PPV 95% CI</th>
+                  <th class="num">Alerts / 10k</th>
+                  <th class="num">Break-even FP/TP</th>
+                  <th class="num">Break-even alerts/TP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in research.prevalence.rows %}
+                <tr>
+                  <td class="num">{{ pct(row.p, 4) }}</td>
+                  <td class="num">{{ pct(row.ppv, 2) }}</td>
+                  <td class="num">{{ pct(row.ppv_low, 2) }}&ndash;{{ pct(row.ppv_high, 2) }}</td>
+                  <td class="num">{{ "%.2f"|format(row.alerts) }}</td>
+                  <td class="num">{{ "%.2f"|format(row.break_even_fp) }}</td>
+                  <td class="num">{{ "%.2f"|format(row.break_even_alerts) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Alerts/10k includes both true and false positives. The illustrating daily volume is 1,000,000 flows; it is not a measured site value.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Five-seed summary</h2>
+          <span class="section-note">Each seed uses its own validation-selected threshold</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="num">Prevalence</th>
+                  <th class="num">PPV from mean rates</th>
+                  <th class="num">Per-seed mean PPV &plusmn; SD</th>
+                  <th class="num">Alerts / 10k mean &plusmn; SD</th>
+                  <th class="num">Break-even alerts/TP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in research.prevalence.five_seed %}
+                <tr>
+                  <td class="num">{{ pct(row.p, 4) }}</td>
+                  <td class="num">{{ pct(row.ppv_from_mean_rates, 2) }}</td>
+                  <td class="num">{{ pct(row.ppv_mean, 2) }} &plusmn; {{ pct(row.ppv_sd, 2) }}</td>
+                  <td class="num">{{ "%.2f"|format(row.alerts_mean) }} &plusmn; {{ "%.2f"|format(row.alerts_sd) }}</td>
+                  <td class="num">{{ "%.2f"|format(row.break_even_alerts) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Averaging PPV is not the same as plugging mean TPR and mean FPR into the formula. Both are shown because PPV is nonlinear.
+          </div>
+        </div>
+      </div>
+
+      {% if research.prevalence.d9 %}
+      <div class="callout danger">
+        <strong>1.21 is not prevalence-free</strong>
+        D9's five-seed mean break-even of {{ "%.2f"|format(research.prevalence.d9.value) }} assumes the benchmark prevalence of {{ pct(research.prevalence.d9.prevalence_assumption, 2) }}. D9 charges a review for every alert, so its ratio is <code>alerts/TP = 1 + FP/TP</code>. At {{ pct(research.prevalence.rows[1].p, 4) }} prevalence the same five-seed ratio is {{ "%.2f"|format(research.prevalence.five_seed[1].break_even_alerts) }}. Presenting 1.21 without its prevalence would overstate the economic case by roughly two orders of magnitude.
+      </div>
+      {% endif %}
+
+      <div class="section">
+        <div class="section-head">
+          <h2>What this view does not claim</h2>
+        </div>
+        <ul class="check-list">
+          <li class="risk"><strong>No new detection evidence.</strong> It re-expresses the frozen seed 42 operating point and the five-seed variation already in the repository.</li>
+          <li class="risk"><strong>No site cost estimate.</strong> The ratios are relative, not currency. No measured analyst cost or breach cost is used.</li>
+          <li class="risk"><strong>No independence claim.</strong> Flows within one capture are not independent, so the bootstrap intervals are a lower bound on uncertainty.</li>
+          <li class="risk"><strong>No transfer claim.</strong> The benchmark prevalence is a property of CIC-IDS-2017, not a real network.</li>
+        </ul>
+      </div>
+      {% else %}
+      <div class="callout danger">
+        <strong>Prevalence artifact unavailable</strong>
+        Generate <code>docs/PREVALENCE_EVAL.json</code> with <code>scripts/prevalence_eval.py</code>. This view does not invent values.
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- ============================== PROVENANCE ============================== -->
+    <section class="view" id="view-provenance" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Model and provenance</p>
+        <h1>What produced each number, and what is only a demo</h1>
+        <p class="lede">
+          This view separates real labelled data, sample slices, model predictions, simulated feedback, and unvalidated live capture. It also records the model hash, dataset hashes, feature parity, and the drift audit.
+        </p>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Model artifact</h2>
+          <span class="section-note">Random Forest, day-based, seed 42</span>
+        </div>
+        <dl class="kv-list">
+          <div class="kv-row"><dt>Artifact</dt><dd class="mono">{{ research.model.file }}</dd></div>
+          <div class="kv-row"><dt>SHA-256</dt><dd class="hash">{{ research.model.hash }}</dd></div>
+          <div class="kv-row"><dt>Task</dt><dd>{{ research.model.task }}, {{ research.model.split_mode }} split</dd></div>
+          <div class="kv-row"><dt>Input features</dt><dd>{{ research.model.features }}</dd></div>
+          <div class="kv-row"><dt>Trained labels</dt><dd>{{ research.model.trained_classes|join(', ') }}</dd></div>
+          <div class="kv-row"><dt>Environment</dt><dd>Python {{ research.model.python }}, scikit-learn {{ research.model.sklearn }}</dd></div>
+          <div class="kv-row"><dt>Binary PR-AUC</dt><dd class="mono">{{ "%.4f"|format(research.model.binary_pr_auc) }}</dd></div>
+          <div class="kv-row"><dt>Binary ROC-AUC</dt><dd class="mono">{{ "%.4f"|format(research.model.binary_roc_auc) }}</dd></div>
+          <div class="kv-row"><dt>Multiclass macro-F1</dt><dd class="mono">{{ "%.4f"|format(research.model.macro_f1) }}</dd></div>
+          <div class="kv-row"><dt>Calibration</dt><dd>Multiclass Brier score {{ "%.4f"|format(research.model.calibration.multiclass_brier_score) }}, expected calibration error {{ "%.4f"|format(research.model.calibration.expected_calibration_error_10_bins) }}</dd></div>
+        </dl>
+        <p class="caption">The registry-active serving bundle is the evaluated seed 42 Random Forest, and the startup gate verifies its SHA-256 against the registry entry. The serving app applies the recorded attack-score threshold, but it is uncalibrated. Do not treat the serving output as a calibrated probability. D4 threshold transfer and D5 calibration are evaluated on this same Random Forest configuration, and their held-out results still fail the detection gate.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Serving artifact used by Analyze flows</h2>
+          <span class="section-note">Loaded at startup from the active registry artifact</span>
+        </div>
+        <dl class="kv-list">
+          <div class="kv-row"><dt>Artifact</dt><dd class="mono">{{ research.serving.file or 'not loaded' }}</dd></div>
+          <div class="kv-row"><dt>SHA-256</dt><dd class="hash">{{ research.serving.hash or 'not available' }}</dd></div>
+          <div class="kv-row"><dt>Algorithm</dt><dd>{{ research.serving.algorithm or 'not available' }}</dd></div>
+          <div class="kv-row"><dt>Output classes</dt><dd>{{ research.serving.classes|join(', ') or 'not available' }}</dd></div>
+          <div class="kv-row"><dt>Model version</dt><dd class="mono">{{ research.serving.model_version or 'unregistered' }}</dd></div>
+          <div class="kv-row"><dt>Feature schema</dt><dd class="mono">{{ research.serving.feature_schema_version or 'not available' }}</dd></div>
+          <div class="kv-row"><dt>Threshold applied</dt><dd>{% if research.serving.threshold_applied %}Yes: attack score &ge; {{ research.serving.threshold }}{% else %}No: argmax fallback{% endif %}</dd></div>
+          <div class="kv-row"><dt>Threshold policy</dt><dd>{{ research.serving.threshold_policy.name if research.serving.threshold_policy else 'not available' }}</dd></div>
+          <div class="kv-row"><dt>Calibration</dt><dd>{{ research.serving.calibration_version or 'uncalibrated' }} ({{ research.serving.calibration_method or 'none' }})</dd></div>
+          <div class="kv-row"><dt>Registry check</dt><dd>{{ research.serving.registry_status or 'not checked' }}{% if research.serving.registry_verified %} &mdash; artifact matches approved hash{% endif %}</dd></div>
+        </dl>
+        <div class="callout danger">
+          <strong>Why the serving output looks quiet on attack-heavy samples</strong>
+          The serving artifact was fitted on BENIGN, FTP-Patator, and SSH-Patator only. It has no output class for the unseen test families. Even when those flows are present, the highest-probability label can remain BENIGN. The research metrics on this page describe the same artifact bytes; the endpoint applies the recorded thresholded attack score. They are not incident counts and not calibrated probabilities.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Dataset hashes</h2>
+          <span class="section-note">SHA-256 for each source CSV in the manifest</span>
+        </div>
+        <details>
+          <summary>Show {{ research.model.dataset_hashes|length }} dataset hashes</summary>
+          <div class="details-body">
+            <dl class="kv-list">
+              {% for name, digest in research.model.dataset_hashes.items() %}
+              <div class="kv-row"><dt>{{ name }}</dt><dd class="hash">{{ digest }}</dd></div>
+              {% endfor %}
+            </dl>
+          </div>
+        </details>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Feature parity with live capture</h2>
+          <span class="section-note">PyFlowMeter live path and Scapy upload parser compared with the 80-feature training schema</span>
+        </div>
+        <dl class="evidence-strip" aria-label="Feature parity summary">
+          <div class="evidence-item"><dt>Required</dt><dd>{{ research.parity.required_features }}</dd><span>Training schema</span></div>
+          <div class="evidence-item"><dt>Live names</dt><dd>{{ research.parity.live_schema_names }}</dd><span>PyFlowMeter after mapping</span></div>
+          <div class="evidence-item"><dt>Upload produced</dt><dd>{{ research.parity.generated_features }}</dd><span>Scapy parser</span></div>
+          <div class="evidence-item"><dt>Missing</dt><dd>{{ research.parity.missing_features }}</dd><span>{{ research.parity.dummy_features }} more are dummy constants</span></div>
+        </dl>
+        <div class="table-wrap" style="margin-top:16px;">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Parity fixture coverage</th><th class="num">Flows</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="name">Live flows</td><td class="num">{{ research.parity.live_flows }}</td><td>PyFlowMeter offline on the deterministic fixture</td></tr>
+                <tr><td class="name">Upload-reference flows</td><td class="num">{{ research.parity.reference_flows }}</td><td>Scapy parser on the same bytes</td></tr>
+                <tr><td class="name">Matched</td><td class="num">{{ research.parity.matched_flows }}</td><td>Same unordered 5-tuple</td></tr>
+                <tr><td class="name">Reference-only</td><td class="num">{{ research.parity.reference_only_flows }}</td><td>{{ research.parity.reference_only_reason }}</td></tr>
+                <tr><td class="name">Unmatched / ambiguous live</td><td class="num">{{ research.parity.unmatched_live_flows }} / {{ research.parity.ambiguous_live_flows }}</td><td>No live flow lacked a reference candidate</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:16px;">
+          {% if research.parity.missing_features or research.parity.dummy_features %}
+          <details>
+            <summary>Show the {{ research.parity.missing_features }} upload-parser missing features</summary>
+            <div class="details-body">
+              <ul class="check-list">
+                {% for feature in research.parity.missing_list %}
+                <li>{{ feature }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Show the {{ research.parity.dummy_features }} upload-parser dummy features</summary>
+            <div class="details-body">
+              <ul class="check-list">
+                {% for feature in research.parity.dummy_list %}
+                <li class="warn">{{ feature }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </details>
+          {% else %}
+          <p>The upload parser now produces all {{ research.parity.required_features }} features; there is no missing-feature or dummy-constant regression list.</p>
+          {% endif %}
+        </div>
+        <div class="callout danger">
+          <strong>Live capture is a research demo</strong>
+          The live path maps every feature name but drops ICMP and IPv6 and disagrees numerically with the upload parser on rate, inter-arrival, and packet-length statistics. Missing TCP window fields, inverted flow direction on mid-session captures, and constant active and idle times change the feature distribution. Predictions from live interfaces are unvalidated and must not drive blocking or firewall changes.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Drift monitor audit</h2>
+          <span class="section-note">Three true warnings, two false warnings, two missed degradations</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Window</th>
+                  <th class="num">Flows</th>
+                  <th class="num">Flagged features</th>
+                  <th>Warning</th>
+                  <th>Degraded</th>
+                  <th>Recall</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in research.drift %}
+                <tr>
+                  <td class="name">{{ row.window }}</td>
+                  <td class="num">{{ "{:,}".format(row.flows) }}</td>
+                  <td class="num">{{ row.flagged }} / 6</td>
+                  <td>{% if row.warning %}<span class="badge warn">Yes</span>{% else %}<span class="badge">No</span>{% endif %}</td>
+                  <td>{% if row.degraded %}<span class="badge bad">Yes</span>{% else %}<span class="badge ok">No</span>{% endif %}</td>
+                  <td class="num">{{ pct(row.recall) }}</td>
+                  <td>
+                    {% if 'True Warning' in row.verdict %}<span class="badge ok">True warning</span>
+                    {% elif 'False Warning' in row.verdict %}<span class="badge warn">False warning</span>
+                    {% elif 'Missed' in row.verdict %}<span class="badge bad">Missed degradation</span>
+                    {% else %}<span class="badge">{{ row.verdict }}</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            Drift warnings are audit signals only. They must not automatically change thresholds, firewall rules, or blocking behaviour.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Real, sample, prediction, simulation</h2>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>What it is</th>
+                  <th>Where it appears</th>
+                  <th>Claim status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="name">CIC-IDS-2017 records</td><td>Labelled flows from a controlled laboratory capture</td><td>Offline training, validation, and test metrics</td><td><span class="badge ok">Real dataset records</span></td></tr>
+                <tr><td class="name">Built-in samples</td><td>1,500-row slices of the dataset</td><td>Flow analysis sample buttons</td><td><span class="badge">Real records, sample slice</span></td></tr>
+                <tr><td class="name">Uploaded files</td><td>User-supplied CSV, PCAP, or PCAPNG</td><td>Flow analysis upload</td><td><span class="badge">Real input, unverified labels</span></td></tr>
+                <tr><td class="name">Model output</td><td>Predicted labels from the loaded model</td><td>Flow analysis results table</td><td><span class="badge warn">Prediction, not ground truth</span></td></tr>
+                <tr><td class="name">Feedback simulation</td><td>Perfect, instant labels applied to selected Thursday flows</td><td>Alert budget view</td><td><span class="badge warn">Simulation, not a human study</span></td></tr>
+                <tr><td class="name">Live capture</td><td>Experimental packet capture path</td><td>Stored flow review and live capture endpoints</td><td><span class="badge bad">Unvalidated prototype</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== LIMITATIONS ============================== -->
+    <section class="view" id="view-limitations" hidden>
+      <div class="view-head">
+        <p class="eyebrow">Limitations and reproduction</p>
+        <h1>What would have to be true before any deployment claim</h1>
+        <p class="lede">
+          The experiment is useful because its negative results are specific. This view lists the threats to validity, the claims the evidence does not support, and the commands needed to reproduce the artifacts.
+        </p>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Threats to validity</h2></div>
+        <ul class="check-list">
+          <li class="risk"><strong>Development evidence, not confirmation.</strong> Weekday results were inspected during development. A confirmatory claim needs a preregistered protocol and an untouched final holdout.</li>
+          <li class="risk"><strong>Dataset realism.</strong> CIC-IDS-2017 was generated by scripted tools in a controlled VLAN. It does not represent encrypted enterprise traffic, diverse protocols, or realistic background noise.</li>
+          <li class="risk"><strong>Unseen families are not zero-day guarantees.</strong> The test families are absent from training, but they are known to the dataset authors and may share feature signatures with training attacks.</li>
+          <li class="risk"><strong>Threshold shift.</strong> A threshold frozen on Wednesday does not preserve a 1% false-positive rate on Thursday and Friday. The seed 42 RF test FPR is {{ pct(research.model.test.fpr) }}.</li>
+          <li class="warn"><strong>Small supports.</strong> Infiltration has 36 test flows and SQL Injection has 21. Their per-family recall estimates are unstable.</li>
+          <li class="warn"><strong>Serving output is uncalibrated.</strong> The serving Random Forest is explicitly registered as uncalibrated, so the console shows no confidence percentage. A calibration artifact exists, but its held-out ECE is about 0.208 and fails the 0.05 gate; calibration does not fix the ranking or alert budget.</li>
+          <li class="warn"><strong>Simulated feedback only.</strong> The feedback study assumes perfect labels and no delay. It is not a human factors study.</li>
+          <li class="risk"><strong>Live parity failure.</strong> {{ research.parity.missing_features }} features are missing and {{ research.parity.dummy_features }} are constants. Live capture cannot be claimed to reproduce the offline feature distribution.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Claims this evidence does not support</h2></div>
+        <ul class="check-list">
+          <li class="risk">Deployment readiness, production intrusion detection, or real-time blocking.</li>
+          <li class="risk">Effective zero-day or novel-attack detection.</li>
+          <li class="risk">Improved detection from analyst feedback in a real SOC.</li>
+          <li class="risk">Validated accuracy on live network interfaces.</li>
+          <li class="risk">A calibrated probability that a given flow is an attack.</li>
+          <li class="risk">Superiority over commercial or production IDS products.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Reproduction commands</h2>
+          <span class="section-note">Run from the repository root</span>
+        </div>
+        <details open>
+          <summary>Baseline training and evaluation</summary>
+          <div class="details-body">
+<pre class="mono" style="overflow-x:auto; padding:12px; border:1px solid var(--line); border-radius:3px; background:var(--bg-subtle); font-size:11px; line-height:1.6;">python training/train_pipeline.py --split-mode day_based --seed 42
+python training/benchmark_baselines.py
+python training/evaluate.py</pre>
+          </div>
+        </details>
+        <details>
+          <summary>Alert budget and simulated feedback</summary>
+          <div class="details-body">
+<pre class="mono" style="overflow-x:auto; padding:12px; border:1px solid var(--line); border-radius:3px; background:var(--bg-subtle); font-size:11px; line-height:1.6;">python training/simulate_feedback.py
+python training/drift_monitor.py
+python training/verify_feature_parity.py</pre>
+          </div>
+        </details>
+        <details>
+          <summary>Workbench</summary>
+          <div class="details-body">
+<pre class="mono" style="overflow-x:auto; padding:12px; border:1px solid var(--line); border-radius:3px; background:var(--bg-subtle); font-size:11px; line-height:1.6;">python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py</pre>
+          </div>
+        </details>
+        <p class="caption">Exact artifact paths, hashes, and licenses are recorded in <code>docs/EVIDENCE_PACKAGE.md</code>. The research narrative is in <code>docs/RESEARCH_REPORT.md</code>.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Claim audit</h2></div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Claim</th>
+                  <th>Status</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="name">Temporal day-based split</td><td><span class="badge ok">Supported</span></td><td>Manifest and metrics record train, validation, and test row counts</td></tr>
+                <tr><td class="name">RF PR-AUC around 0.75 across five seeds</td><td><span class="badge ok">Supported</span></td><td><code>docs/summary_metrics.json</code></td></tr>
+                <tr><td class="name">Threshold FPR exceeds 1% on test</td><td><span class="badge ok">Supported</span></td><td>Seed 42 metrics and five-seed summary</td></tr>
+                <tr><td class="name">Botnet is effectively undetected</td><td><span class="badge ok">Supported</span></td><td>Per-family recall in metrics and feedback JSON</td></tr>
+                <tr><td class="name">Feedback improves Friday detection</td><td><span class="badge bad">Not supported</span></td><td>No-feedback mean is not beaten by a clear margin</td></tr>
+                <tr><td class="name">Live capture is validated</td><td><span class="badge bad">Not supported</span></td><td>Upload parser: 80/80 features; live path drops ICMP and IPv6; no labelled live traffic</td></tr>
+                <tr><td class="name">Service meets its declared SLOs</td><td><span class="badge bad">Not supported</span></td><td>Ingest p95 641 ms at 20 flows/s; first 503 at 50 flows/s</td></tr>
+                <tr><td class="name">Deployment ready</td><td><span class="badge bad">Not supported</span></td><td>No prospective evaluation or operational pilot</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>NetShield research workbench. Offline research prototype, not a production detection service.</span>
+      <span>CIC-IDS-2017 is used under academic, non-commercial terms.</span>
+    </footer>
+  </main>
+</div>
+
+<script id="research-data" type="application/json">{{ research|tojson }}</script>
+<script src="{{ url_for('static', filename='js/workbench.js') }}?v=3"></script>
 </body>
 </html>

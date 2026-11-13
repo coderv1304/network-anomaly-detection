@@ -1,0 +1,118 @@
+{
+  "capture_message": "Packet capture listening on Wi-Fi",
+  "capture_state": "listening",
+  "capture_status": {
+    "capture_requested": true,
+    "demo_stream_enabled": false,
+    "flows_received": 11,
+    "interface": "Wi-Fi",
+    "interfaces": [
+      {
+        "interface": "Wi-Fi",
+        "message": "Packet capture listening on Wi-Fi",
+        "state": "listening"
+      }
+    ],
+    "last_flow_at": "2026-11-10T02:44:01.636405Z",
+    "message": "Packet capture listening on Wi-Fi",
+    "prediction_boundary": "Flow predictions are unvalidated on live capture: no labelled live traffic exists, the live extractor's flag counts are 0/1 indicators, and the two extractors disagree on several numeric features.",
+    "state": "listening",
+    "unknown_interfaces": []
+  },
+  "flows_after": 21590,
+  "flows_before": 21579,
+  "flows_ingested": 11,
+  "interface": "auto",
+  "interface_selection": "auto",
+  "interface_states": [
+    {
+      "interface": "Wi-Fi",
+      "message": "Packet capture listening on Wi-Fi",
+      "state": "listening"
+    }
+  ],
+  "note": "Ingest-path smoke test only. It does not establish feature parity, detection accuracy, or live validation.",
+  "resolved_interfaces": [
+    "Wi-Fi"
+  ],
+  "sample_provenance": [
+    {
+      "id": 21590,
+      "is_attack": false,
+      "predicted_label": "BENIGN",
+      "provenance": {
+        "artifact_sha256": "f6d3a5c1e90008bf3ba8789591c46067d4b59f0523328f745aa536a8d0d2925d",
+        "attack_score": 0.0,
+        "calibration_version": "uncalibrated",
+        "decision_basis": "attack_probability_threshold",
+        "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+        "model_argmax_label": "BENIGN",
+        "model_version": "serving-lr-day-based-seed42-v1",
+        "threshold_policy": "global_validation_max_fpr"
+      }
+    },
+    {
+      "id": 21589,
+      "is_attack": false,
+      "predicted_label": "BENIGN",
+      "provenance": {
+        "artifact_sha256": "f6d3a5c1e90008bf3ba8789591c46067d4b59f0523328f745aa536a8d0d2925d",
+        "attack_score": 0.0,
+        "calibration_version": "uncalibrated",
+        "decision_basis": "attack_probability_threshold",
+        "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+        "model_argmax_label": "BENIGN",
+        "model_version": "serving-lr-day-based-seed42-v1",
+        "threshold_policy": "global_validation_max_fpr"
+      }
+    },
+    {
+      "id": 21588,
+      "is_attack": false,
+      "predicted_label": "BENIGN",
+      "provenance": {
+        "artifact_sha256": "f6d3a5c1e90008bf3ba8789591c46067d4b59f0523328f745aa536a8d0d2925d",
+        "attack_score": 0.0,
+        "calibration_version": "uncalibrated",
+        "decision_basis": "attack_probability_threshold",
+        "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+        "model_argmax_label": "BENIGN",
+        "model_version": "serving-lr-day-based-seed42-v1",
+        "threshold_policy": "global_validation_max_fpr"
+      }
+    },
+    {
+      "id": 21587,
+      "is_attack": false,
+      "predicted_label": "BENIGN",
+      "provenance": {
+        "artifact_sha256": "f6d3a5c1e90008bf3ba8789591c46067d4b59f0523328f745aa536a8d0d2925d",
+        "attack_score": 0.0,
+        "calibration_version": "uncalibrated",
+        "decision_basis": "attack_probability_threshold",
+        "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+        "model_argmax_label": "BENIGN",
+        "model_version": "serving-lr-day-based-seed42-v1",
+        "threshold_policy": "global_validation_max_fpr"
+      }
+    },
+    {
+      "id": 21586,
+      "is_attack": false,
+      "predicted_label": "BENIGN",
+      "provenance": {
+        "artifact_sha256": "f6d3a5c1e90008bf3ba8789591c46067d4b59f0523328f745aa536a8d0d2925d",
+        "attack_score": 0.0,
+        "calibration_version": "uncalibrated",
+        "decision_basis": "attack_probability_threshold",
+        "feature_schema_version": "cic-ids-2017-80f-45cd75ce849b",
+        "model_argmax_label": "BENIGN",
+        "model_version": "serving-lr-day-based-seed42-v1",
+        "threshold_policy": "global_validation_max_fpr"
+      }
+    }
+  ],
+  "seconds": 35,
+  "server": "http://127.0.0.1:5055",
+  "tool": "scripts/live_capture_smoke.py"
+}

@@ -1,0 +1,108 @@
+{
+  "drill": "sqlite backup and restore",
+  "timestamp_utc": "2026-11-10T02:39:41.253436+00:00",
+  "source": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\instance\\network_anomaly.db",
+    "sha256": "0cf7a0c0182ad2fe62891fb597ab352cb381cdb76420c998f0691f396b2e3214",
+    "size_bytes": 3715072,
+    "page_count": 907,
+    "page_size": 4096,
+    "tables": {
+      "audit_events": 136,
+      "flow": 21579,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "logical_sha256": "1ef4df6153fcfc95f8eae6f168cd44876997c6b7cfae0dd6e5f92443b8d27c9f",
+    "integrity_check": "ok"
+  },
+  "backup": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\network_anomaly-20261110T023939Z.db",
+    "sha256": "b80b6e9cbd4ae7c7bb2a37ce6db4e3616eafcb83ad12226f7d9a8835d6959ee8",
+    "size_bytes": 3715072,
+    "page_count": 907,
+    "page_size": 4096,
+    "tables": {
+      "audit_events": 136,
+      "flow": 21579,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "logical_sha256": "1ef4df6153fcfc95f8eae6f168cd44876997c6b7cfae0dd6e5f92443b8d27c9f",
+    "integrity_check": "ok"
+  },
+  "damaged_copy": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\network_anomaly-20261110T023939Z.damaged.db",
+    "sha256": "17a2ff1f0d4607effc43db281bbd81ef4eb91e2c76e872a31d24ae15c7eca0bd",
+    "size_bytes": 3715072,
+    "page_count": 907,
+    "page_size": 4096,
+    "tables": {
+      "audit_events": 136,
+      "flow": 0,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "logical_sha256": "c18eb7a33cfc5ea3834ab61a37d17074bb62ceb070968d7a91ecef554ff2b055",
+    "integrity_check": "ok"
+  },
+  "restored_over_damaged_copy": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\network_anomaly-20261110T023939Z.restored.db",
+    "sha256": "3a0d01ce3c5d887298592dd794676fe981f454e77633bee017dfd345d43ae0a0",
+    "size_bytes": 3715072,
+    "page_count": 907,
+    "page_size": 4096,
+    "tables": {
+      "audit_events": 136,
+      "flow": 21579,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "logical_sha256": "1ef4df6153fcfc95f8eae6f168cd44876997c6b7cfae0dd6e5f92443b8d27c9f",
+    "integrity_check": "ok"
+  },
+  "fresh_restore": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\network_anomaly-20261110T023939Z.fresh-restore.db",
+    "sha256": "b80b6e9cbd4ae7c7bb2a37ce6db4e3616eafcb83ad12226f7d9a8835d6959ee8",
+    "size_bytes": 3715072,
+    "page_count": 907,
+    "page_size": 4096,
+    "tables": {
+      "audit_events": 136,
+      "flow": 21579,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "logical_sha256": "1ef4df6153fcfc95f8eae6f168cd44876997c6b7cfae0dd6e5f92443b8d27c9f",
+    "integrity_check": "ok"
+  },
+  "checks": {
+    "backup_counts_match_source": true,
+    "backup_integrity_ok": true,
+    "damage_removed_flows": true,
+    "restore_counts_match_backup": true,
+    "restore_integrity_ok": true,
+    "restore_logical_sha256_matches_backup": true,
+    "fresh_restore_count_matches": true,
+    "fresh_restore_integrity_ok": true,
+    "fresh_restore_hash_matches_backup": true
+  },
+  "status": "pass",
+  "duration_seconds": 1.271,
+  "restore_seconds": 0.683,
+  "notes": [
+    "The live database was read only; every mutation happened on disposable copies.",
+    "The backup is local. It is not encrypted and not off-host; production needs both.",
+    "A passing drill does not establish a recovery point objective or an off-site backup."
+  ]
+}

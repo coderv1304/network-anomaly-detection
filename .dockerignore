@@ -1,0 +1,42 @@
+.git
+.venv
+venv
+__pycache__
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+!.env.example
+instance/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+uploads/*
+!uploads/.gitkeep
+data/*.csv
+data/*.pcap
+data/raw/
+
+# Runtime image does not need test, training, or evidence files. Excluding
+# them also stops Trivy from scanning our own SBOM/audit JSON as if it were
+# installed software (which produced false-positive package findings).
+#
+# Exception: app.py imports training.model_registry (stdlib-only) for the
+# signed registry and deployment check, and joblib unpickles the served
+# pipeline, whose classes live in training.preprocessor. Excluding the whole
+# package made the container unable to boot, so keep exactly the modules the
+# serving path needs.
+training/**
+!training/__init__.py
+!training/model_registry.py
+!training/preprocessor.py
+docs/*
+!docs/summary_metrics.json
+tests/
+scripts/
+models/eval_cache/
+docs/figures/
+*.md
+!models/README.md
+

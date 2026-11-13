@@ -1,0 +1,885 @@
+{
+  "method": "bootstrap_scores",
+  "seed": 20261113,
+  "bootstrap_draws": 10000,
+  "inputs": {
+    "metrics": "models\\metrics_rf_day_based_seed42.json",
+    "partition": "test (Thursday + Friday)",
+    "operating_point": "score >= 0.002515048908954043",
+    "threshold": 0.002515048908954043,
+    "threshold_source": "metrics operating_threshold",
+    "model": "rf",
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "review_cost_ratio": 0.0,
+    "flows_per_day": 1000000.0,
+    "flows_per_day_note": "Illustrative volume, not a measured site value."
+  },
+  "benchmark_prevalence": 0.2505358994548498,
+  "prevalence": [
+    {
+      "p": 0.0001,
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "ppv": 0.007924810838175563,
+      "ppv_ci95": [
+        0.007738050470421564,
+        0.008120009539825572
+      ],
+      "alerts_per_10k": 73.115650061669,
+      "alerts_per_10k_ci95": [
+        71.39217353543218,
+        74.87236487118962
+      ],
+      "alerts_per_day": 7311.5650061669,
+      "break_even_per_flow": 125.18597723276615,
+      "break_even_with_review": 125.18597723276615,
+      "break_even_all_alerts": 126.18597723276615
+    },
+    {
+      "p": 0.001,
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "ppv": 0.0740338771965216,
+      "ppv_ci95": [
+        0.07240285686498099,
+        0.07573312522049534
+      ],
+      "alerts_per_10k": 78.26521019706774,
+      "alerts_per_10k_ci95": [
+        76.53896107468972,
+        80.02467648117567
+      ],
+      "alerts_per_day": 7826.521019706774,
+      "break_even_per_flow": 12.507329858539192,
+      "break_even_with_review": 12.507329858539192,
+      "break_even_all_alerts": 13.507329858539192
+    },
+    {
+      "p": 0.01,
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "ppv": 0.44653519743207476,
+      "ppv_ci95": [
+        0.4406025897915032,
+        0.45260514996962714
+      ],
+      "alerts_per_10k": 129.7608115510551,
+      "alerts_per_10k_ci95": [
+        128.0553197832404,
+        131.51360593912594
+      ],
+      "alerts_per_day": 12976.081155105509,
+      "break_even_per_flow": 1.2394651211164964,
+      "break_even_with_review": 1.2394651211164964,
+      "break_even_all_alerts": 2.2394651211164964
+    },
+    {
+      "p": 0.1,
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "ppv": 0.8987320843802175,
+      "ppv_ci95": [
+        0.8965233573104183,
+        0.9009428612707538
+      ],
+      "alerts_per_10k": 644.7168250909285,
+      "alerts_per_10k_ci95": [
+        642.3214292000064,
+        647.0458298608592
+      ],
+      "alerts_per_day": 64471.682509092854,
+      "break_even_per_flow": 0.11267864737422696,
+      "break_even_with_review": 0.11267864737422696,
+      "break_even_all_alerts": 1.112678647374227
+    },
+    {
+      "p": 0.2505358994548498,
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "ppv": 0.9638996183118872,
+      "ppv_ci95": [
+        0.9630538119989469,
+        0.9647435347906843
+      ],
+      "alerts_per_10k": 1506.0431215121355,
+      "alerts_per_10k_ci95": [
+        1501.3443740238283,
+        1510.698627013119
+      ],
+      "alerts_per_day": 150604.31215121355,
+      "break_even_per_flow": 0.037452428657806444,
+      "break_even_with_review": 0.037452428657806444,
+      "break_even_all_alerts": 1.0374524286578064
+    }
+  ],
+  "seed42": {
+    "counts": {
+      "true_positives": 168694,
+      "false_positives": 6318,
+      "false_negatives": 122445,
+      "true_negatives": 864608
+    },
+    "tpr": 0.5794276960489663,
+    "fpr": 0.007254347671329137,
+    "tpr_ci95": [
+      0.5776335044617174,
+      0.5812197916326036
+    ],
+    "fpr_ci95": [
+      0.007078280313400722,
+      0.007434761790712701
+    ],
+    "positives": 291139,
+    "negatives": 870926
+  },
+  "five_seed": [
+    {
+      "p": 0.0001,
+      "ppv_mean": 0.0032885982077750808,
+      "ppv_sd": 0.0032865609076162426,
+      "ppv_from_mean_rates": 0.001417808094227194,
+      "mean_tpr": 0.5829916294278678,
+      "mean_fpr": 0.041065027338717634,
+      "alerts_per_10k_mean": 411.19219998926553,
+      "alerts_per_10k_sd": 327.4939387449606,
+      "break_even_per_flow_mean": 715.3223876078724,
+      "break_even_per_flow_sd": 566.8967276001061,
+      "break_even_all_alerts_mean": 716.3223876078724,
+      "break_even_all_alerts_sd": 566.8967276001061,
+      "seeds_used": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    },
+    {
+      "p": 0.001,
+      "ppv_mean": 0.03126459135689104,
+      "ppv_sd": 0.03059884553507668,
+      "ppv_from_mean_rates": 0.01401187960688677,
+      "mean_tpr": 0.5829916294278678,
+      "mean_fpr": 0.041065027338717634,
+      "alerts_per_10k_mean": 416.06953940806795,
+      "alerts_per_10k_sd": 327.67914033132547,
+      "break_even_per_flow_mean": 71.4678533073572,
+      "break_even_per_flow_sd": 56.63864695194581,
+      "break_even_all_alerts_mean": 72.4678533073572,
+      "break_even_all_alerts_sd": 56.63864695194581,
+      "seeds_used": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    },
+    {
+      "p": 0.01,
+      "ppv_mean": 0.21520280282621237,
+      "ppv_sd": 0.17631077115680163,
+      "ppv_from_mean_rates": 0.12541690693623356,
+      "mean_tpr": 0.5829916294278678,
+      "mean_fpr": 0.041065027338717634,
+      "alerts_per_10k_mean": 464.8429335960915,
+      "alerts_per_10k_sd": 329.78846581383243,
+      "break_even_per_flow_mean": 7.082399877305667,
+      "break_even_per_flow_sd": 5.612838887129763,
+      "break_even_all_alerts_mean": 8.082399877305667,
+      "break_even_all_alerts_sd": 5.612838887129763,
+      "seeds_used": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    },
+    {
+      "p": 0.1,
+      "ppv_mean": 0.6592738971867,
+      "ppv_sd": 0.2087623773347636,
+      "ppv_from_mean_rates": 0.6120153075691122,
+      "mean_tpr": 0.5829916294278678,
+      "mean_fpr": 0.041065027338717634,
+      "alerts_per_10k_mean": 952.5768754763264,
+      "alerts_per_10k_sd": 374.1267003402832,
+      "break_even_per_flow_mean": 0.6438545343005152,
+      "break_even_per_flow_sd": 0.5102580806481604,
+      "break_even_all_alerts_mean": 1.6438545343005153,
+      "break_even_all_alerts_sd": 0.5102580806481604,
+      "seeds_used": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    },
+    {
+      "p": 0.2505358994548498,
+      "ppv_mean": 0.8366754451296551,
+      "ppv_sd": 0.1164089639538686,
+      "ppv_from_mean_rates": 0.8259597987700016,
+      "mean_tpr": 0.5829916294278678,
+      "mean_fpr": 0.041065027338717634,
+      "alerts_per_10k_mean": 1768.3709603163334,
+      "alerts_per_10k_sd": 512.4947148940113,
+      "break_even_per_flow_mean": 0.21400608344017824,
+      "break_even_per_flow_sd": 0.16960093866831064,
+      "break_even_all_alerts_mean": 1.2140060834401782,
+      "break_even_all_alerts_sd": 0.1696009386683107,
+      "seeds_used": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    }
+  ],
+  "per_seed": {
+    "42": {
+      "partition": "test",
+      "score_cache": "models/eval_cache\\rf_seed42_test.npz",
+      "threshold": 0.002515048908954043,
+      "counts": {
+        "true_positives": 168694,
+        "false_positives": 6318,
+        "false_negatives": 122445,
+        "true_negatives": 864608
+      },
+      "tpr": 0.5794276960489663,
+      "fpr": 0.007254347671329137,
+      "tpr_ci95": [
+        0.5776335044617174,
+        0.5812197916326036
+      ],
+      "fpr_ci95": [
+        0.007078280313400722,
+        0.007434761790712701
+      ],
+      "positives": 291139,
+      "negatives": 870926,
+      "benchmark_prevalence": 0.2505358994548498,
+      "prevalence": [
+        {
+          "p": 0.0001,
+          "tpr": 0.5794276960489663,
+          "fpr": 0.007254347671329137,
+          "ppv": 0.007924810838175563,
+          "ppv_ci95": [
+            0.007738050470421564,
+            0.008120009539825572
+          ],
+          "alerts_per_10k": 73.115650061669,
+          "alerts_per_10k_ci95": [
+            71.39217353543218,
+            74.87236487118962
+          ],
+          "alerts_per_day": 7311.5650061669,
+          "break_even_per_flow": 125.18597723276615,
+          "break_even_with_review": 125.18597723276615,
+          "break_even_all_alerts": 126.18597723276615
+        },
+        {
+          "p": 0.001,
+          "tpr": 0.5794276960489663,
+          "fpr": 0.007254347671329137,
+          "ppv": 0.0740338771965216,
+          "ppv_ci95": [
+            0.07240285686498099,
+            0.07573312522049534
+          ],
+          "alerts_per_10k": 78.26521019706774,
+          "alerts_per_10k_ci95": [
+            76.53896107468972,
+            80.02467648117567
+          ],
+          "alerts_per_day": 7826.521019706774,
+          "break_even_per_flow": 12.507329858539192,
+          "break_even_with_review": 12.507329858539192,
+          "break_even_all_alerts": 13.507329858539192
+        },
+        {
+          "p": 0.01,
+          "tpr": 0.5794276960489663,
+          "fpr": 0.007254347671329137,
+          "ppv": 0.44653519743207476,
+          "ppv_ci95": [
+            0.4406025897915032,
+            0.45260514996962714
+          ],
+          "alerts_per_10k": 129.7608115510551,
+          "alerts_per_10k_ci95": [
+            128.0553197832404,
+            131.51360593912594
+          ],
+          "alerts_per_day": 12976.081155105509,
+          "break_even_per_flow": 1.2394651211164964,
+          "break_even_with_review": 1.2394651211164964,
+          "break_even_all_alerts": 2.2394651211164964
+        },
+        {
+          "p": 0.1,
+          "tpr": 0.5794276960489663,
+          "fpr": 0.007254347671329137,
+          "ppv": 0.8987320843802175,
+          "ppv_ci95": [
+            0.8965233573104183,
+            0.9009428612707538
+          ],
+          "alerts_per_10k": 644.7168250909285,
+          "alerts_per_10k_ci95": [
+            642.3214292000064,
+            647.0458298608592
+          ],
+          "alerts_per_day": 64471.682509092854,
+          "break_even_per_flow": 0.11267864737422696,
+          "break_even_with_review": 0.11267864737422696,
+          "break_even_all_alerts": 1.112678647374227
+        },
+        {
+          "p": 0.2505358994548498,
+          "tpr": 0.5794276960489663,
+          "fpr": 0.007254347671329137,
+          "ppv": 0.9638996183118872,
+          "ppv_ci95": [
+            0.9630538119989469,
+            0.9647435347906843
+          ],
+          "alerts_per_10k": 1506.0431215121355,
+          "alerts_per_10k_ci95": [
+            1501.3443740238283,
+            1510.698627013119
+          ],
+          "alerts_per_day": 150604.31215121355,
+          "break_even_per_flow": 0.037452428657806444,
+          "break_even_with_review": 0.037452428657806444,
+          "break_even_all_alerts": 1.0374524286578064
+        }
+      ],
+      "threshold_source": "models/metrics_rf_day_based_seed42.json"
+    },
+    "43": {
+      "partition": "test",
+      "score_cache": "models/eval_cache\\rf_seed43_test.npz",
+      "threshold": 0.00185520361990954,
+      "counts": {
+        "true_positives": 163328,
+        "false_positives": 8652,
+        "false_negatives": 127811,
+        "true_negatives": 862274
+      },
+      "tpr": 0.5609966373450482,
+      "fpr": 0.009934253886093652,
+      "tpr_ci95": [
+        0.5591931920116535,
+        0.5627984730488234
+      ],
+      "fpr_ci95": [
+        0.009728120114924115,
+        0.010144710777894757
+      ],
+      "positives": 291139,
+      "negatives": 870926,
+      "benchmark_prevalence": 0.2505358994548498,
+      "prevalence": [
+        {
+          "p": 0.0001,
+          "tpr": 0.5609966373450482,
+          "fpr": 0.009934253886093652,
+          "ppv": 0.005615941665498048,
+          "ppv_ci95": [
+            0.005501224258411691,
+            0.005738393157702726
+          ],
+          "alerts_per_10k": 99.89360124439548,
+          "alerts_per_10k_ci95": [
+            97.79267734983435,
+            101.94820085110344
+          ],
+          "alerts_per_day": 9989.360124439549,
+          "break_even_per_flow": 177.06452765411964,
+          "break_even_with_review": 177.06452765411964,
+          "break_even_all_alerts": 178.06452765411964
+        },
+        {
+          "p": 0.001,
+          "tpr": 0.5609966373450482,
+          "fpr": 0.009934253886093652,
+          "ppv": 0.05350307257531921,
+          "ppv_ci95": [
+            0.05246176759078211,
+            0.054612322696545035
+          ],
+          "alerts_per_10k": 104.85316269552605,
+          "alerts_per_10k_ci95": [
+            102.75497269788909,
+            106.90800462970306
+          ],
+          "alerts_per_day": 10485.316269552606,
+          "break_even_per_flow": 17.690515364182968,
+          "break_even_with_review": 17.690515364182968,
+          "break_even_all_alerts": 18.690515364182968
+        },
+        {
+          "p": 0.01,
+          "tpr": 0.5609966373450482,
+          "fpr": 0.009934253886093652,
+          "ppv": 0.3632250429498595,
+          "ppv_ci95": [
+            0.35843855996980767,
+            0.3682572312935957
+          ],
+          "alerts_per_10k": 154.44877720683198,
+          "alerts_per_10k_ci95": [
+            152.34484379392504,
+            156.4934880366222
+          ],
+          "alerts_per_day": 15444.877720683196,
+          "break_even_per_flow": 1.7531141351893034,
+          "break_even_with_review": 1.7531141351893034,
+          "break_even_all_alerts": 2.7531141351893034
+        },
+        {
+          "p": 0.1,
+          "tpr": 0.5609966373450482,
+          "fpr": 0.009934253886093652,
+          "ppv": 0.862534427544094,
+          "ppv_ci95": [
+            0.8600550878439166,
+            0.8650863827635833
+          ],
+          "alerts_per_10k": 650.4049223198912,
+          "alerts_per_10k_ci95": [
+            647.7499508533772,
+            652.9685048086606
+          ],
+          "alerts_per_day": 65040.49223198911,
+          "break_even_per_flow": 0.1593740122899367,
+          "break_even_with_review": 0.1593740122899367,
+          "break_even_all_alerts": 1.1593740122899368
+        },
+        {
+          "p": 0.2505358994548498,
+          "tpr": 0.5609966373450482,
+          "fpr": 0.009934253886093652,
+          "ppv": 0.949691824630771,
+          "ppv_ci95": [
+            0.9486909512367118,
+            0.9507182089456376
+          ],
+          "alerts_per_10k": 1479.9516378171618,
+          "alerts_per_10k_ci95": [
+            1475.06378730966,
+            1484.7362238773214
+          ],
+          "alerts_per_day": 147995.16378171617,
+          "break_even_per_flow": 0.05297315830721003,
+          "break_even_with_review": 0.05297315830721003,
+          "break_even_all_alerts": 1.05297315830721
+        }
+      ],
+      "threshold_source": "models/metrics_rf_day_based_seed43.json"
+    },
+    "44": {
+      "partition": "test",
+      "score_cache": "models/eval_cache\\rf_seed44_test.npz",
+      "threshold": 0.009363636363636352,
+      "counts": {
+        "true_positives": 136200,
+        "false_positives": 60058,
+        "false_negatives": 154939,
+        "true_negatives": 810868
+      },
+      "tpr": 0.46781777776251204,
+      "fpr": 0.0689587863951702,
+      "tpr_ci95": [
+        0.4660057626025702,
+        0.46963064217350114
+      ],
+      "fpr_ci95": [
+        0.0684285321375046,
+        0.06949284308787304
+      ],
+      "positives": 291139,
+      "negatives": 870926,
+      "benchmark_prevalence": 0.2505358994548498,
+      "prevalence": [
+        {
+          "p": 0.0001,
+          "tpr": 0.46781777776251204,
+          "fpr": 0.0689587863951702,
+          "ppv": 0.0006780098257066195,
+          "ppv_ci95": [
+            0.0006723349572575366,
+            0.0006838382453327609
+          ],
+          "alerts_per_10k": 689.9867229430694,
+          "alerts_per_10k_ci95": [
+            684.6579958336381,
+            695.1744949284948
+          ],
+          "alerts_per_day": 68998.67229430693,
+          "break_even_per_flow": 1473.9048790816612,
+          "break_even_with_review": 1473.9048790816612,
+          "break_even_all_alerts": 1474.9048790816612
+        },
+        {
+          "p": 0.001,
+          "tpr": 0.46781777776251204,
+          "fpr": 0.0689587863951702,
+          "ppv": 0.006745006626959634,
+          "ppv_ci95": [
+            0.006688891548645575,
+            0.006802634136693859
+          ],
+          "alerts_per_10k": 693.5764538653755,
+          "alerts_per_10k_ci95": [
+            688.2551344170143,
+            698.7608425367607
+          ],
+          "alerts_per_day": 69357.64538653755,
+          "break_even_per_flow": 147.25782320257824,
+          "break_even_with_review": 147.25782320257824,
+          "break_even_all_alerts": 148.25782320257824
+        },
+        {
+          "p": 0.01,
+          "tpr": 0.46781777776251204,
+          "fpr": 0.0689587863951702,
+          "ppv": 0.06413085726097557,
+          "ppv_ci95": [
+            0.06362790425428706,
+            0.0646468630398627
+          ],
+          "alerts_per_10k": 729.4737630884362,
+          "alerts_per_10k_ci95": [
+            724.2216586785736,
+            734.6461392948146
+          ],
+          "alerts_per_day": 72947.37630884361,
+          "break_even_per_flow": 14.59311761466991,
+          "break_even_with_review": 14.59311761466991,
+          "break_even_all_alerts": 15.59311761466991
+        },
+        {
+          "p": 0.1,
+          "tpr": 0.46781777776251204,
+          "fpr": 0.0689587863951702,
+          "ppv": 0.42980304961732474,
+          "ppv_ci95": [
+            0.4277430246306186,
+            0.4319034570772658
+          ],
+          "alerts_per_10k": 1088.4468553190438,
+          "alerts_per_10k_ci95": [
+            1083.3047477216737,
+            1093.4813366233197
+          ],
+          "alerts_per_day": 108844.68553190438,
+          "break_even_per_flow": 1.326647055879083,
+          "break_even_with_review": 1.326647055879083,
+          "break_even_all_alerts": 2.326647055879083
+        },
+        {
+          "p": 0.2505358994548498,
+          "tpr": 0.46781777776251204,
+          "fpr": 0.0689587863951702,
+          "ppv": 0.6939844490415678,
+          "ppv_ci95": [
+            0.6921953399204327,
+            0.695800467232265
+          ],
+          "alerts_per_10k": 1688.8728255304136,
+          "alerts_per_10k_ci95": [
+            1682.8574563385007,
+            1694.8709839811027
+          ],
+          "alerts_per_day": 168887.28255304135,
+          "break_even_per_flow": 0.44095447870778265,
+          "break_even_with_review": 0.44095447870778265,
+          "break_even_all_alerts": 1.4409544787077826
+        }
+      ],
+      "threshold_source": "models/metrics_rf_day_based_seed44.json"
+    },
+    "45": {
+      "partition": "test",
+      "score_cache": "models/eval_cache\\rf_seed45_test.npz",
+      "threshold": 0.010000000000000009,
+      "counts": {
+        "true_positives": 242212,
+        "false_positives": 68341,
+        "false_negatives": 48927,
+        "true_negatives": 802585
+      },
+      "tpr": 0.831946252477339,
+      "fpr": 0.07846935330900673,
+      "tpr_ci95": [
+        0.8305836560648936,
+        0.8333000892180495
+      ],
+      "fpr_ci95": [
+        0.07790645276319302,
+        0.07903597239228197
+      ],
+      "positives": 291139,
+      "negatives": 870926,
+      "benchmark_prevalence": 0.2505358994548498,
+      "prevalence": [
+        {
+          "p": 0.0001,
+          "tpr": 0.831946252477339,
+          "fpr": 0.07846935330900673,
+          "ppv": 0.001059200992424353,
+          "ppv_ci95": [
+            0.00105155822028716,
+            0.0010669835292466683
+          ],
+          "alerts_per_10k": 785.4470099892357,
+          "alerts_per_10k_ci95": [
+            779.8222266364146,
+            790.9241156342947
+          ],
+          "alerts_per_day": 78544.70099892357,
+          "break_even_per_flow": 943.1078767412681,
+          "break_even_with_review": 943.1078767412681,
+          "break_even_all_alerts": 944.1078767412681
+        },
+        {
+          "p": 0.001,
+          "tpr": 0.831946252477339,
+          "fpr": 0.07846935330900673,
+          "ppv": 0.010501344754930125,
+          "ppv_ci95": [
+            0.010426282340869002,
+            0.010577769327427858
+          ],
+          "alerts_per_10k": 792.2283020817507,
+          "alerts_per_10k_ci95": [
+            786.6162286525603,
+            797.7042812717002
+          ],
+          "alerts_per_day": 79222.83020817507,
+          "break_even_per_flow": 94.22589947640034,
+          "break_even_with_review": 94.22589947640034,
+          "break_even_all_alerts": 95.22589947640034
+        },
+        {
+          "p": 0.01,
+          "tpr": 0.831946252477339,
+          "fpr": 0.07846935330900673,
+          "ppv": 0.09673329954681298,
+          "ppv_ci95": [
+            0.09610172441931308,
+            0.09737552800101833
+          ],
+          "alerts_per_10k": 860.0412230069006,
+          "alerts_per_10k_ci95": [
+            854.468009923421,
+            865.4830345089231
+          ],
+          "alerts_per_day": 86004.12230069005,
+          "break_even_per_flow": 9.337701749913549,
+          "break_even_with_review": 9.337701749913549,
+          "break_even_all_alerts": 10.337701749913549
+        },
+        {
+          "p": 0.1,
+          "tpr": 0.831946252477339,
+          "fpr": 0.07846935330900673,
+          "ppv": 0.5408674065173937,
+          "ppv_ci95": [
+            0.5390666358201242,
+            0.5426867347026353
+          ],
+          "alerts_per_10k": 1538.1704322583996,
+          "alerts_per_10k_ci95": [
+            1532.9372092371045,
+            1543.2646881698117
+          ],
+          "alerts_per_day": 153817.04322583997,
+          "break_even_per_flow": 0.8488819772648679,
+          "break_even_with_review": 0.8488819772648679,
+          "break_even_all_alerts": 1.848881977264868
+        },
+        {
+          "p": 0.2505358994548498,
+          "tpr": 0.831946252477339,
+          "fpr": 0.07846935330900673,
+          "ppv": 0.779937723995582,
+          "ppv_ci95": [
+            0.7786909476207691,
+            0.7811929665166735
+          ],
+          "alerts_per_10k": 2672.4236596059604,
+          "alerts_per_10k_ci95": [
+            2667.148352286662,
+            2677.7592045195406
+          ],
+          "alerts_per_day": 267242.365960596,
+          "break_even_per_flow": 0.2821536505210311,
+          "break_even_with_review": 0.2821536505210311,
+          "break_even_all_alerts": 1.2821536505210311
+        }
+      ],
+      "threshold_source": "models/metrics_rf_day_based_seed45.json"
+    },
+    "46": {
+      "partition": "test",
+      "score_cache": "models/eval_cache\\rf_seed46_test.npz",
+      "threshold": 0.00712097468444628,
+      "counts": {
+        "true_positives": 138224,
+        "false_positives": 35454,
+        "false_negatives": 152915,
+        "true_negatives": 835472
+      },
+      "tpr": 0.47476978350547333,
+      "fpr": 0.04070839543198848,
+      "tpr_ci95": [
+        0.4729562243962211,
+        0.4765840084105063
+      ],
+      "fpr_ci95": [
+        0.04029539173025419,
+        0.04112545077990974
+      ],
+      "positives": 291139,
+      "negatives": 870926,
+      "benchmark_prevalence": 0.2505358994548498,
+      "prevalence": [
+        {
+          "p": 0.0001,
+          "tpr": 0.47476978350547333,
+          "fpr": 0.04070839543198848,
+          "ppv": 0.0011650277170708206,
+          "ppv_ci95": [
+            0.0011524207666041475,
+            0.001177734829779939
+          ],
+          "alerts_per_10k": 407.5180157079582,
+          "alerts_per_10k_ci95": [
+            403.3514999213536,
+            411.5816452558836
+          ],
+          "alerts_per_day": 40751.801570795826,
+          "break_even_per_flow": 857.3486773295467,
+          "break_even_with_review": 857.3486773295467,
+          "break_even_all_alerts": 858.3486773295467
+        },
+        {
+          "p": 0.001,
+          "tpr": 0.47476978350547333,
+          "fpr": 0.04070839543198848,
+          "ppv": 0.011539655630724637,
+          "ppv_ci95": [
+            0.011416066304637955,
+            0.011664198763426448
+          ],
+          "alerts_per_10k": 411.4245682006197,
+          "alerts_per_10k_ci95": [
+            407.2700344088693,
+            415.47911046547773
+          ],
+          "alerts_per_day": 41142.45682006197,
+          "break_even_per_flow": 85.65769863508524,
+          "break_even_with_review": 85.65769863508524,
+          "break_even_all_alerts": 86.65769863508524
+        },
+        {
+          "p": 0.01,
+          "tpr": 0.47476978350547333,
+          "fpr": 0.04070839543198848,
+          "ppv": 0.10538961694133916,
+          "ppv_ci95": [
+            0.1043670247589304,
+            0.10641799937036507
+          ],
+          "alerts_per_10k": 450.49009312723337,
+          "alerts_per_10k_ci95": [
+            446.37991018774375,
+            454.50625339164606
+          ],
+          "alerts_per_day": 45049.009312723334,
+          "break_even_per_flow": 8.488600765639077,
+          "break_even_with_review": 8.488600765639077,
+          "break_even_all_alerts": 9.488600765639077
+        },
+        {
+          "p": 0.1,
+          "tpr": 0.47476978350547333,
+          "fpr": 0.04070839543198848,
+          "ppv": 0.5644325178744707,
+          "ppv_ci95": [
+            0.5617526965039685,
+            0.5671007357131899
+          ],
+          "alerts_per_10k": 841.1453423933697,
+          "alerts_per_10k_ci95": [
+            836.9541246643928,
+            845.2585420142547
+          ],
+          "alerts_per_day": 84114.53423933696,
+          "break_even_per_flow": 0.7716909786944615,
+          "break_even_with_review": 0.7716909786944615,
+          "break_even_all_alerts": 1.7716909786944615
+        },
+        {
+          "p": 0.2505358994548498,
+          "tpr": 0.47476978350547333,
+          "fpr": 0.04070839543198848,
+          "ppv": 0.795863609668467,
+          "ppv_ci95": [
+            0.7940882170341209,
+            0.7976224378546724
+          ],
+          "alerts_per_10k": 1494.563557115996,
+          "alerts_per_10k_ci95": [
+            1489.1163575187275,
+            1500.0709943075474
+          ],
+          "alerts_per_day": 149456.3557115996,
+          "break_even_per_flow": 0.256496701007061,
+          "break_even_with_review": 0.256496701007061,
+          "break_even_all_alerts": 1.2564967010070611
+        }
+      ],
+      "threshold_source": "models/metrics_rf_day_based_seed46.json"
+    }
+  },
+  "d9_break_even_1_21": {
+    "value": 1.2140400000000002,
+    "sd": 0.16960227887619905,
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "source": "docs/COST_SENSITIVE_RESULTS.json",
+    "prevalence_assumption": 0.2505358994548498,
+    "note": "Five-seed mean at the benchmark test prevalence. D9 charges a review for every alert, so its break-even is alerts/TP = 1 + FP/TP. It is not prevalence-free and not the same as the per-flow false-positive model."
+  },
+  "notes": [
+    "Bootstrap resamples held-out positive and negative scores separately and preserves class counts.",
+    "PPV and alert intervals are 2.5th-97.5th percentiles of 10,000 draws.",
+    "TPR/FPR Wilson intervals are a sanity check on the point estimate.",
+    "Costs are per flow; review cost is per alert; no blocking cost is modeled.",
+    "break_even_per_flow = FP/TP. break_even_all_alerts = alerts/TP = 1 + FP/TP, matching D9.",
+    "alerts/day uses an explicitly illustrative flow volume unless a site value is supplied.",
+    "Five-seed rows use each seed's own validation-selected threshold.",
+    "ppv_mean averages per-seed PPV; ppv_from_mean_rates plugs mean TPR and mean FPR into the formula. They differ because PPV is nonlinear.",
+    "1.21 in D9 is a five-seed mean at the benchmark prevalence, not a prevalence-free constant."
+  ]
+}

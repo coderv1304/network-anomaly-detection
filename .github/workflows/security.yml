@@ -1,0 +1,81 @@
+name: security-and-tests
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: python -m pytest tests -q
+      - name: Secret scan
+        run: python scripts/secret_scan.py
+      - name: Model artifact and registry gate
+        run: python scripts/deployment_check.py
+      - name: Audit runtime requirements
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements-runtime.txt --strict
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build serving image
+        run: docker build -f Dockerfile -t netshield:ci .
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: netshield:ci
+          format: json
+          output: trivy_image.json
+          scanners: vuln,secret,misconfig
+          ignore-unfixed: false
+      - name: Enforce the actionable-findings gate
+        run: python scripts/security_gate.py --report trivy_image.json --json security_gate.json
+      - name: Upload scan evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-scan
+          path: |
+            trivy_image.json
+            security_gate.json
+
+  release-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      # This is a release gate, not a pull-request gate. Until the external
+      # review and a real pilot exist, a non-zero exit is the expected and
+      # correct result. The step records the verdict without pretending it
+      # passed and without blocking unrelated pull requests.
+      - name: Record S8 release-gate verdict (expected FAIL or BLOCKED)
+        continue-on-error: true
+        run: python scripts/release_gate.py --json s8_release_gate.json
+      - name: Upload release-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s8-release-gate
+          path: s8_release_gate.json

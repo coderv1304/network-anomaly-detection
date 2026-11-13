@@ -1,0 +1,2424 @@
+{
+  "protocol": "docs/D6_EXPERIMENT_PROTOCOL.md",
+  "generated_at_utc": "2026-11-10T02:31:15Z",
+  "feature_schema": "cic-ids-2017-80f-45cd75ce849b",
+  "seeds": [
+    42
+  ],
+  "training_sample": {
+    "rows": 213776,
+    "attacks": 13835,
+    "benign": 199941,
+    "benign_source_sample_seed": 42,
+    "attack_families": [
+      "FTP-Patator",
+      "SSH-Patator"
+    ],
+    "declared_deviation": "all training attacks plus 200k benign rows; see protocol"
+  },
+  "validation_partition": "Wednesday",
+  "test_partition": "Thursday + Friday",
+  "arms": {
+    "R_full_data_rf_reference": {
+      "description": "Frozen full-data Random Forest predictions from models/eval_cache; no retraining.",
+      "seeds": {
+        "42": {
+          "threshold": 0.0025150489527732134,
+          "fpr": 0.007254347671329137,
+          "recall": 0.5794276960489663,
+          "precision": 0.9638996183118872,
+          "alert_rate": 0.15060431215121356,
+          "alerts": 175012,
+          "true_positives": 168694,
+          "false_positives": 6318,
+          "false_negatives": 122445,
+          "true_negatives": 864608,
+          "fp_per_10k_benign": 72.54347671329137,
+          "recall_wilson_95": [
+            0.5776334714735861,
+            0.5812198245437047
+          ],
+          "pr_auc": 0.6637044128216193,
+          "roc_auc": 0.7816325744476468,
+          "calibration": {
+            "brier": 0.17555123421037316,
+            "ece_10_bins": 0.2630514534366357
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 22,
+              "recall": 0.011190233977619531,
+              "recall_wilson_95": [
+                0.0074013825645298,
+                0.01688564640267243
+              ],
+              "average_precision": 0.0016753294695461707,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 81380,
+              "recall": 0.635647168175463,
+              "recall_wilson_95": [
+                0.6330069583444812,
+                0.6382792377465706
+              ],
+              "average_precision": 0.4308899388036535,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 20,
+              "recall": 0.5555555555555556,
+              "recall_wilson_95": [
+                0.3958078731600341,
+                0.7045897012345685
+              ],
+              "average_precision": 0.00019356862639928794,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 85286,
+              "recall": 0.5366261876297741,
+              "recall_wilson_95": [
+                0.5341737025004428,
+                0.5390769021712812
+              ],
+              "average_precision": 0.293084546197908,
+              "seen_in_training": false
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "detected": 1367,
+              "recall": 0.907100199071002,
+              "recall_wilson_95": [
+                0.891390519812123,
+                0.9207396201045963
+              ],
+              "average_precision": 0.27504788600995045,
+              "seen_in_training": false
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "detected": 9,
+              "recall": 0.42857142857142855,
+              "recall_wilson_95": [
+                0.24469699486521046,
+                0.6345378370296754
+              ],
+              "average_precision": 0.00010489551639471153,
+              "seen_in_training": false
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "detected": 610,
+              "recall": 0.9355828220858896,
+              "recall_wilson_95": [
+                0.9140701664072414,
+                0.951992614605735
+              ],
+              "average_precision": 0.1287651922037041,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 0.0025150489527732134,
+            "fpr": 0.0052225492312762065,
+            "recall": 0.0458699257136751,
+            "pr_auc": 0.38896326519083,
+            "calibration": {
+              "brier": 0.22916925008686564,
+              "ece_10_bins": 0.011399184338026988
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 0.0025150489527732134,
+              "fpr": 0.01056045763443121,
+              "recall": 0.9052346570397112,
+              "precision": 0.29379027533684826,
+              "alert_rate": 0.014881490764452677,
+              "alerts": 6828,
+              "true_positives": 2006,
+              "false_positives": 4822,
+              "false_negatives": 210,
+              "true_negatives": 451787,
+              "fp_per_10k_benign": 105.6045763443121,
+              "recall_wilson_95": [
+                0.8923289074422038,
+                0.9167378295718245
+              ],
+              "pr_auc": 0.703598016734742,
+              "roc_auc": 0.9528344288483618,
+              "calibration": {
+                "brier": 0.13175715863091883,
+                "ece_10_bins": 0.36013098871375565
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 20,
+                  "recall": 0.5555555555555556,
+                  "recall_wilson_95": [
+                    0.3958078731600341,
+                    0.7045897012345685
+                  ],
+                  "average_precision": 0.0017838538277194413,
+                  "seen_in_training": false
+                },
+                "Web Attack - Brute Force": {
+                  "support": 1507,
+                  "detected": 1367,
+                  "recall": 0.907100199071002,
+                  "recall_wilson_95": [
+                    0.891390519812123,
+                    0.9207396201045963
+                  ],
+                  "average_precision": 0.4874181235161431,
+                  "seen_in_training": false
+                },
+                "Web Attack - Sql Injection": {
+                  "support": 21,
+                  "detected": 9,
+                  "recall": 0.42857142857142855,
+                  "recall_wilson_95": [
+                    0.24469699486521046,
+                    0.6345378370296754
+                  ],
+                  "average_precision": 0.000604193165969473,
+                  "seen_in_training": false
+                },
+                "Web Attack - XSS": {
+                  "support": 652,
+                  "detected": 610,
+                  "recall": 0.9355828220858896,
+                  "recall_wilson_95": [
+                    0.9140701664072414,
+                    0.951992614605735
+                  ],
+                  "average_precision": 0.22764748464275825,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 0.0025150489527732134,
+              "fpr": 0.0036107618079876036,
+              "recall": 0.5769288010992548,
+              "precision": 0.9911049802597155,
+              "alert_rate": 0.23915590694499744,
+              "alerts": 168184,
+              "true_positives": 166688,
+              "false_positives": 1496,
+              "false_negatives": 122235,
+              "true_negatives": 412821,
+              "fp_per_10k_benign": 36.10761807987603,
+              "recall_wilson_95": [
+                0.5751262957906587,
+                0.5787292607018815
+              ],
+              "pr_auc": 0.7476098599755151,
+              "roc_auc": 0.7823881453700797,
+              "calibration": {
+                "brier": 0.20412443358433244,
+                "ece_10_bins": 0.2060626883477392
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 22,
+                  "recall": 0.011190233977619531,
+                  "recall_wilson_95": [
+                    0.0074013825645298,
+                    0.01688564640267243
+                  ],
+                  "average_precision": 0.002767031931136888,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 81380,
+                  "recall": 0.635647168175463,
+                  "recall_wilson_95": [
+                    0.6330069583444812,
+                    0.6382792377465706
+                  ],
+                  "average_precision": 0.49281020695774846,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 85286,
+                  "recall": 0.5366261876297741,
+                  "recall_wilson_95": [
+                    0.5341737025004428,
+                    0.5390769021712812
+                  ],
+                  "average_precision": 0.3483639369201445,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1162065,
+            "total_attacks": 291139,
+            "total_benign": 870926,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 5810,
+                "alerts_generated": 5810,
+                "alert_rate": 0.004999720325455117,
+                "effective_threshold": 0.05000000074505806,
+                "true_positives": 5198,
+                "false_positives": 612,
+                "precision": 0.8946643717728056,
+                "recall": 0.017854014748968704,
+                "fp_per_10k_benign": 7.0270034423131245,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.010810219719277965,
+                  "Infiltration": 0.027777777777777776,
+                  "PortScan": 0.012571572390360537,
+                  "Web Attack - Brute Force": 0.8334439283344393,
+                  "Web Attack - Sql Injection": 0.09523809523809523,
+                  "Web Attack - XSS": 0.8542944785276073
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 11621,
+                "alerts_generated": 11621,
+                "alert_rate": 0.010000301187971412,
+                "effective_threshold": 0.03999999910593033,
+                "true_positives": 10689,
+                "false_positives": 932,
+                "precision": 0.9198003614146804,
+                "recall": 0.036714421633652655,
+                "fp_per_10k_benign": 10.701253608228482,
+                "per_family_recall": {
+                  "Bot": 0.000508646998982706,
+                  "DDoS": 0.052481117264327054,
+                  "Infiltration": 0.16666666666666666,
+                  "PortScan": 0.013081230730510287,
+                  "Web Attack - Brute Force": 0.8613138686131386,
+                  "Web Attack - Sql Injection": 0.19047619047619047,
+                  "Web Attack - XSS": 0.8926380368098159
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.007254347671329137,
+          "std": 0.0,
+          "values": [
+            0.007254347671329137
+          ]
+        },
+        "recall": {
+          "mean": 0.5794276960489663,
+          "std": 0.0,
+          "values": [
+            0.5794276960489663
+          ]
+        },
+        "precision": {
+          "mean": 0.9638996183118872,
+          "std": 0.0,
+          "values": [
+            0.9638996183118872
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.15060431215121356,
+          "std": 0.0,
+          "values": [
+            0.15060431215121356
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.6637044128216193,
+          "std": 0.0,
+          "values": [
+            0.6637044128216193
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.7816325744476468,
+          "std": 0.0,
+          "values": [
+            0.7816325744476468
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 72.54347671329137,
+          "std": 0.0,
+          "values": [
+            72.54347671329137
+          ]
+        },
+        "brier": {
+          "mean": 0.17555123421037316,
+          "std": 0.0,
+          "values": [
+            0.17555123421037316
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.2630514534366357,
+          "std": 0.0,
+          "values": [
+            0.2630514534366357
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.011190233977619531,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.011190233977619531
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.635647168175463,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.635647168175463
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.5555555555555556,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.5555555555555556
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.5366261876297741,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.5366261876297741
+            ]
+          },
+          "Web Attack - Brute Force": {
+            "support": 1507,
+            "recall_mean": 0.907100199071002,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.907100199071002
+            ]
+          },
+          "Web Attack - Sql Injection": {
+            "support": 21,
+            "recall_mean": 0.42857142857142855,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.42857142857142855
+            ]
+          },
+          "Web Attack - XSS": {
+            "support": 652,
+            "recall_mean": 0.9355828220858896,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.9355828220858896
+            ]
+          }
+        }
+      }
+    },
+    "A_class_weighting": {
+      "description": "Binary Random Forest with balanced_subsample class weights on the fixed sample.",
+      "seeds": {
+        "42": {
+          "threshold": 0.009999999776482582,
+          "fpr": 0.01939559670016554,
+          "recall": 0.2171090193724439,
+          "precision": 0.88165618301789,
+          "alert_rate": 0.09840124343903255,
+          "alerts": 142762,
+          "true_positives": 125867,
+          "false_positives": 16895,
+          "false_negatives": 453874,
+          "true_negatives": 854179,
+          "fp_per_10k_benign": 193.9559670016554,
+          "recall_wilson_95": [
+            0.21604961904243628,
+            0.21817216877933224
+          ],
+          "pr_auc": 0.5017646773347096,
+          "roc_auc": 0.5978009557538695,
+          "calibration": {
+            "brier": 0.2234628236027589,
+            "ece_10_bins": 0.033234106557139174
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 7,
+              "recall": 0.003560528992878942,
+              "recall_wilson_95": [
+                0.0017257653707808051,
+                0.0073316126437763035
+              ],
+              "average_precision": 0.0013504501169780117,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 80850,
+              "recall": 0.6315074164043523,
+              "recall_wilson_95": [
+                0.6288610443372563,
+                0.6341458966403152
+              ],
+              "average_precision": 0.37276783624525167,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 14,
+              "recall": 0.3888888888888889,
+              "recall_wilson_95": [
+                0.24784655417822943,
+                0.5513582970325652
+              ],
+              "average_precision": 8.830931629457874e-05,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 43010,
+              "recall": 0.2706222865412446,
+              "recall_wilson_95": [
+                0.26844355589995855,
+                0.2728121057891502
+              ],
+              "average_precision": 0.16761192908950046,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 0.009999999776482582,
+            "fpr": 0.009999295504180387,
+            "recall": 0.10058099037487335,
+            "pr_auc": 0.4133267489028398,
+            "calibration": {
+              "brier": 0.22529377073387846,
+              "ece_10_bins": 0.02207953565781675
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 0.009999999776482582,
+              "fpr": 0.02593967842505342,
+              "recall": 0.006877153408661087,
+              "precision": 0.14442518775274407,
+              "alert_rate": 0.018524017817729443,
+              "alerts": 13848,
+              "true_positives": 2000,
+              "false_positives": 11848,
+              "false_negatives": 288818,
+              "true_negatives": 444904,
+              "fp_per_10k_benign": 259.3967842505342,
+              "recall_wilson_95": [
+                0.006583232309491022,
+                0.007184102282616177
+              ],
+              "pr_auc": 0.3913577155567993,
+              "roc_auc": 0.4895332875535254,
+              "calibration": {
+                "brier": 0.24399174203786225,
+                "ece_10_bins": 0.053159140910017236
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 14,
+                  "recall": 0.3888888888888889,
+                  "recall_wilson_95": [
+                    0.24784655417822943,
+                    0.5513582970325652
+                  ],
+                  "average_precision": 0.0004399720924615255,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 0.009999999776482582,
+              "fpr": 0.012181346875135763,
+              "recall": 0.42871976270494216,
+              "precision": 0.9608498689048512,
+              "alert_rate": 0.1833130701249209,
+              "alerts": 128914,
+              "true_positives": 123867,
+              "false_positives": 5047,
+              "false_negatives": 165056,
+              "true_negatives": 409275,
+              "fp_per_10k_benign": 121.81346875135763,
+              "recall_wilson_95": [
+                0.42691614126403493,
+                0.4305252796440873
+              ],
+              "pr_auc": 0.6450813416469771,
+              "roc_auc": 0.7073699000722372,
+              "calibration": {
+                "brier": 0.20163998297889357,
+                "ece_10_bins": 0.11654364807183873
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 7,
+                  "recall": 0.003560528992878942,
+                  "recall_wilson_95": [
+                    0.0017257653707808051,
+                    0.0073316126437763035
+                  ],
+                  "average_precision": 0.0027858512502728187,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 80850,
+                  "recall": 0.6315074164043523,
+                  "recall_wilson_95": [
+                    0.6288610443372563,
+                    0.6341458966403152
+                  ],
+                  "average_precision": 0.4517065345082413,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 43010,
+                  "recall": 0.2706222865412446,
+                  "recall_wilson_95": [
+                    0.26844355589995855,
+                    0.2728121057891502
+                  ],
+                  "average_precision": 0.2682892729807477,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 0.029999999329447746,
+                "true_positives": 5390,
+                "false_positives": 1864,
+                "precision": 0.743038323683485,
+                "recall": 0.00929725515359445,
+                "fp_per_10k_benign": 21.398870819241534,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.005936247822724894,
+                  "Infiltration": 0.027777777777777776,
+                  "PortScan": 0.017101868747247215,
+                  "Web Attack \u2013 Brute Force": 0.8712674187126742,
+                  "Web Attack \u2013 Sql Injection": 0.23809523809523808,
+                  "Web Attack \u2013 XSS": 0.9095092024539877,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 0.019999999552965164,
+                "true_positives": 9970,
+                "false_positives": 4538,
+                "precision": 0.6872070581748001,
+                "recall": 0.01719733467186209,
+                "fp_per_10k_benign": 52.09660717688738,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.02760355237567076,
+                  "Infiltration": 0.08333333333333333,
+                  "PortScan": 0.0282388472912603,
+                  "Web Attack \u2013 Brute Force": 0.8812209688122097,
+                  "Web Attack \u2013 Sql Injection": 0.23809523809523808,
+                  "Web Attack \u2013 XSS": 0.9386503067484663,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.01939559670016554,
+          "std": 0.0,
+          "values": [
+            0.01939559670016554
+          ]
+        },
+        "recall": {
+          "mean": 0.2171090193724439,
+          "std": 0.0,
+          "values": [
+            0.2171090193724439
+          ]
+        },
+        "precision": {
+          "mean": 0.88165618301789,
+          "std": 0.0,
+          "values": [
+            0.88165618301789
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.09840124343903255,
+          "std": 0.0,
+          "values": [
+            0.09840124343903255
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.5017646773347096,
+          "std": 0.0,
+          "values": [
+            0.5017646773347096
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.5978009557538695,
+          "std": 0.0,
+          "values": [
+            0.5978009557538695
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 193.9559670016554,
+          "std": 0.0,
+          "values": [
+            193.9559670016554
+          ]
+        },
+        "brier": {
+          "mean": 0.2234628236027589,
+          "std": 0.0,
+          "values": [
+            0.2234628236027589
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.033234106557139174,
+          "std": 0.0,
+          "values": [
+            0.033234106557139174
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.003560528992878942,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.003560528992878942
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.6315074164043523,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.6315074164043523
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.3888888888888889,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.3888888888888889
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.2706222865412446,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.2706222865412446
+            ]
+          }
+        }
+      }
+    },
+    "B_family_aware_augmentation": {
+      "description": "Balanced RF with within-known-family interpolation augmentation.",
+      "seeds": {
+        "42": {
+          "threshold": 0.019999999552965164,
+          "fpr": 0.09786883777956867,
+          "recall": 0.7640722322554382,
+          "precision": 0.8386054920818228,
+          "alert_rate": 0.36408156794629226,
+          "alerts": 528215,
+          "true_positives": 442964,
+          "false_positives": 85251,
+          "false_negatives": 136777,
+          "true_negatives": 785823,
+          "fp_per_10k_benign": 978.6883777956867,
+          "recall_wilson_95": [
+            0.7629775459441002,
+            0.7651634188896264
+          ],
+          "pr_auc": 0.7629263638391504,
+          "roc_auc": 0.86987554242447,
+          "calibration": {
+            "brier": 0.15297628599671484,
+            "ece_10_bins": 0.25110093403816863
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 43,
+              "recall": 0.02187182095625636,
+              "recall_wilson_95": [
+                0.01627808299981128,
+                0.029330457301094133
+              ],
+              "average_precision": 0.0011997140935437007,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 2201,
+              "recall": 0.017191686128707227,
+              "recall_wilson_95": [
+                0.016494005192808345,
+                0.017918340652460243
+              ],
+              "average_precision": 0.09951235582206748,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 12,
+              "recall": 0.3333333333333333,
+              "recall_wilson_95": [
+                0.20214424774586046,
+                0.49666302907033155
+              ],
+              "average_precision": 4.279034348405568e-05,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 150129,
+              "recall": 0.9446234191153338,
+              "recall_wilson_95": [
+                0.9434881703361322,
+                0.9457371738526161
+              ],
+              "average_precision": 0.47694431995505654,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 0.019999999552965164,
+            "fpr": 0.005954125959307412,
+            "recall": 0.26066600177304966,
+            "pr_auc": 0.5577365805183278,
+            "calibration": {
+              "brier": 0.193459798111269,
+              "ece_10_bins": 0.03289878242612033
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 0.019999999552965164,
+              "fpr": 0.14437813080183556,
+              "recall": 0.9992194430881169,
+              "precision": 0.8150397154845513,
+              "alert_rate": 0.47692657543775163,
+              "alerts": 356536,
+              "true_positives": 290591,
+              "false_positives": 65945,
+              "false_negatives": 227,
+              "true_negatives": 390807,
+              "fp_per_10k_benign": 1443.7813080183557,
+              "recall_wilson_95": [
+                0.9991111325190457,
+                0.9993145648168865
+              ],
+              "pr_auc": 0.8114026364343023,
+              "roc_auc": 0.8718786535954034,
+              "calibration": {
+                "brier": 0.1568321645987651,
+                "ece_10_bins": 0.3256251252260949
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 12,
+                  "recall": 0.3333333333333333,
+                  "recall_wilson_95": [
+                    0.20214424774586046,
+                    0.49666302907033155
+                  ],
+                  "average_precision": 0.00010277278351397603,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 0.019999999552965164,
+              "fpr": 0.04659660843498535,
+              "recall": 0.527382728270162,
+              "precision": 0.8875459433011609,
+              "alert_rate": 0.24412402505527944,
+              "alerts": 171679,
+              "true_positives": 152373,
+              "false_positives": 19306,
+              "false_negatives": 136550,
+              "true_negatives": 395016,
+              "fp_per_10k_benign": 465.96608434985353,
+              "recall_wilson_95": [
+                0.5255619094690068,
+                0.5292028189043642
+              ],
+              "pr_auc": 0.8146255063210178,
+              "roc_auc": 0.8605659960235744,
+              "calibration": {
+                "brier": 0.148877374285242,
+                "ece_10_bins": 0.17789123043125177
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 43,
+                  "recall": 0.02187182095625636,
+                  "recall_wilson_95": [
+                    0.01627808299981128,
+                    0.029330457301094133
+                  ],
+                  "average_precision": 0.0025380842961397875,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 2201,
+                  "recall": 0.017191686128707227,
+                  "recall_wilson_95": [
+                    0.016494005192808345,
+                    0.017918340652460243
+                  ],
+                  "average_precision": 0.2243505782742843,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 150129,
+                  "recall": 0.9446234191153338,
+                  "recall_wilson_95": [
+                    0.9434881703361322,
+                    0.9457371738526161
+                  ],
+                  "average_precision": 0.91900999676884,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 0.11998748779296875,
+                "true_positives": 5141,
+                "false_positives": 2113,
+                "precision": 0.7087124345188861,
+                "recall": 0.008867753013845838,
+                "fp_per_10k_benign": 24.257410966232488,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.0001327844907714779,
+                  "Infiltration": 0.027777777777777776,
+                  "PortScan": 0.02437551123135972,
+                  "Web Attack \u2013 Brute Force": 0.5607166556071665,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.6196319018404908,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 0.07999999821186066,
+                "true_positives": 10159,
+                "false_positives": 4349,
+                "precision": 0.7002343534601599,
+                "recall": 0.017523342320105013,
+                "fp_per_10k_benign": 49.92687188459305,
+                "per_family_recall": {
+                  "Bot": 0.000508646998982706,
+                  "DDoS": 0.00014059534316980012,
+                  "Infiltration": 0.027777777777777776,
+                  "PortScan": 0.05282828918391745,
+                  "Web Attack \u2013 Brute Force": 0.7538155275381553,
+                  "Web Attack \u2013 Sql Injection": 0.2857142857142857,
+                  "Web Attack \u2013 XSS": 0.9217791411042945,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.09786883777956867,
+          "std": 0.0,
+          "values": [
+            0.09786883777956867
+          ]
+        },
+        "recall": {
+          "mean": 0.7640722322554382,
+          "std": 0.0,
+          "values": [
+            0.7640722322554382
+          ]
+        },
+        "precision": {
+          "mean": 0.8386054920818228,
+          "std": 0.0,
+          "values": [
+            0.8386054920818228
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.36408156794629226,
+          "std": 0.0,
+          "values": [
+            0.36408156794629226
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.7629263638391504,
+          "std": 0.0,
+          "values": [
+            0.7629263638391504
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.86987554242447,
+          "std": 0.0,
+          "values": [
+            0.86987554242447
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 978.6883777956867,
+          "std": 0.0,
+          "values": [
+            978.6883777956867
+          ]
+        },
+        "brier": {
+          "mean": 0.15297628599671484,
+          "std": 0.0,
+          "values": [
+            0.15297628599671484
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.25110093403816863,
+          "std": 0.0,
+          "values": [
+            0.25110093403816863
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.02187182095625636,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.02187182095625636
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.017191686128707227,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.017191686128707227
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.3333333333333333,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.3333333333333333
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.9446234191153338,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.9446234191153338
+            ]
+          }
+        }
+      }
+    },
+    "C1_isolation_forest": {
+      "description": "Benign-only Isolation Forest; primary open-set arm.",
+      "seeds": {
+        "42": {
+          "threshold": 0.6650689244270325,
+          "fpr": 0.011753306837306588,
+          "recall": 0.006982428360250525,
+          "precision": 0.2833543329133417,
+          "alert_rate": 0.009846879167915965,
+          "alerts": 14286,
+          "true_positives": 4048,
+          "false_positives": 10238,
+          "false_negatives": 575693,
+          "true_negatives": 860836,
+          "fp_per_10k_benign": 117.53306837306589,
+          "recall_wilson_95": [
+            0.006771322428758344,
+            0.00720006811892773
+          ],
+          "pr_auc": 0.39778420870072684,
+          "roc_auc": 0.4263617323625993,
+          "calibration": {
+            "brier": 0.31230102832182594,
+            "ece_10_bins": 0.29888417681064494
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 0,
+              "recall": 0.0,
+              "recall_wilson_95": [
+                0.0,
+                0.0019502075699893836
+              ],
+              "average_precision": 0.0018479612025364366,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 4041,
+              "recall": 0.03156365454162013,
+              "recall_wilson_95": [
+                0.0306199103494818,
+                0.032535509852020646
+              ],
+              "average_precision": 0.34672729815825154,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 7,
+              "recall": 0.19444444444444445,
+              "recall_wilson_95": [
+                0.09752972019453349,
+                0.350283620635152
+              ],
+              "average_precision": 0.00040946434180555376,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 0,
+              "recall": 0.0,
+              "recall_wilson_95": [
+                0.0,
+                2.4171063640860234e-05
+              ],
+              "average_precision": 0.11880681995715224,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 0.6650689244270325,
+            "fpr": 0.009999295504180387,
+            "recall": 0.06403954533941236,
+            "pr_auc": 0.7617567886435032,
+            "calibration": {
+              "brier": 0.14213511827980624,
+              "ece_10_bins": 0.09628116275983943
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 0.6650689244270325,
+              "fpr": 0.0019069429362104599,
+              "recall": 2.4070036930313806e-05,
+              "precision": 0.007972665148063782,
+              "alert_rate": 0.0011744719558034699,
+              "alerts": 878,
+              "true_positives": 7,
+              "false_positives": 871,
+              "false_negatives": 290811,
+              "true_negatives": 455881,
+              "fp_per_10k_benign": 19.0694293621046,
+              "recall_wilson_95": [
+                1.1659643796274115e-05,
+                4.9689255935058856e-05
+              ],
+              "pr_auc": 0.43617224704685675,
+              "roc_auc": 0.19106496297811648,
+              "calibration": {
+                "brier": 0.3411524037562634,
+                "ece_10_bins": 0.34421941656078875
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 7,
+                  "recall": 0.19444444444444445,
+                  "recall_wilson_95": [
+                    0.09752972019453349,
+                    0.350283620635152
+                  ],
+                  "average_precision": 0.003905700912871883,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 0.6650689244270325,
+              "fpr": 0.022608019849295957,
+              "recall": 0.01398642544899506,
+              "precision": 0.30138723150357993,
+              "alert_rate": 0.019065901641675376,
+              "alerts": 13408,
+              "true_positives": 4041,
+              "false_positives": 9367,
+              "false_negatives": 284882,
+              "true_negatives": 404955,
+              "fp_per_10k_benign": 226.08019849295957,
+              "recall_wilson_95": [
+                0.013564628643556852,
+                0.01442114642400959
+              ],
+              "pr_auc": 0.4834700330810424,
+              "roc_auc": 0.6308835158478037,
+              "calibration": {
+                "brier": 0.28163117253398184,
+                "ece_10_bins": 0.2694195928987202
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 0,
+                  "recall": 0.0,
+                  "recall_wilson_95": [
+                    0.0,
+                    0.0019502075699893836
+                  ],
+                  "average_precision": 0.0028083628689872056,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 4041,
+                  "recall": 0.03156365454162013,
+                  "recall_wilson_95": [
+                    0.0306199103494818,
+                    0.032535509852020646
+                  ],
+                  "average_precision": 0.44707146947461146,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 0,
+                  "recall": 0.0,
+                  "recall_wilson_95": [
+                    0.0,
+                    2.4171063640860234e-05
+                  ],
+                  "average_precision": 0.18205813038491883,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 0.6899471282958984,
+                "true_positives": 234,
+                "false_positives": 7020,
+                "precision": 0.03225806451612903,
+                "recall": 0.0004036285168721895,
+                "fp_per_10k_benign": 80.59016799950406,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.0017886851992157905,
+                  "Infiltration": 0.1388888888888889,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 0.6638665795326233,
+                "true_positives": 4198,
+                "false_positives": 10310,
+                "precision": 0.2893575958092087,
+                "recall": 0.00724116458901475,
+                "fp_per_10k_benign": 118.35963419870184,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.032735282401368464,
+                  "Infiltration": 0.19444444444444445,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.011753306837306588,
+          "std": 0.0,
+          "values": [
+            0.011753306837306588
+          ]
+        },
+        "recall": {
+          "mean": 0.006982428360250525,
+          "std": 0.0,
+          "values": [
+            0.006982428360250525
+          ]
+        },
+        "precision": {
+          "mean": 0.2833543329133417,
+          "std": 0.0,
+          "values": [
+            0.2833543329133417
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.009846879167915965,
+          "std": 0.0,
+          "values": [
+            0.009846879167915965
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.39778420870072684,
+          "std": 0.0,
+          "values": [
+            0.39778420870072684
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.4263617323625993,
+          "std": 0.0,
+          "values": [
+            0.4263617323625993
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 117.53306837306589,
+          "std": 0.0,
+          "values": [
+            117.53306837306589
+          ]
+        },
+        "brier": {
+          "mean": 0.31230102832182594,
+          "std": 0.0,
+          "values": [
+            0.31230102832182594
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.29888417681064494,
+          "std": 0.0,
+          "values": [
+            0.29888417681064494
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.0,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.0
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.03156365454162013,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.03156365454162013
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.19444444444444445,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.19444444444444445
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.0,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.0
+            ]
+          }
+        }
+      }
+    },
+    "C2_pca_reconstruction": {
+      "description": "Benign-only PCA reconstruction error; sensitivity arm.",
+      "seeds": {
+        "42": {
+          "threshold": 1.274949550628662,
+          "fpr": 0.022696119962253493,
+          "recall": 0.11541015729437801,
+          "precision": 0.7719144419575902,
+          "alert_rate": 0.05974435058915162,
+          "alerts": 86678,
+          "true_positives": 66908,
+          "false_positives": 19770,
+          "false_negatives": 512833,
+          "true_negatives": 851304,
+          "fp_per_10k_benign": 226.96119962253493,
+          "recall_wilson_95": [
+            0.1145902117992044,
+            0.11623519965366741
+          ],
+          "pr_auc": 0.537303862668655,
+          "roc_auc": 0.6279257944648934,
+          "calibration": {
+            "brier": 0.2663075301631911,
+            "ece_10_bins": 0.20685591552061297
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 43,
+              "recall": 0.02187182095625636,
+              "recall_wilson_95": [
+                0.01627808299981128,
+                0.029330457301094133
+              ],
+              "average_precision": 0.0013217208779501824,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 66827,
+              "recall": 0.5219758332226796,
+              "recall_wilson_95": [
+                0.5192389670908156,
+                0.5247113805729148
+              ],
+              "average_precision": 0.5930451957167321,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 12,
+              "recall": 0.3333333333333333,
+              "recall_wilson_95": [
+                0.20214424774586046,
+                0.49666302907033155
+              ],
+              "average_precision": 0.11221781447910692,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 26,
+              "recall": 0.00016359403510979678,
+              "recall_wilson_95": [
+                0.00011164781044347558,
+                0.0002397034149333104
+              ],
+              "average_precision": 0.15523678994686657,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 1.274949550628662,
+            "fpr": 0.009999295504180387,
+            "recall": 0.5124786284194529,
+            "pr_auc": 0.8886141250762533,
+            "calibration": {
+              "brier": 0.11734818254793838,
+              "ece_10_bins": 0.08400121193036576
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 1.274949550628662,
+              "fpr": 0.004448803727186744,
+              "recall": 4.1262920451966524e-05,
+              "precision": 0.005870841487279843,
+              "alert_rate": 0.002734192115788488,
+              "alerts": 2044,
+              "true_positives": 12,
+              "false_positives": 2032,
+              "false_negatives": 290806,
+              "true_negatives": 454720,
+              "fp_per_10k_benign": 44.48803727186744,
+              "recall_wilson_95": [
+                2.3604918618208315e-05,
+                7.212929393895473e-05
+              ],
+              "pr_auc": 0.5398306828310068,
+              "roc_auc": 0.467579861800079,
+              "calibration": {
+                "brier": 0.2852791759062312,
+                "ece_10_bins": 0.249429793182317
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 12,
+                  "recall": 0.3333333333333333,
+                  "recall_wilson_95": [
+                    0.20214424774586046,
+                    0.49666302907033155
+                  ],
+                  "average_precision": 0.13973136968809635,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 1.274949550628662,
+              "fpr": 0.04281211231843832,
+              "recall": 0.23153573789556386,
+              "precision": 0.7904151995651866,
+              "alert_rate": 0.12034781619492496,
+              "alerts": 84634,
+              "true_positives": 66896,
+              "false_positives": 17738,
+              "false_negatives": 222027,
+              "true_negatives": 396584,
+              "fp_per_10k_benign": 428.1211231843832,
+              "recall_wilson_95": [
+                0.2300012089157878,
+                0.23307740593035875
+              ],
+              "pr_auc": 0.6415417611098172,
+              "roc_auc": 0.7667191707008312,
+              "calibration": {
+                "brier": 0.2461401159503286,
+                "ece_10_bins": 0.1715922616187323
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 43,
+                  "recall": 0.02187182095625636,
+                  "recall_wilson_95": [
+                    0.01627808299981128,
+                    0.029330457301094133
+                  ],
+                  "average_precision": 0.0022953117211059774,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 66827,
+                  "recall": 0.5219758332226796,
+                  "recall_wilson_95": [
+                    0.5192389670908156,
+                    0.5247113805729148
+                  ],
+                  "average_precision": 0.6410711039663133,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 26,
+                  "recall": 0.00016359403510979678,
+                  "recall_wilson_95": [
+                    0.00011164781044347558,
+                    0.0002397034149333104
+                  ],
+                  "average_precision": 0.22585157070680878,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 21.92350959777832,
+                "true_positives": 6557,
+                "false_positives": 697,
+                "precision": 0.9039150813344362,
+                "recall": 0.011310223013380112,
+                "fp_per_10k_benign": 8.001616395392354,
+                "per_family_recall": {
+                  "Bot": 0.002034587995930824,
+                  "DDoS": 0.05111421809462067,
+                  "Infiltration": 0.25,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 17.250171661376953,
+                "true_positives": 13210,
+                "false_positives": 1298,
+                "precision": 0.9105321202095396,
+                "recall": 0.022786037213169328,
+                "fp_per_10k_benign": 14.901145023270123,
+                "per_family_recall": {
+                  "Bot": 0.004069175991861648,
+                  "DDoS": 0.10304076483866684,
+                  "Infiltration": 0.2777777777777778,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.022696119962253493,
+          "std": 0.0,
+          "values": [
+            0.022696119962253493
+          ]
+        },
+        "recall": {
+          "mean": 0.11541015729437801,
+          "std": 0.0,
+          "values": [
+            0.11541015729437801
+          ]
+        },
+        "precision": {
+          "mean": 0.7719144419575902,
+          "std": 0.0,
+          "values": [
+            0.7719144419575902
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.05974435058915162,
+          "std": 0.0,
+          "values": [
+            0.05974435058915162
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.537303862668655,
+          "std": 0.0,
+          "values": [
+            0.537303862668655
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.6279257944648934,
+          "std": 0.0,
+          "values": [
+            0.6279257944648934
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 226.96119962253493,
+          "std": 0.0,
+          "values": [
+            226.96119962253493
+          ]
+        },
+        "brier": {
+          "mean": 0.2663075301631911,
+          "std": 0.0,
+          "values": [
+            0.2663075301631911
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.20685591552061297,
+          "std": 0.0,
+          "values": [
+            0.20685591552061297
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.02187182095625636,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.02187182095625636
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.5219758332226796,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.5219758332226796
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.3333333333333333,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.3333333333333333
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.00016359403510979678,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.00016359403510979678
+            ]
+          }
+        }
+      }
+    },
+    "C3_mahalanobis": {
+      "description": "Benign-only regularised Mahalanobis distance; sensitivity arm.",
+      "seeds": {
+        "42": {
+          "threshold": 31.98024559020996,
+          "fpr": 0.02434925161352537,
+          "recall": 0.12605284083754642,
+          "precision": 0.7750509078567792,
+          "alert_rate": 0.06498967821534793,
+          "alerts": 94288,
+          "true_positives": 73078,
+          "false_positives": 21210,
+          "false_negatives": 506663,
+          "true_negatives": 849864,
+          "fp_per_10k_benign": 243.4925161352537,
+          "recall_wilson_95": [
+            0.12520092441721437,
+            0.12690971307741683
+          ],
+          "pr_auc": 0.8008871489596773,
+          "roc_auc": 0.8589527376297919,
+          "calibration": {
+            "brier": 0.1689442096457989,
+            "ece_10_bins": 0.15831878535511065
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 44,
+              "recall": 0.022380467955239063,
+              "recall_wilson_95": [
+                0.016713642057134645,
+                0.029910208307280438
+              ],
+              "average_precision": 0.0010619930208374242,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 72968,
+              "recall": 0.5699422778007764,
+              "recall_wilson_95": [
+                0.5672282539226897,
+                0.5726521044049714
+              ],
+              "average_precision": 0.5726734644246835,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 14,
+              "recall": 0.3888888888888889,
+              "recall_wilson_95": [
+                0.24784655417822943,
+                0.5513582970325652
+              ],
+              "average_precision": 0.07218906023250214,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 52,
+              "recall": 0.00032718807021959355,
+              "recall_wilson_95": [
+                0.0002495340653990383,
+                0.0004289973217136735
+              ],
+              "average_precision": 0.10350866380248254,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 31.98024559020996,
+            "fpr": 0.009999295504180387,
+            "recall": 0.4873591058763931,
+            "pr_auc": 0.8501219757249389,
+            "calibration": {
+              "brier": 0.11452849331392279,
+              "ece_10_bins": 0.023755745753279767
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 31.98024559020996,
+              "fpr": 0.005070585350474656,
+              "recall": 4.814007386062761e-05,
+              "precision": 0.006008583690987125,
+              "alert_rate": 0.0031167649852187757,
+              "alerts": 2330,
+              "true_positives": 14,
+              "false_positives": 2316,
+              "false_negatives": 290804,
+              "true_negatives": 454436,
+              "fp_per_10k_benign": 50.705853504746564,
+              "recall_wilson_95": [
+                2.867717968937847e-05,
+                8.081115799811661e-05
+              ],
+              "pr_auc": 0.969993033104981,
+              "roc_auc": 0.9795646559261475,
+              "calibration": {
+                "brier": 0.09274756697093968,
+                "ece_10_bins": 0.2568256924621938
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 14,
+                  "recall": 0.3888888888888889,
+                  "recall_wilson_95": [
+                    0.24784655417822943,
+                    0.5513582970325652
+                  ],
+                  "average_precision": 0.11813073882652195,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 31.98024559020996,
+              "fpr": 0.045602212771708964,
+              "recall": 0.2528839863908377,
+              "precision": 0.7945366362904804,
+              "alert_rate": 0.1307623943291456,
+              "alerts": 91958,
+              "true_positives": 73064,
+              "false_positives": 18894,
+              "false_negatives": 215859,
+              "true_negatives": 395428,
+              "fp_per_10k_benign": 456.02212771708963,
+              "recall_wilson_95": [
+                0.2513023141127607,
+                0.2544722300270662
+              ],
+              "pr_auc": 0.6513322792479803,
+              "roc_auc": 0.7628731729473325,
+              "calibration": {
+                "brier": 0.24994346902829642,
+                "ece_10_bins": 0.20943418173568668
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 44,
+                  "recall": 0.022380467955239063,
+                  "recall_wilson_95": [
+                    0.016713642057134645,
+                    0.029910208307280438
+                  ],
+                  "average_precision": 0.0023066282153025803,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 72968,
+                  "recall": 0.5699422778007764,
+                  "recall_wilson_95": [
+                    0.5672282539226897,
+                    0.5726521044049714
+                  ],
+                  "average_precision": 0.6359242804865034,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 52,
+                  "recall": 0.00032718807021959355,
+                  "recall_wilson_95": [
+                    0.0002495340653990383,
+                    0.0004289973217136735
+                  ],
+                  "average_precision": 0.25070238724648924,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 144.26473999023438,
+                "true_positives": 6583,
+                "false_positives": 671,
+                "precision": 0.9074993107251171,
+                "recall": 0.011355070626365912,
+                "fp_per_10k_benign": 7.703134291690488,
+                "per_family_recall": {
+                  "Bot": 0.002034587995930824,
+                  "DDoS": 0.05132511110937537,
+                  "Infiltration": 0.2222222222222222,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 119.1825942993164,
+                "true_positives": 13155,
+                "false_positives": 1353,
+                "precision": 0.9067411083540116,
+                "recall": 0.022691167262622446,
+                "fp_per_10k_benign": 15.53254947340869,
+                "per_family_recall": {
+                  "Bot": 0.00508646998982706,
+                  "DDoS": 0.10261116795675912,
+                  "Infiltration": 0.2222222222222222,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.0,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          }
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.02434925161352537,
+          "std": 0.0,
+          "values": [
+            0.02434925161352537
+          ]
+        },
+        "recall": {
+          "mean": 0.12605284083754642,
+          "std": 0.0,
+          "values": [
+            0.12605284083754642
+          ]
+        },
+        "precision": {
+          "mean": 0.7750509078567792,
+          "std": 0.0,
+          "values": [
+            0.7750509078567792
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.06498967821534793,
+          "std": 0.0,
+          "values": [
+            0.06498967821534793
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.8008871489596773,
+          "std": 0.0,
+          "values": [
+            0.8008871489596773
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.8589527376297919,
+          "std": 0.0,
+          "values": [
+            0.8589527376297919
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 243.4925161352537,
+          "std": 0.0,
+          "values": [
+            243.4925161352537
+          ]
+        },
+        "brier": {
+          "mean": 0.1689442096457989,
+          "std": 0.0,
+          "values": [
+            0.1689442096457989
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.15831878535511065,
+          "std": 0.0,
+          "values": [
+            0.15831878535511065
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.022380467955239063,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.022380467955239063
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.5699422778007764,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.5699422778007764
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.3888888888888889,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.3888888888888889
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.00032718807021959355,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.00032718807021959355
+            ]
+          }
+        }
+      }
+    },
+    "D_hybrid_supervised_anomaly": {
+      "description": "Validation-selected blend of arm A and C1 scores.",
+      "seeds": {
+        "42": {
+          "threshold": 0.7318638563156128,
+          "fpr": 0.015952720434773623,
+          "recall": 0.13647128631578584,
+          "precision": 0.8506031350119337,
+          "alert_rate": 0.06411155109369561,
+          "alerts": 93014,
+          "true_positives": 79118,
+          "false_positives": 13896,
+          "false_negatives": 500623,
+          "true_negatives": 857178,
+          "fp_per_10k_benign": 159.52720434773624,
+          "recall_wilson_95": [
+            0.13559000858317743,
+            0.13735738179512097
+          ],
+          "pr_auc": 0.5124812986871963,
+          "roc_auc": 0.4632105881078293,
+          "calibration": {
+            "brier": 0.31381091420216795,
+            "ece_10_bins": 0.3064185466464907
+          },
+          "per_family": {
+            "Bot": {
+              "support": 1966,
+              "detected": 3,
+              "recall": 0.001525940996948118,
+              "recall_wilson_95": [
+                0.0005190809432736448,
+                0.004477056817244763
+              ],
+              "average_precision": 0.0017204427304331905,
+              "seen_in_training": false
+            },
+            "DDoS": {
+              "support": 128027,
+              "detected": 78364,
+              "recall": 0.6120896373421232,
+              "recall_wilson_95": [
+                0.6094171281221611,
+                0.6147554200023685
+              ],
+              "average_precision": 0.7029096950694479,
+              "seen_in_training": false
+            },
+            "Infiltration": {
+              "support": 36,
+              "detected": 15,
+              "recall": 0.4166666666666667,
+              "recall_wilson_95": [
+                0.27140333505087283,
+                0.5780003033572232
+              ],
+              "average_precision": 0.08667005904997517,
+              "seen_in_training": false
+            },
+            "PortScan": {
+              "support": 158930,
+              "detected": 720,
+              "recall": 0.0045302963568866796,
+              "recall_wilson_95": [
+                0.00421189467859816,
+                0.0048726500946529505
+              ],
+              "average_precision": 0.14285688932626797,
+              "seen_in_training": false
+            }
+          },
+          "validation": {
+            "threshold": 0.7318638563156128,
+            "fpr": 0.009999295504180387,
+            "recall": 0.04083159194528875,
+            "pr_auc": 0.7988676952641645,
+            "calibration": {
+              "brier": 0.1353009316008423,
+              "ece_10_bins": 0.08039098502871184
+            }
+          },
+          "per_day": {
+            "Thursday": {
+              "threshold": 0.7318638563156128,
+              "fpr": 0.005120940904473324,
+              "recall": 0.00010659587783424685,
+              "precision": 0.013080168776371307,
+              "alert_rate": 0.0031702716802439906,
+              "alerts": 2370,
+              "true_positives": 31,
+              "false_positives": 2339,
+              "false_negatives": 290787,
+              "true_negatives": 454413,
+              "fp_per_10k_benign": 51.20940904473324,
+              "recall_wilson_95": [
+                7.51002774224834e-05,
+                0.0001512981238728339
+              ],
+              "pr_auc": 0.4368253241175879,
+              "roc_auc": 0.193773317023172,
+              "calibration": {
+                "brier": 0.37965046255731677,
+                "ece_10_bins": 0.4443399373090087
+              },
+              "per_family": {
+                "Infiltration": {
+                  "support": 36,
+                  "detected": 15,
+                  "recall": 0.4166666666666667,
+                  "recall_wilson_95": [
+                    0.27140333505087283,
+                    0.5780003033572232
+                  ],
+                  "average_precision": 0.1564730816925565,
+                  "seen_in_training": false
+                }
+              }
+            },
+            "Friday": {
+              "threshold": 0.7318638563156128,
+              "fpr": 0.027893763787585502,
+              "recall": 0.2737303710677239,
+              "precision": 0.8725012135386788,
+              "alert_rate": 0.1288939132165888,
+              "alerts": 90644,
+              "true_positives": 79087,
+              "false_positives": 11557,
+              "false_negatives": 209836,
+              "true_negatives": 402765,
+              "fp_per_10k_benign": 278.93763787585505,
+              "recall_wilson_95": [
+                0.27210755641599416,
+                0.27535920272640035
+              ],
+              "pr_auc": 0.6790421372241315,
+              "roc_auc": 0.7122396283937968,
+              "calibration": {
+                "brier": 0.243821548954127,
+                "ece_10_bins": 0.21858282227659293
+              },
+              "per_family": {
+                "Bot": {
+                  "support": 1966,
+                  "detected": 3,
+                  "recall": 0.001525940996948118,
+                  "recall_wilson_95": [
+                    0.0005190809432736448,
+                    0.004477056817244763
+                  ],
+                  "average_precision": 0.0026028400668713053,
+                  "seen_in_training": false
+                },
+                "DDoS": {
+                  "support": 128027,
+                  "detected": 78364,
+                  "recall": 0.6120896373421232,
+                  "recall_wilson_95": [
+                    0.6094171281221611,
+                    0.6147554200023685
+                  ],
+                  "average_precision": 0.7438887677038203,
+                  "seen_in_training": false
+                },
+                "PortScan": {
+                  "support": 158930,
+                  "detected": 720,
+                  "recall": 0.0045302963568866796,
+                  "recall_wilson_95": [
+                    0.00421189467859816,
+                    0.0048726500946529505
+                  ],
+                  "average_precision": 0.20633776805958037,
+                  "seen_in_training": false
+                }
+              }
+            }
+          },
+          "alert_budgets": {
+            "total_flows": 1450815,
+            "total_attacks": 579741,
+            "total_benign": 871074,
+            "budgets_per_10k": {
+              "50_per_10k": {
+                "budget_k": 7254,
+                "alerts_generated": 7254,
+                "alert_rate": 0.00499994830491827,
+                "effective_threshold": 0.9611248970031738,
+                "true_positives": 7160,
+                "false_positives": 94,
+                "precision": 0.9870416322029225,
+                "recall": 0.012350342653012294,
+                "fp_per_10k_benign": 1.0791276056913648,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.05576948612402072,
+                  "Infiltration": 0.25,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.01687116564417178,
+                  "nan": 0.0
+                }
+              },
+              "100_per_10k": {
+                "budget_k": 14508,
+                "alerts_generated": 14508,
+                "alert_rate": 0.00999989660983654,
+                "effective_threshold": 0.9579488635063171,
+                "true_positives": 14385,
+                "false_positives": 123,
+                "precision": 0.9915219189412737,
+                "recall": 0.024812804338489085,
+                "fp_per_10k_benign": 1.4120499521280625,
+                "per_family_recall": {
+                  "Bot": 0.0,
+                  "DDoS": 0.11218727299710217,
+                  "Infiltration": 0.3055555555555556,
+                  "PortScan": 0.0,
+                  "Web Attack \u2013 Brute Force": 0.0,
+                  "Web Attack \u2013 Sql Injection": 0.0,
+                  "Web Attack \u2013 XSS": 0.01687116564417178,
+                  "nan": 0.0
+                }
+              }
+            },
+            "fixed_budgets": {}
+          },
+          "selected_alpha": 0.5,
+          "validation_selection_ap": 0.7988676952641645
+        }
+      },
+      "aggregate": {
+        "fpr": {
+          "mean": 0.015952720434773623,
+          "std": 0.0,
+          "values": [
+            0.015952720434773623
+          ]
+        },
+        "recall": {
+          "mean": 0.13647128631578584,
+          "std": 0.0,
+          "values": [
+            0.13647128631578584
+          ]
+        },
+        "precision": {
+          "mean": 0.8506031350119337,
+          "std": 0.0,
+          "values": [
+            0.8506031350119337
+          ]
+        },
+        "alert_rate": {
+          "mean": 0.06411155109369561,
+          "std": 0.0,
+          "values": [
+            0.06411155109369561
+          ]
+        },
+        "pr_auc": {
+          "mean": 0.5124812986871963,
+          "std": 0.0,
+          "values": [
+            0.5124812986871963
+          ]
+        },
+        "roc_auc": {
+          "mean": 0.4632105881078293,
+          "std": 0.0,
+          "values": [
+            0.4632105881078293
+          ]
+        },
+        "fp_per_10k_benign": {
+          "mean": 159.52720434773624,
+          "std": 0.0,
+          "values": [
+            159.52720434773624
+          ]
+        },
+        "brier": {
+          "mean": 0.31381091420216795,
+          "std": 0.0,
+          "values": [
+            0.31381091420216795
+          ]
+        },
+        "ece_10_bins": {
+          "mean": 0.3064185466464907,
+          "std": 0.0,
+          "values": [
+            0.3064185466464907
+          ]
+        },
+        "per_family": {
+          "Bot": {
+            "support": 1966,
+            "recall_mean": 0.001525940996948118,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.001525940996948118
+            ]
+          },
+          "DDoS": {
+            "support": 128027,
+            "recall_mean": 0.6120896373421232,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.6120896373421232
+            ]
+          },
+          "Infiltration": {
+            "support": 36,
+            "recall_mean": 0.4166666666666667,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.4166666666666667
+            ]
+          },
+          "PortScan": {
+            "support": 158930,
+            "recall_mean": 0.0045302963568866796,
+            "recall_std": 0.0,
+            "recall_values": [
+              0.0045302963568866796
+            ]
+          }
+        }
+      },
+      "selection": [
+        {
+          "seed": 42,
+          "alpha": 0.5,
+          "ap": 0.7988676952641645
+        }
+      ]
+    }
+  },
+  "elapsed_seconds": 388.7
+}

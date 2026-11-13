@@ -25,7 +25,7 @@
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               if (updateToast) updateToast.hidden = false;
-              console.log('[PWA] New version available — reload to update.');
+              console.log('[PWA] New version available : reload to update.');
             }
           });
         });

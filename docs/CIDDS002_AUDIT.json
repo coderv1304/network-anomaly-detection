@@ -1,0 +1,813 @@
+{
+  "artifact_version": "cidds002-audit-v1",
+  "method": "cidds002_scanning_ingestion_and_coverage_audit",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope.",
+  "dataset": "cidds002",
+  "audit": {
+    "status": "coverage_pass",
+    "provenance": {
+      "directory": "C:/Users/varun/Downloads/CIDDS-002\\CIDDS-002",
+      "files": [
+        {
+          "path": "C:/Users/varun/Downloads/CIDDS-002\\CIDDS-002\\traffic\\week1.csv",
+          "sha256": "5bb6197012b7383905accf928e21afdb8fe774c9d35faf3ba92dea4528574dd7",
+          "bytes": 1094816183,
+          "rows": 8185992,
+          "columns": 16
+        },
+        {
+          "path": "C:/Users/varun/Downloads/CIDDS-002\\CIDDS-002\\traffic\\week2.csv",
+          "sha256": "833e2875c57574dc5b74818bf95a4e3b708e6a03b29df77aff18d9518fe6703c",
+          "bytes": 1067416903,
+          "rows": 7975191,
+          "columns": 16
+        },
+        {
+          "path": "C:/Users/varun/Downloads/CIDDS-002\\CIDDS-002\\attack_logs\\attacks_logs_intern.csv",
+          "sha256": "737d3fbf6b82251f6b40e66b71fe3ed289e3070f22dc6dcca5f1c17fce46dcaa",
+          "bytes": 4988,
+          "rows": 43,
+          "columns": 8
+        }
+      ],
+      "official_source": "https://www.hs-coburg.de/forschen/cidds-coburg-intrusion-detection-data-sets/",
+      "citation": "Ring, Wunderlich, Scheuring, Landes, Hotho (2017), Creation of Flow-Based Data Sets for Intrusion Detection, Journal of Information Warfare 16(4).",
+      "licence_status": "not recorded; verify the official terms and citation before publication",
+      "release_note": "CIDDS-002 is unidirectional NetFlow. It is a separate scanning study, not a Tier A validation of the bidirectional CIC model."
+    },
+    "label_policy": {
+      "raw_label_values": {
+        "normal": "benign",
+        "attacker": "scan source",
+        "victim": "scan target"
+      },
+      "raw_attack_type_values": [
+        "---",
+        "scan"
+      ],
+      "positive_labels": [
+        "PortScan"
+      ],
+      "negative_labels": [
+        "Normal"
+      ],
+      "required_families": [
+        "PortScan"
+      ],
+      "ping_sweep_policy": "excluded from the PortScan family; nmap -sP -PE is host discovery, not a port scan",
+      "victim_policy": "excluded: a victim flow is the target's response to a scan, not scan traffic, and must not enter the benign base",
+      "family_mapping": {
+        "Normal": "label == normal",
+        "PortScan": "label == attacker, attackType == scan, nmap scan is -sS/-sA/-sF/-sU",
+        "PingSweep": "label == attacker, attackType == scan, nmap args contain -sP",
+        "Excluded": "victim flows and every other label"
+      }
+    },
+    "rows": {
+      "raw": 16161183,
+      "unique_flow_keys": 16131290,
+      "duplicate_rows": 29893,
+      "feature_only_duplicates_not_removed": 5579481,
+      "conflicting_duplicate_groups": 0,
+      "malformed_timestamps": 0
+    },
+    "duplicate_policy": "Duplicate keys are Date first seen plus the 11 NetFlow attributes. The start timestamp is part of the identity: the same 5-tuple and counters recur across days, so feature-only deduplication would delete real traffic and distort prevalence. Feature-only duplicates are reported but kept.",
+    "capture_days": [
+      "2017-08-02",
+      "2017-08-03",
+      "2017-08-04",
+      "2017-08-05",
+      "2017-08-06",
+      "2017-08-07",
+      "2017-08-08",
+      "2017-08-10",
+      "2017-08-11",
+      "2017-08-12",
+      "2017-08-13",
+      "2017-08-14",
+      "2017-08-15",
+      "2017-08-16"
+    ],
+    "rows_per_day": {
+      "2017-08-02": 1640994,
+      "2017-08-03": 1573666,
+      "2017-08-04": 1449953,
+      "2017-08-05": 130058,
+      "2017-08-06": 49174,
+      "2017-08-07": 1511443,
+      "2017-08-08": 1830704,
+      "2017-08-10": 1803836,
+      "2017-08-11": 967920,
+      "2017-08-12": 429092,
+      "2017-08-13": 60903,
+      "2017-08-14": 1543820,
+      "2017-08-15": 1838795,
+      "2017-08-16": 1330825
+    },
+    "temporal_split": {
+      "method": "temporal_capture_split: week1 train; week2 validation up to the end of activityID 29; week2 test after it. A whole nmap run stays in one partition.",
+      "train_window": [
+        "2017-08-02",
+        "2017-08-08"
+      ],
+      "validation_window": [
+        "2017-08-10",
+        "2017-08-12T03:23:44.203037"
+      ],
+      "test_window": [
+        "2017-08-12T03:23:44.203037",
+        "2017-08-16"
+      ],
+      "validation_attack_ids": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "test_attack_ids": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "boundary": "2017-08-12T03:23:44.203037",
+      "partitions": {
+        "train": {
+          "rows": 8165541,
+          "label_counts": {
+            "Normal": 7918499,
+            "PingSweep": 268,
+            "PortScan": 150533
+          },
+          "positive_rows": 150533,
+          "positive_families": [
+            "PortScan"
+          ],
+          "scan_types": {
+            "ACK": 39112,
+            "FIN": 54285,
+            "SYN": 35417,
+            "UDP": 21719
+          }
+        },
+        "validation": {
+          "rows": 2778158,
+          "label_counts": {
+            "Normal": 2651320,
+            "PortScan": 80572
+          },
+          "positive_rows": 80572,
+          "positive_families": [
+            "PortScan"
+          ],
+          "scan_types": {
+            "ACK": 563,
+            "FIN": 25969,
+            "SYN": 27335,
+            "UDP": 26705
+          }
+        },
+        "test": {
+          "rows": 5187591,
+          "label_counts": {
+            "Normal": 5026910,
+            "PingSweep": 801,
+            "PortScan": 101812
+          },
+          "positive_rows": 101812,
+          "positive_families": [
+            "PortScan"
+          ],
+          "scan_types": {
+            "ACK": 2513,
+            "FIN": 41605,
+            "SYN": 4502,
+            "UDP": 53192
+          }
+        }
+      },
+      "family_partition_matrix": {
+        "partitions": {
+          "train": {
+            "label_counts": {
+              "Normal": 7918499,
+              "PingSweep": 268,
+              "PortScan": 150533
+            },
+            "primary_positives": 150533,
+            "primary_positive_families": [
+              "PortScan"
+            ]
+          },
+          "validation": {
+            "label_counts": {
+              "Normal": 2651320,
+              "PortScan": 80572
+            },
+            "primary_positives": 80572,
+            "primary_positive_families": [
+              "PortScan"
+            ]
+          },
+          "test": {
+            "label_counts": {
+              "Normal": 5026910,
+              "PingSweep": 801,
+              "PortScan": 101812
+            },
+            "primary_positives": 101812,
+            "primary_positive_families": [
+              "PortScan"
+            ]
+          }
+        },
+        "train_validation_overlap": [
+          "PortScan"
+        ],
+        "train_test_overlap": [
+          "PortScan"
+        ],
+        "validation_test_overlap": [
+          "PortScan"
+        ],
+        "validation_test_disjoint": false,
+        "train_has_primary_positives": true
+      },
+      "coverage_gate": {
+        "minimums": {
+          "train": 1,
+          "validation": 1,
+          "test": 1
+        },
+        "families": {
+          "PortScan": {
+            "train": 150533,
+            "validation": 80572,
+            "test": 101812,
+            "observed": true,
+            "required": true,
+            "pass": true
+          }
+        },
+        "missing_required": [],
+        "overall_pass": true,
+        "reason": "Every positive family is present in train, validation, and test, and validation/test families overlap."
+      }
+    },
+    "attacks": [
+      {
+        "activity_id": 1,
+        "start": "2017-08-02T11:35:00",
+        "end": "2017-08-03T11:44:00",
+        "nmap_args": "nmap args: -sU -T 0",
+        "scan_type": "UDP",
+        "partition": "train",
+        "attacker_flows": 4398
+      },
+      {
+        "activity_id": 2,
+        "start": "2017-08-03T11:44:31.113361",
+        "end": "2017-08-03T12:13:38.986912",
+        "nmap_args": "nmap args: -sF -T 2",
+        "scan_type": "FIN",
+        "partition": "train",
+        "attacker_flows": 4540
+      },
+      {
+        "activity_id": 3,
+        "start": "2017-08-03T12:25:00.730032",
+        "end": "2017-08-03T12:27:53.848766",
+        "nmap_args": "nmap args: -sF -T 3",
+        "scan_type": "FIN",
+        "partition": "train",
+        "attacker_flows": 7232
+      },
+      {
+        "activity_id": 4,
+        "start": "2017-08-03T12:36:52.955006",
+        "end": "2017-08-03T15:10:21.191982",
+        "nmap_args": "nmap args: -sF -T 2",
+        "scan_type": "FIN",
+        "partition": "train",
+        "attacker_flows": 31764
+      },
+      {
+        "activity_id": 5,
+        "start": "2017-08-03T15:18:16.215692",
+        "end": "2017-08-03T15:32:47.462217",
+        "nmap_args": "nmap args: -n -sP -PE -T 2",
+        "scan_type": "PingSweep",
+        "partition": "train",
+        "attacker_flows": 492
+      },
+      {
+        "activity_id": 6,
+        "start": "2017-08-03T15:38:05.492608",
+        "end": "2017-08-03T16:36:16.641021",
+        "nmap_args": "nmap args: -sU -T 2",
+        "scan_type": "UDP",
+        "partition": "train",
+        "attacker_flows": 7576
+      },
+      {
+        "activity_id": 7,
+        "start": "2017-08-03T16:41:17.747475",
+        "end": "2017-08-03T16:46:52.075512",
+        "nmap_args": "nmap args: -sA -T 3",
+        "scan_type": "ACK",
+        "partition": "train",
+        "attacker_flows": 5034
+      },
+      {
+        "activity_id": 8,
+        "start": "2017-08-04T10:50:00",
+        "end": "2017-08-04T17:25:00",
+        "nmap_args": "nmap args: -sA -T 1",
+        "scan_type": "ACK",
+        "partition": "train",
+        "attacker_flows": 4594
+      },
+      {
+        "activity_id": 9,
+        "start": "2017-08-04T17:43:29.551653",
+        "end": "2017-08-04T17:49:12.533349",
+        "nmap_args": "nmap args: -sF -T 3",
+        "scan_type": "FIN",
+        "partition": "train",
+        "attacker_flows": 5096
+      },
+      {
+        "activity_id": 10,
+        "start": "2017-08-04T17:58:08.542952",
+        "end": "2017-08-04T22:56:11.003771",
+        "nmap_args": "nmap args: -sA -T 1",
+        "scan_type": "ACK",
+        "partition": "train",
+        "attacker_flows": 11527
+      },
+      {
+        "activity_id": 11,
+        "start": "2017-08-07T11:19:35.897795",
+        "end": "2017-08-07T11:26:42.207915",
+        "nmap_args": "nmap args: -sF -T 3",
+        "scan_type": "FIN",
+        "partition": "train",
+        "attacker_flows": 39023
+      },
+      {
+        "activity_id": 12,
+        "start": "2017-08-07T13:26:42.069672",
+        "end": "2017-08-07T18:25:22.290536",
+        "nmap_args": "nmap args: -sS -T 1",
+        "scan_type": "SYN",
+        "partition": "train",
+        "attacker_flows": 11774
+      },
+      {
+        "activity_id": 13,
+        "start": "2017-08-07T18:56:05.502358",
+        "end": "2017-08-07T23:56:59.029308",
+        "nmap_args": "nmap args: -sU -T 1",
+        "scan_type": "UDP",
+        "partition": "train",
+        "attacker_flows": 10143
+      },
+      {
+        "activity_id": 14,
+        "start": "2017-08-08T00:06:00",
+        "end": "2017-08-08T00:12:30",
+        "nmap_args": "nmap args: -sS -T 3",
+        "scan_type": "SYN",
+        "partition": "train",
+        "attacker_flows": 5114
+      },
+      {
+        "activity_id": 15,
+        "start": "2017-08-08T00:25:00",
+        "end": "2017-08-08T09:55:00",
+        "nmap_args": "nmap args: -sS -T 1",
+        "scan_type": "SYN",
+        "partition": "train",
+        "attacker_flows": 7540
+      },
+      {
+        "activity_id": 16,
+        "start": "2017-08-08T12:00:00",
+        "end": "2017-08-08T14:08:00",
+        "nmap_args": "nmap args: -sU -T 1",
+        "scan_type": "UDP",
+        "partition": "train",
+        "attacker_flows": 2046
+      },
+      {
+        "activity_id": 17,
+        "start": "2017-08-08T14:12:47.924275",
+        "end": "2017-08-08T14:19:15.224161",
+        "nmap_args": "nmap args: -sA -T 3",
+        "scan_type": "ACK",
+        "partition": "train",
+        "attacker_flows": 40025
+      },
+      {
+        "activity_id": 18,
+        "start": "2017-08-08T14:26:29.259452",
+        "end": "2017-08-08T16:04:18.313748",
+        "nmap_args": "nmap args: -sA -T 2",
+        "scan_type": "ACK",
+        "partition": "train",
+        "attacker_flows": 4436
+      },
+      {
+        "activity_id": 19,
+        "start": "2017-08-08T16:12:17.381109",
+        "end": "2017-08-08T17:05:30.237899",
+        "nmap_args": "nmap args: -sU -T 2",
+        "scan_type": "UDP",
+        "partition": "train",
+        "attacker_flows": 9462
+      },
+      {
+        "activity_id": 20,
+        "start": "2017-08-08T17:10:55.339732",
+        "end": "2017-08-08T19:52:43.511983",
+        "nmap_args": "nmap args: -sS -T 2",
+        "scan_type": "SYN",
+        "partition": "train",
+        "attacker_flows": 35226
+      },
+      {
+        "activity_id": 21,
+        "start": "2017-08-10T09:17:03.287132",
+        "end": "2017-08-10T11:35:30.646470",
+        "nmap_args": "nmap args: -sS -T 2",
+        "scan_type": "SYN",
+        "partition": "validation",
+        "attacker_flows": 31953
+      },
+      {
+        "activity_id": 22,
+        "start": "2017-08-10T11:41:36.776127",
+        "end": "2017-08-10T16:45:19.954159",
+        "nmap_args": "nmap args: -sF -T 1",
+        "scan_type": "FIN",
+        "partition": "validation",
+        "attacker_flows": 11585
+      },
+      {
+        "activity_id": 23,
+        "start": "2017-08-10T16:54:58.061165",
+        "end": "2017-08-10T17:14:43.852228",
+        "nmap_args": "nmap args: -sU -T 3",
+        "scan_type": "UDP",
+        "partition": "validation",
+        "attacker_flows": 27749
+      },
+      {
+        "activity_id": 24,
+        "start": "2017-08-10T17:20:03.959221",
+        "end": "2017-08-10T18:11:52.155516",
+        "nmap_args": "nmap args: -sF -T 2",
+        "scan_type": "FIN",
+        "partition": "validation",
+        "attacker_flows": 11532
+      },
+      {
+        "activity_id": 25,
+        "start": "2017-08-10T18:29:57.132730",
+        "end": "2017-08-10T18:34:37.547996",
+        "nmap_args": "nmap args: -sF -T 3",
+        "scan_type": "FIN",
+        "partition": "validation",
+        "attacker_flows": 15184
+      },
+      {
+        "activity_id": 26,
+        "start": "2017-08-10T18:44:02.654742",
+        "end": "2017-08-10T23:49:55.769766",
+        "nmap_args": "nmap args: -sF -T 1",
+        "scan_type": "FIN",
+        "partition": "validation",
+        "attacker_flows": 11518
+      },
+      {
+        "activity_id": 27,
+        "start": "2017-08-11T09:04:15.407171",
+        "end": "2017-08-11T14:02:28.893646",
+        "nmap_args": "nmap args: -sS -T 1",
+        "scan_type": "SYN",
+        "partition": "validation",
+        "attacker_flows": 11716
+      },
+      {
+        "activity_id": 28,
+        "start": "2017-08-11T14:10:00",
+        "end": "2017-08-11T15:10:00",
+        "nmap_args": "nmap args: -sA -T 1",
+        "scan_type": "ACK",
+        "partition": "validation",
+        "attacker_flows": 906
+      },
+      {
+        "activity_id": 29,
+        "start": "2017-08-11T15:52:18.807613",
+        "end": "2017-08-12T03:23:44.203037",
+        "nmap_args": "nmap args: -sS -T 1",
+        "scan_type": "SYN",
+        "partition": "validation",
+        "attacker_flows": 4695
+      },
+      {
+        "activity_id": 30,
+        "start": "2017-08-12T03:30:09.318352",
+        "end": "2017-08-12T05:08:00.856801",
+        "nmap_args": "nmap args: -sF -T 2",
+        "scan_type": "FIN",
+        "partition": "test",
+        "attacker_flows": 4424
+      },
+      {
+        "activity_id": 31,
+        "start": "2017-08-12T05:14:39.964179",
+        "end": "2017-08-12T10:17:58.946830",
+        "nmap_args": "nmap args: -sU -T 1",
+        "scan_type": "UDP",
+        "partition": "test",
+        "attacker_flows": 8524
+      },
+      {
+        "activity_id": 32,
+        "start": "2017-08-12T10:27:21.959686",
+        "end": "2017-08-12T10:32:10.737482",
+        "nmap_args": "nmap args: -sF -T 3",
+        "scan_type": "FIN",
+        "partition": "test",
+        "attacker_flows": 43312
+      },
+      {
+        "activity_id": 33,
+        "start": "2017-08-12T10:39:52.799704",
+        "end": "2017-08-12T15:44:34.722096",
+        "nmap_args": "nmap args: -sF -T 1",
+        "scan_type": "FIN",
+        "partition": "test",
+        "attacker_flows": 11604
+      },
+      {
+        "activity_id": 34,
+        "start": "2017-08-12T15:49:42.827271",
+        "end": "2017-08-12T16:04:30.694691",
+        "nmap_args": "nmap args: -n -sP -PE -T 2",
+        "scan_type": "PingSweep",
+        "partition": "test",
+        "attacker_flows": 439
+      },
+      {
+        "activity_id": 35,
+        "start": "2017-08-12T16:11:26.803102",
+        "end": "2017-08-12T16:15:32.435272",
+        "nmap_args": "nmap args: -sA -T 3",
+        "scan_type": "ACK",
+        "partition": "test",
+        "attacker_flows": 5025
+      },
+      {
+        "activity_id": 36,
+        "start": "2017-08-12T16:21:00.469462",
+        "end": "2017-08-12T17:14:13.587316",
+        "nmap_args": "nmap args: -sF -T 2",
+        "scan_type": "FIN",
+        "partition": "test",
+        "attacker_flows": 11405
+      },
+      {
+        "activity_id": 37,
+        "start": "2017-08-14T09:21:47.592195",
+        "end": "2017-08-14T09:38:01.511963",
+        "nmap_args": "nmap args: -n -sP -PE -T 1",
+        "scan_type": "PingSweep",
+        "partition": "test",
+        "attacker_flows": 524
+      },
+      {
+        "activity_id": 38,
+        "start": "2017-08-14T09:46:01.619024",
+        "end": "2017-08-14T10:01:05.361051",
+        "nmap_args": "nmap args: -n -sP -PE -T 1",
+        "scan_type": "PingSweep",
+        "partition": "test",
+        "attacker_flows": 472
+      },
+      {
+        "activity_id": 39,
+        "start": "2017-08-14T10:10:45.791246",
+        "end": "2017-08-14T13:08:00.696634",
+        "nmap_args": "nmap args: -sU -T 2",
+        "scan_type": "UDP",
+        "partition": "test",
+        "attacker_flows": 29210
+      },
+      {
+        "activity_id": 40,
+        "start": "2017-08-14T13:17:32.773629",
+        "end": "2017-08-14T16:13:45.134921",
+        "nmap_args": "nmap args: -sU -T 2",
+        "scan_type": "UDP",
+        "partition": "test",
+        "attacker_flows": 27298
+      },
+      {
+        "activity_id": 41,
+        "start": "2017-08-14T16:22:02.243914",
+        "end": "2017-08-14T17:14:33.200609",
+        "nmap_args": "nmap args: -sU -T 2",
+        "scan_type": "UDP",
+        "partition": "test",
+        "attacker_flows": 9486
+      },
+      {
+        "activity_id": 42,
+        "start": "2017-08-14T17:23:42.217935",
+        "end": "2017-08-14T19:02:06.977172",
+        "nmap_args": "nmap args: -sS -T 2",
+        "scan_type": "SYN",
+        "partition": "test",
+        "attacker_flows": 4441
+      },
+      {
+        "activity_id": 43,
+        "start": "2017-08-15T11:48:00",
+        "end": "2017-08-15T16:26:00",
+        "nmap_args": "nmap args: -sS -T 1",
+        "scan_type": "SYN",
+        "partition": "test",
+        "attacker_flows": 4517
+      }
+    ],
+    "attack_flow_totals": {
+      "1": 4398,
+      "2": 4540,
+      "3": 7232,
+      "4": 31764,
+      "5": 492,
+      "6": 7576,
+      "7": 5034,
+      "8": 4594,
+      "9": 5096,
+      "10": 11527,
+      "11": 39023,
+      "12": 11774,
+      "13": 10143,
+      "14": 5114,
+      "15": 7540,
+      "16": 2046,
+      "17": 40025,
+      "18": 4436,
+      "19": 9462,
+      "20": 35226,
+      "21": 31953,
+      "22": 11585,
+      "23": 27749,
+      "24": 11532,
+      "25": 15184,
+      "26": 11518,
+      "27": 11716,
+      "28": 906,
+      "29": 4695,
+      "30": 4424,
+      "31": 8524,
+      "32": 43312,
+      "33": 11604,
+      "34": 439,
+      "35": 5025,
+      "36": 11405,
+      "37": 524,
+      "38": 472,
+      "39": 29210,
+      "40": 27298,
+      "41": 9486,
+      "42": 4441,
+      "43": 4517
+    },
+    "schema": {
+      "features": {
+        "flow_duration": {
+          "status": "rename",
+          "source_column": "Duration",
+          "present": true,
+          "note": "seconds; multiply by 1e6 for microseconds"
+        },
+        "total_fwd_packets": {
+          "status": "rename",
+          "source_column": "Packets",
+          "present": true,
+          "note": "unidirectional; no backward counterpart"
+        },
+        "total_backward_packets": {
+          "status": "missing",
+          "source_column": null,
+          "present": false,
+          "note": "unidirectional capture"
+        },
+        "total_length_of_fwd_packets": {
+          "status": "rename",
+          "source_column": "Bytes",
+          "present": true,
+          "note": "unidirectional"
+        },
+        "total_length_of_bwd_packets": {
+          "status": "missing",
+          "source_column": null,
+          "present": false,
+          "note": "unidirectional capture"
+        },
+        "flow_packets_s": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Packets / Duration; Duration > 0"
+        },
+        "flow_bytes_s": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Bytes / Duration; Duration > 0"
+        },
+        "packet_length_mean": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Bytes / Packets; Packets > 0"
+        },
+        "packet_length_max": {
+          "status": "missing",
+          "source_column": null,
+          "present": false,
+          "note": "no packet length column"
+        },
+        "syn_flag_count": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Flags contains 'S'"
+        },
+        "fin_flag_count": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Flags contains 'F'"
+        },
+        "rst_flag_count": {
+          "status": "derive",
+          "source_column": null,
+          "present": false,
+          "note": "Flags contains 'R'"
+        }
+      },
+      "available": 9,
+      "missing": 3,
+      "total": 12
+    }
+  },
+  "decision": {
+    "p2b_status": "blocked",
+    "cidds002_verdict": "usable for a separate, leakage-safe, temporal scanning study with explicit port-scan labels. It is unidirectional NetFlow and cannot validate the bidirectional Tier A serving model.",
+    "training_authorized": false,
+    "reason": "The audit records feasibility and a candidate split. It does not authorize a fit, a threshold change, or a registry row."
+  },
+  "artifact_identity": {
+    "serving_artifact": "models/model_bundle_rf_day_based_seed42.pkl",
+    "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "pandas_version": "2.2.3"
+  },
+  "notes": [
+    "No model is trained, no registry row is written, and the serving artifact is untouched.",
+    "CIDDS-002 is unidirectional NetFlow; it is not a Tier A dataset.",
+    "The split is temporal and keeps each nmap run in one partition.",
+    "Source URL, citation, and licence must be verified before publication."
+  ],
+  "findings": [
+    "CIDDS-002 contains 16,161,183 raw flow records across 14 capture days, and 16,131,290 unique flow keys after removing 29,893 exact duplicate records.",
+    "CIDDS-002 is the only public dataset in this review with explicit port-scan labels and benign traffic in the same capture period: 150,533 train, 80,572 validation, and 101,812 test PortScan flows. The coverage gate is PASS.",
+    "The raw attackType value is 'scan', not 'portScan'. The family mapping uses label=attacker plus attackType=scan, and splits ping sweeps (nmap -sP -PE) out of the PortScan family because they are host discovery, not port scanning.",
+    "Victim flows are excluded, not treated as benign. They are the target's responses to a scan, and putting them in the benign base would distort the false-positive rate at low alert budgets.",
+    "Duplicate policy differs from CIC-IDS-2018 on purpose. CIDDS-002 is unidirectional NetFlow, so Date first seen is part of the flow identity: 5,579,481 feature-only duplicates are reported but kept. Removing them would delete legitimate repeated traffic and change prevalence.",
+    "Only 9/12 Tier A features are available and 3 are missing. The missing ones are the backward counters and packet_length_max, which cannot exist in a unidirectional NetFlow record. This dataset cannot validate the bidirectional serving model; it supports a separate scanning study.",
+    "The validation/test boundary is the end of activityID 29, not midnight. Cutting at midnight would split one nmap run across two partitions.",
+    "The temporal split also shifts the scan-type mix. UDP is 14.4% of train PortScan flows but 52.2% of test, while ACK falls from 26.0% to 2.5%. A PortScan result on this split is partly a scan-type generalization test, not a uniform port-scan benchmark."
+  ]
+}

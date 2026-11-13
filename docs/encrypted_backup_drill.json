@@ -1,0 +1,88 @@
+{
+  "drill": "encrypted SQLite backup, authenticated restore, optional off-host copy",
+  "timestamp_utc": "2026-11-12T04:17:32.714686+00:00",
+  "source": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\instance\\network_anomaly.db",
+    "sha256": "3e49f9ecdad06e981479403fc6ffb2bf3789ed42f5f0268ec4f6f61c1bfac137",
+    "last_modified_utc": "2026-11-12T04:15:08.989159+00:00",
+    "tables": {
+      "audit_events": 250,
+      "flow": 21851,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "integrity_check": "ok"
+  },
+  "backup": {
+    "plaintext_path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\encrypted\\network_anomaly-20261112T041732Z.db",
+    "plaintext_sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
+    "tables": {
+      "audit_events": 250,
+      "flow": 21851,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    }
+  },
+  "encryption": {
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\encrypted\\network_anomaly-20261112T041732Z.db.enc",
+    "sha256": "3cf39a2ecb8a0c1263a8052ddcf8da4352e9ee09daad13bf89921b4976473ccc",
+    "size_bytes": 4218913,
+    "plaintext_sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
+    "nonce_hex": "ec66e7172eb54b4b8a1d2cf1",
+    "algorithm": "AES-256-GCM"
+  },
+  "restore": {
+    "sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
+    "tables": {
+      "audit_events": 250,
+      "flow": 21851,
+      "flow_review_audit": 2,
+      "flow_reviews": 1,
+      "tenants": 1,
+      "users": 1
+    },
+    "integrity_check": "ok",
+    "restore_seconds": 0.12
+  },
+  "offsite": {
+    "path": "C:\\Users\\varun\\AppData\\Local\\Temp\\netshield-offsite\\network_anomaly-20261112T041732Z.db.enc",
+    "sha256": "3cf39a2ecb8a0c1263a8052ddcf8da4352e9ee09daad13bf89921b4976473ccc",
+    "matches_local_ciphertext": true
+  },
+  "key": {
+    "source": "NETSHIELD_BACKUP_KEY",
+    "stored_in_artifact": false,
+    "note": "The key is not written to the encrypted file or this report."
+  },
+  "rpo_observation": {
+    "source_last_modified_utc": "2026-11-12T04:15:08.989159+00:00",
+    "backup_started_utc": "1970-01-01T01:45:38.074320+00:00",
+    "source_age_seconds": 0.0,
+    "note": "Single-host observation, not a production RPO measurement."
+  },
+  "rto_observation": {
+    "restore_seconds": 0.12,
+    "note": "Decrypt plus integrity check on this host, not a production RTO."
+  },
+  "checks": {
+    "source_integrity_ok": true,
+    "backup_integrity_ok": true,
+    "backup_counts_match_source": true,
+    "ciphertext_is_not_plaintext": true,
+    "decrypted_hash_matches_backup": true,
+    "restored_integrity_ok": true,
+    "restored_counts_match_backup": true,
+    "offsite_hash_matches": true,
+    "key_not_embedded": true
+  },
+  "status": "pass",
+  "limits": [
+    "The drill proves the procedure on this host only.",
+    "Off-host durability, key custody, and a site-declared RPO/RTO are operational evidence and are not established here.",
+    "SQLite only; a managed Postgres deployment must use its own encrypted snapshot/PITR mechanism."
+  ]
+}

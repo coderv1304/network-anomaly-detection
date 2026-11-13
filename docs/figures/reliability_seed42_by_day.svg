@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="390" viewBox="0 0 1060 390">
+<rect width="1060" height="390" fill="#f9fafb"/>
+<text x="530.0" y="22.0" font-family="Inter, Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f2937" font-weight="700">Reliability by day: seed 42</text>
+<rect x="10" y="34" width="510" height="350" fill="#ffffff" stroke="#d1d5db"/>
+<text x="265.0" y="54.0" font-family="Inter, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#1f2937" font-weight="600">Thursday</text>
+<line x1="58" y1="348.0" x2="498" y2="348.0" stroke="#e5e7eb"/>
+<line x1="58.0" y1="64" x2="58.0" y2="348" stroke="#e5e7eb"/>
+<text x="52.0" y="352.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.0</text>
+<text x="58.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.0</text>
+<line x1="58" y1="277.0" x2="498" y2="277.0" stroke="#e5e7eb"/>
+<line x1="168.0" y1="64" x2="168.0" y2="348" stroke="#e5e7eb"/>
+<text x="52.0" y="281.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.2</text>
+<text x="168.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.2</text>
+<line x1="58" y1="206.0" x2="498" y2="206.0" stroke="#e5e7eb"/>
+<line x1="278.0" y1="64" x2="278.0" y2="348" stroke="#e5e7eb"/>
+<text x="52.0" y="210.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.5</text>
+<text x="278.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.5</text>
+<line x1="58" y1="135.0" x2="498" y2="135.0" stroke="#e5e7eb"/>
+<line x1="388.0" y1="64" x2="388.0" y2="348" stroke="#e5e7eb"/>
+<text x="52.0" y="139.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.8</text>
+<text x="388.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.8</text>
+<line x1="58" y1="64.0" x2="498" y2="64.0" stroke="#e5e7eb"/>
+<line x1="498.0" y1="64" x2="498.0" y2="348" stroke="#e5e7eb"/>
+<text x="52.0" y="68.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">1.0</text>
+<text x="498.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">1.0</text>
+<line x1="58" y1="348" x2="498" y2="64" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<text x="278.0" y="382.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#4b5563" font-weight="normal">Mean predicted probability</text>
+<text x="24" y="206.0" font-family="Inter, Arial, sans-serif" font-size="10" fill="#4b5563" text-anchor="middle" transform="rotate(-90 24 206.0)">Observed frequency</text>
+<polyline points="58.2,346.8 111.5,151.1 164.0,318.5 210.2,291.2 238.4,348.0" fill="none" stroke="#6b7280" stroke-width="2"/>
+<circle cx="58.2" cy="346.8" r="9.0" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="111.5" cy="151.1" r="3.6" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="164.0" cy="318.5" r="3.0" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="210.2" cy="291.2" r="2.7" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="238.4" cy="348.0" r="2.6" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<polyline points="205.0,347.9 249.5,302.7" fill="none" stroke="#2563eb" stroke-width="2"/>
+<circle cx="205.0" cy="347.9" r="9.0" fill="#2563eb" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="249.5" cy="302.7" r="8.7" fill="#2563eb" fill-opacity="0.75" stroke="#ffffff"/>
+<polyline points="214.1,347.9 446.9,250.6 489.7,314.4" fill="none" stroke="#059669" stroke-width="2"/>
+<circle cx="214.1" cy="347.9" r="9.0" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="446.9" cy="250.6" r="6.7" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="489.7" cy="314.4" r="3.0" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<rect x="58" y="363" width="12" height="12" fill="#6b7280"/>
+<text x="75.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Uncalibrated</text>
+<rect x="208" y="363" width="12" height="12" fill="#2563eb"/>
+<text x="225.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Temperature</text>
+<rect x="358" y="363" width="12" height="12" fill="#059669"/>
+<text x="375.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Isotonic</text>
+<rect x="530" y="34" width="510" height="350" fill="#ffffff" stroke="#d1d5db"/>
+<text x="785.0" y="54.0" font-family="Inter, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#1f2937" font-weight="600">Friday</text>
+<line x1="578" y1="348.0" x2="1018" y2="348.0" stroke="#e5e7eb"/>
+<line x1="578.0" y1="64" x2="578.0" y2="348" stroke="#e5e7eb"/>
+<text x="572.0" y="352.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.0</text>
+<text x="578.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.0</text>
+<line x1="578" y1="277.0" x2="1018" y2="277.0" stroke="#e5e7eb"/>
+<line x1="688.0" y1="64" x2="688.0" y2="348" stroke="#e5e7eb"/>
+<text x="572.0" y="281.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.2</text>
+<text x="688.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.2</text>
+<line x1="578" y1="206.0" x2="1018" y2="206.0" stroke="#e5e7eb"/>
+<line x1="798.0" y1="64" x2="798.0" y2="348" stroke="#e5e7eb"/>
+<text x="572.0" y="210.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.5</text>
+<text x="798.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.5</text>
+<line x1="578" y1="135.0" x2="1018" y2="135.0" stroke="#e5e7eb"/>
+<line x1="908.0" y1="64" x2="908.0" y2="348" stroke="#e5e7eb"/>
+<text x="572.0" y="139.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">0.8</text>
+<text x="908.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">0.8</text>
+<line x1="578" y1="64.0" x2="1018" y2="64.0" stroke="#e5e7eb"/>
+<line x1="1018.0" y1="64" x2="1018.0" y2="348" stroke="#e5e7eb"/>
+<text x="572.0" y="68.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">1.0</text>
+<text x="1018.0" y="364.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">1.0</text>
+<line x1="578" y1="348" x2="1018" y2="64" stroke="#9ca3af" stroke-dasharray="4 4"/>
+<text x="798.0" y="382.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="middle" fill="#4b5563" font-weight="normal">Mean predicted probability</text>
+<text x="544" y="206.0" font-family="Inter, Arial, sans-serif" font-size="10" fill="#4b5563" text-anchor="middle" transform="rotate(-90 544 206.0)">Observed frequency</text>
+<polyline points="579.8,231.5 633.4,86.7 682.2,64.8 720.5,64.0 771.6,64.0" fill="none" stroke="#6b7280" stroke-width="2"/>
+<circle cx="579.8" cy="231.5" r="9.0" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="633.4" cy="86.7" r="3.5" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="682.2" cy="64.8" r="3.6" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="720.5" cy="64.0" r="3.1" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="771.6" cy="64.0" r="2.6" fill="#6b7280" fill-opacity="0.75" stroke="#ffffff"/>
+<polyline points="724.9,282.5 774.4,74.2" fill="none" stroke="#2563eb" stroke-width="2"/>
+<circle cx="724.9" cy="282.5" r="9.0" fill="#2563eb" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="774.4" cy="74.2" r="9.0" fill="#2563eb" fill-opacity="0.75" stroke="#ffffff"/>
+<polyline points="734.1,281.8 966.9,65.5 1012.8,64.6" fill="none" stroke="#059669" stroke-width="2"/>
+<circle cx="734.1" cy="281.8" r="9.0" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="966.9" cy="65.5" r="9.0" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<circle cx="1012.8" cy="64.6" r="3.7" fill="#059669" fill-opacity="0.75" stroke="#ffffff"/>
+<rect x="578" y="363" width="12" height="12" fill="#6b7280"/>
+<text x="595.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Uncalibrated</text>
+<rect x="728" y="363" width="12" height="12" fill="#2563eb"/>
+<text x="745.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Temperature</text>
+<rect x="878" y="363" width="12" height="12" fill="#059669"/>
+<text x="895.0" y="372.0" font-family="Inter, Arial, sans-serif" font-size="10" text-anchor="start" fill="#374151" font-weight="normal">Isotonic</text>
+</svg>

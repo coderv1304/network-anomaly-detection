@@ -1,0 +1,128 @@
+{
+  "artifact_sha256": "4cfe17e605d80e0d5ee6b1d7e9012a10509d344b6a409ff10f9406548c2c2cec",
+  "calibration_version": "rf-day-based-seed45-isotonic-v1",
+  "feature_schema_sha256": "45cd75ce849b005c854ef8190a1cbe14d0d1a22daa6aa10e05e767ec6a757be6",
+  "fit_partition": "validation (Wednesday)",
+  "method": "isotonic",
+  "metrics": {
+    "attack_prevalence": 0.2505358994548498,
+    "brier_score": 0.15218849614167523,
+    "ece_10_bins": 0.22157830266626746,
+    "log_loss": 0.4915558692956791,
+    "reliability": {
+      "bins": [
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.0,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.1
+        },
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.1,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.2
+        },
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.2,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.30000000000000004
+        },
+        {
+          "absolute_gap": 0.301543056827397,
+          "count": 851512,
+          "lower": 0.30000000000000004,
+          "mean_predicted": 0.359002023935318,
+          "observed_frequency": 0.05745896710792097,
+          "upper": 0.4
+        },
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.4,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.5
+        },
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.5,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.6000000000000001
+        },
+        {
+          "absolute_gap": null,
+          "count": 0,
+          "lower": 0.6000000000000001,
+          "mean_predicted": null,
+          "observed_frequency": null,
+          "upper": 0.7000000000000001
+        },
+        {
+          "absolute_gap": 0.002027474168928234,
+          "count": 309872,
+          "lower": 0.7000000000000001,
+          "mean_predicted": 0.7817816952666718,
+          "observed_frequency": 0.7797542210977436,
+          "upper": 0.8
+        },
+        {
+          "absolute_gap": 0.17186647653579712,
+          "count": 1,
+          "lower": 0.8,
+          "mean_predicted": 0.8281335234642029,
+          "observed_frequency": 1.0,
+          "upper": 0.9
+        },
+        {
+          "absolute_gap": 0.1359257948749205,
+          "count": 680,
+          "lower": 0.9,
+          "mean_predicted": 0.9991610889925676,
+          "observed_frequency": 0.8632352941176471,
+          "upper": 1.0
+        }
+      ],
+      "ece": 0.22157830266626746
+    },
+    "rows": 1162065
+  },
+  "parameters": {
+    "fit_partition": "Wednesday validation only",
+    "isotonic_x": [
+      0.0,
+      0.00993575993925333,
+      0.009999999776482582,
+      0.1899999976158142,
+      0.20000000298023224,
+      0.25999999046325684,
+      0.3100000023841858,
+      0.5299999713897705
+    ],
+    "isotonic_y": [
+      0.359002023935318,
+      0.359002023935318,
+      0.7817814946174622,
+      0.7817814946174622,
+      0.998733401298523,
+      0.998733401298523,
+      1.0,
+      1.0
+    ],
+    "target": "binary attack score (1 - P(BENIGN))",
+    "temperature": 19.999868646867466
+  },
+  "seed": 45,
+  "target": "binary_attack_score",
+  "validation_attack_prevalence": 0.36476989573919494,
+  "validation_rows": 692686
+}

@@ -1,5 +1,5 @@
 # Build stage for Go capture binary
-FROM golang:1.22-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /src
 COPY capture/go.mod capture/go.sum ./
 RUN go mod download
@@ -9,7 +9,7 @@ RUN apk add --no-cache libpcap-dev gcc musl-dev && CGO_ENABLED=1 GOOS=linux GOAR
 
 # Runtime stage (minimal)
 FROM alpine:3.20 AS capture-runtime
-RUN apk add --no-cache libpcap
+RUN apk add --no-cache libpcap procps
 # Add non‑root user (but we will run as root for capability injection, then drop)
 RUN addgroup -S capture && adduser -S capture -G capture
 COPY --from=builder /go-bin/capture /usr/local/bin/capture
@@ -18,3 +18,5 @@ RUN chown capture:capture /usr/local/bin/capture
 USER capture
 # Default command (can be overridden by docker‑compose)
 ENTRYPOINT ["capture"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD pgrep -x capture >/dev/null || exit 1

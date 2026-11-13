@@ -1,10 +1,23 @@
 """
 live_capture.py
 
-Sniffs live network traffic, groups packets into bidirectional flows,
-computes CICFlowMeter-style statistical features per flow, and POSTs
-each completed flow to the Flask backend's /api/flows endpoint for
-real-time classification, storage, and dashboard push.
+Standalone live-traffic collector. Sniffs live network traffic on one or more
+adapters, groups packets into bidirectional flows, computes
+CICFlowMeter-style statistical features per flow, and POSTs each completed
+flow to the Flask backend's /api/flows endpoint for real-time classification,
+storage, and dashboard push.
+
+Works on any connectivity — Wi-Fi, Ethernet, mobile hotspot / USB tethering,
+VPN, virtual adapters, and loopback — because interface selection goes
+through ``capture_interfaces``:
+
+    NETSHIELD_CAPTURE_INTERFACE=auto        default-route adapter (recommended)
+    NETSHIELD_CAPTURE_INTERFACE=all          every adapter with an IP address
+    NETSHIELD_CAPTURE_INTERFACE=loopback    loopback only
+    NETSHIELD_CAPTURE_INTERFACE="Wi-Fi, Ethernet"   explicit list
+
+Run ``python live_capture.py --list`` to see every adapter this machine can
+capture on.
 
 REQUIREMENTS
 ------------
@@ -21,13 +34,35 @@ below (it's a small, infrequently-updated package), run:
 and adjust the keyword arguments in main() to match.
 """
 
+import argparse
+import os
 import sys
 import time
+from urllib.parse import quote
+
+APP_ENV = os.environ.get("NETSHIELD_ENV", "development").strip().lower()
+if APP_ENV == "production":
+    raise SystemExit(
+        "The bundled PyFlowMeter client is for local demos only. "
+        "Production collectors must use TLS and an X-API-Key header."
+    )
+API_KEY = os.environ.get("LIVE_CAPTURE_API_KEY", "").strip()
+if not API_KEY:
+    raise SystemExit("Set LIVE_CAPTURE_API_KEY to the same value used by app.py before starting capture.")
 
 try:
     from pyflowmeter.sniffer import create_sniffer
 except ImportError:
     print("pyflowmeter is not installed. Run: pip install pyflowmeter")
+    sys.exit(1)
+
+try:
+    from capture_interfaces import (
+        format_capture_interfaces,
+        resolve_capture_interfaces,
+    )
+except ImportError:
+    print("scapy is not installed. Run: pip install scapy")
     sys.exit(1)
 
 
@@ -58,44 +93,81 @@ def _patch_pyflowmeter_bulk_rate_bug():
 
 _patch_pyflowmeter_bulk_rate_bug()
 
-# ---------------- CONFIGURE THIS ----------------
-# On Windows, list your interfaces first if you're not sure of the
-# exact name — see the execution guide for the command. Common values
-# look like "Wi-Fi" or "Ethernet", but Npcap sometimes requires the
-# full adapter GUID instead.
-INTERFACE = "MediaTek Wi-Fi 6E MT7922 (RZ616) 160MHz PCIe Adapter"  # confirmed active adapter
-
-# Must match LIVE_CAPTURE_API_KEY set on the app.py side. pyflowmeter
-# can't set custom HTTP headers, so the key is passed as a URL query
-# param instead — app.py accepts either form.
-API_KEY = "dev-only-change-me"
-BACKEND_URL = f"http://127.0.0.1:5000/api/flows?api_key={API_KEY}"
+# Configure the same explicit key for app.py and this local-only collector.
+# PyFlowMeter cannot send an API-key header, so the loopback demo passes the
+# key in the query string. Production service keys are header-only.
+BACKEND_URL = f"http://127.0.0.1:5000/api/flows?api_key={quote(API_KEY, safe='')}"
 
 POLL_SECONDS = 1  # how often this script stays alive to check for Ctrl+C
-# --------------------------------------------------
 
 
 def main():
-    print(f"[live_capture] Interface : {INTERFACE}")
+    parser = argparse.ArgumentParser(
+        description="Standalone live-capture collector for the NetShield backend.",
+        epilog="Interface selection accepts 'auto' (default-route adapter), "
+        "'all', 'loopback', or a comma-separated list of names/descriptions/IPs.",
+    )
+    parser.add_argument(
+        "--interface",
+        default=os.environ.get("NETSHIELD_CAPTURE_INTERFACE", "auto"),
+        help="Interface selection (default: NETSHIELD_CAPTURE_INTERFACE or 'auto').",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List every adapter this machine can capture on and exit.",
+    )
+    args = parser.parse_args()
+
+    if args.list:
+        print(format_capture_interfaces())
+        return 0
+
+    resolved, unknown = resolve_capture_interfaces(args.interface)
+    if unknown:
+        print(f"[live_capture] WARNING: entries not in the adapter list: {', '.join(unknown)}")
+    if not resolved:
+        print(f"[live_capture] No capture interface matched {args.interface!r}.")
+        print("[live_capture] Adapters on this machine:")
+        print(format_capture_interfaces())
+        return 3
+
+    print(f"[live_capture] Interface(s): {', '.join(resolved)}")
     print(f"[live_capture] Sending flows to: {BACKEND_URL.split('?')[0]}")
     print("[live_capture] Press Ctrl+C to stop.\n")
 
-    sniffer = create_sniffer(
-        input_interface=INTERFACE,
-        to_csv=False,
-        server_endpoint=BACKEND_URL,
-    )
+    sniffers = []
+    for name in resolved:
+        try:
+            sniffer = create_sniffer(
+                input_interface=name,
+                to_csv=False,
+                server_endpoint=BACKEND_URL,
+            )
+            sniffers.append(sniffer)
+            sniffer.start()
+            print(f"[live_capture] listening on {name}")
+        except Exception as err:  # noqa: BLE001 - keep other adapters running
+            print(f"[live_capture] FAILED to start capture on {name}: {err}")
 
-    sniffer.start()
+    if not sniffers:
+        print("[live_capture] All interfaces failed to start.")
+        return 3
+
     try:
         while True:
             time.sleep(POLL_SECONDS)
     except KeyboardInterrupt:
         print("\n[live_capture] Stopping...")
-        sniffer.stop()
-        sniffer.join()
+        for sniffer in sniffers:
+            try:
+                sniffer.stop()
+                sniffer.join()
+            except Exception as err:  # noqa: BLE001
+                print(f"[live_capture] Error stopping a sniffer: {err}")
         print("[live_capture] Stopped cleanly.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

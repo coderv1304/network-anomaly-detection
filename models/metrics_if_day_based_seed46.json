@@ -1,0 +1,95 @@
+{
+  "model_type": "if",
+  "task": "binary_attack",
+  "seed": 46,
+  "split_mode": "day_based",
+  "threshold_selection": {
+    "threshold": 0.19289935912955158,
+    "max_fpr": 0.01,
+    "validation_fpr": 0.009999659102530596,
+    "validation_tpr": 0.036656363413292384
+  },
+  "binary_metrics": {
+    "threshold": 0.19289935912955158,
+    "fpr": 0.01214454500152711,
+    "tpr": 2.4043498122889755e-05,
+    "precision": 0.0006613756613756613,
+    "recall": 2.4043498122889755e-05,
+    "alert_rate": 0.009107924255527875
+  },
+  "pr_auc": 0.365792954982928,
+  "roc_auc": 0.7056901341162131,
+  "operating_threshold": {
+    "threshold": 0.19289935912955158,
+    "max_fpr": 0.01,
+    "validation_fpr": 0.009999659102530596,
+    "validation_tpr": 0.036656363413292384,
+    "test": {
+      "threshold": 0.19289935912955158,
+      "fpr": 0.01214454500152711,
+      "tpr": 2.4043498122889755e-05,
+      "precision": 0.0006613756613756613,
+      "recall": 2.4043498122889755e-05,
+      "alert_rate": 0.009107924255527875
+    },
+    "selected_on": "validation partition only"
+  },
+  "attack_family_detection": {
+    "Bot": {
+      "support": 1966,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    },
+    "DDoS": {
+      "support": 128027,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    },
+    "Infiltration": {
+      "support": 36,
+      "detected": 7,
+      "recall": 0.19444444444444445,
+      "seen_in_training": false
+    },
+    "PortScan": {
+      "support": 158930,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    },
+    "Web Attack \u2013 Brute Force": {
+      "support": 1507,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    },
+    "Web Attack \u2013 Sql Injection": {
+      "support": 21,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    },
+    "Web Attack \u2013 XSS": {
+      "support": 652,
+      "detected": 0,
+      "recall": 0.0,
+      "seen_in_training": false
+    }
+  },
+  "fit_seconds": 3.3907377000141423,
+  "feature_count": 80,
+  "train_rows": 975789,
+  "validation_rows": 692686,
+  "test_rows": 1162065,
+  "unseen_test_labels": [
+    "Bot",
+    "DDoS",
+    "Infiltration",
+    "PortScan",
+    "Web Attack \u2013 Brute Force",
+    "Web Attack \u2013 Sql Injection",
+    "Web Attack \u2013 XSS"
+  ]
+}

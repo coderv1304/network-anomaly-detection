@@ -1,5 +1,5 @@
 /* ============================================================
-   NETSHIELD AI — Enterprise SOC Batch Traffic & Telemetry Engine
+   NETSHIELD AI: Enterprise SOC Batch Traffic & Telemetry Engine
    Architectural Pillars:
    1. Compact Operational Hierarchy & Telemetry Header
    2. SHAP Explainability & Flow Inspector SideSheet Drawer
@@ -9,32 +9,25 @@
    ============================================================ */
 
 'use strict';
+function apiFetch(resource, options = {}) {
+  const headers = new Headers(options.headers || {});
+  const method = String(options.method || 'GET').toUpperCase();
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method) && csrf) headers.set('X-CSRF-Token', csrf);
+  return fetch(resource, { ...options, headers, credentials: 'same-origin' });
+}
 
-// ── Threat Severity Classifier & Rules ──
-const SEVERITY_RULES = {
-  'BENIGN':                          { label: 'Safe',     cls: 'badge-safe' },
-  'DDoS':                            { label: 'Critical', cls: 'badge-critical' },
-  'DoS slowloris':                   { label: 'Critical', cls: 'badge-critical' },
-  'DoS Slowhttptest':                { label: 'Critical', cls: 'badge-critical' },
-  'DoS Hulk':                        { label: 'Critical', cls: 'badge-critical' },
-  'DoS GoldenEye':                   { label: 'Critical', cls: 'badge-critical' },
-  'Heartbleed':                      { label: 'Critical', cls: 'badge-critical' },
-  'Infiltration':                    { label: 'Critical', cls: 'badge-critical' },
-  'Bot':                             { label: 'Critical', cls: 'badge-critical' },
-  'Web Attack – Brute Force':        { label: 'High',     cls: 'badge-high' },
-  'Web Attack – XSS':                { label: 'High',     cls: 'badge-high' },
-  'Web Attack – Sql Injection':      { label: 'High',     cls: 'badge-high' },
-  'FTP-Patator':                     { label: 'High',     cls: 'badge-high' },
-  'SSH-Patator':                     { label: 'High',     cls: 'badge-high' },
-  'PortScan':                        { label: 'Medium',   cls: 'badge-medium' },
-};
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+}
+
 
 function getSeverity(type) {
-  if (SEVERITY_RULES[type]) return SEVERITY_RULES[type];
-  if (type.includes('DoS') || type.includes('DDoS')) return { label: 'Critical', cls: 'badge-critical' };
-  if (type.includes('Web Attack') || type.includes('Patator')) return { label: 'High', cls: 'badge-high' };
-  if (type === 'BENIGN') return { label: 'Safe', cls: 'badge-safe' };
-  return { label: 'Medium', cls: 'badge-medium' };
+  return type === 'BENIGN'
+    ? { label: 'Predicted benign', cls: 'badge-safe' }
+    : { label: 'Predicted non-benign', cls: 'badge-medium' };
 }
 
 // ── DOM References ──
@@ -74,8 +67,12 @@ const drawerMitre         = document.getElementById('drawerMitre');
 
 // Incident & Threat Intel DOM
 const drawerTriageStatus  = document.getElementById('drawerTriageStatus');
-const drawerSlaBadge      = document.getElementById('drawerSlaBadge');
-const drawerAnalystName   = document.getElementById('drawerAnalystName');
+const drawerReviewNote    = document.getElementById('drawerReviewNote');
+const reviewControls      = document.getElementById('reviewControls');
+const reviewUnavailable   = document.getElementById('reviewUnavailable');
+const reviewUpdatedMeta   = document.getElementById('reviewUpdatedMeta');
+const reviewAuditList     = document.getElementById('reviewAuditList');
+const btnSaveFlowReview   = document.getElementById('btnSaveFlowReview');
 const drawerThreatAsn     = document.getElementById('drawerThreatAsn');
 const drawerThreatGeo     = document.getElementById('drawerThreatGeo');
 const drawerAbuseScore    = document.getElementById('drawerAbuseScore');
@@ -125,24 +122,16 @@ const toastContainer      = document.getElementById('toastContainer');
 // Topology Metadata & Ingestion Vectors
 const TOPOLOGY_META = {
   'all': {
-    tag: 'ALL INGRESS VECTORS',
-    desc: 'Monitoring enterprise ingress across all physical & virtual taps simultaneously'
+    tag: 'ALL UPLOADED FLOWS',
+    desc: 'All rows in the current uploaded capture or CSV analysis'
   },
-  'eth0': {
-    tag: 'ETH0 · 10GbE CORE BACKBONE',
-    desc: 'SPAN/TAP mirror on Core Catalyst 9500 (VLAN 10, 20, 50) · Full Duplex 10 Gbps'
+  'pcap': {
+    tag: 'PCAP UPLOAD',
+    desc: 'Rows reconstructed from the uploaded packet capture'
   },
-  'wlan0': {
-    tag: 'WLAN0 · 802.11AX AIRSPACE',
-    desc: 'Corp-Secure-WPA3 Wi-Fi Controller · 0 Rogue APs / Evil Twins detected'
-  },
-  'wwan0': {
-    tag: 'WWAN0 · 5G REMOTE EDGE',
-    desc: 'Verizon Private 5G NR Gateway · SIM auth valid · Latency: 18ms'
-  },
-  'wg0': {
-    tag: 'WG0 · ZERO-TRUST VPC MESH',
-    desc: 'WireGuard / Cilium eBPF mesh overlay · Mutual TLS (SPIFFE ID verified)'
+  'batch': {
+    tag: 'CSV UPLOAD',
+    desc: 'Rows from the current uploaded CSV file'
   }
 };
 
@@ -152,9 +141,8 @@ let barChart   = null;
 let currentResultsPayload = null;
 let currentSampleFlows = [];
 let activeChartFilter = null; // e.g., 'PortScan' or 'Threats'
-let activeTopologyFilter = 'all'; // 'all', 'eth0', 'wlan0', 'wwan0', 'wg0'
+let activeTopologyFilter = 'all';
 let activeInspectedFlow = null;
-let slaTimer = null;
 
 // ============================================================
 // 1. TOAST NOTIFICATION SYSTEM
@@ -164,8 +152,13 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast-message ${type === 'success' ? 'toast-success' : type === 'danger' ? 'toast-danger' : ''}`;
   
-  const icon = type === 'success' ? '✓' : type === 'danger' ? '🛡' : 'ℹ';
-  toast.innerHTML = `<span style="font-weight:700;">${icon}</span> <span>${message}</span>`;
+  const icon = type === 'success' ? '✓' : type === 'danger' ? '!' : 'ℹ';
+  const iconNode = document.createElement('span');
+  iconNode.style.fontWeight = '700';
+  iconNode.textContent = icon;
+  const messageNode = document.createElement('span');
+  messageNode.textContent = message;
+  toast.replaceChildren(iconNode, document.createTextNode(' '), messageNode);
   toastContainer.appendChild(toast);
 
   setTimeout(() => {
@@ -206,11 +199,11 @@ function selectFile(file) {
   }
   const typeLabel = EXTENSION_LABELS[ext] || 'Network Capture';
   if (uploadFilename) {
-    uploadFilename.textContent = `📦 ${file.name}  ·  ${typeLabel}  ·  ${(file.size / 1024).toFixed(0)} KB`;
+    uploadFilename.textContent = `FILE ${file.name}  ·  ${typeLabel}  ·  ${(file.size / 1024).toFixed(0)} KB`;
     uploadFilename.classList.add('show');
   }
   if (analyzeBtn) analyzeBtn.disabled = false;
-  showToast(`Ingested: ${typeLabel} — ${file.name}`, 'info');
+  showToast(`Ingested: ${typeLabel}: ${file.name}`, 'info');
 }
 
 if (dropZone) {
@@ -294,7 +287,7 @@ async function executePrediction(url, options) {
 
   try {
     advancePipeline(2);
-    const fetchPromise = fetch(url, options);
+    const fetchPromise = apiFetch(url, options);
 
     await new Promise(r => setTimeout(r, 350));
     advancePipeline(3);
@@ -334,7 +327,7 @@ if (analyzeBtn) {
 if (btnSampleDemo) {
   btnSampleDemo.addEventListener('click', async () => {
     if (uploadFilename) {
-      uploadFilename.textContent = '⚡ Built-in Test Dataset (1,500 CIC-IDS-2017 Flows)';
+      uploadFilename.textContent = 'Built-in Test Dataset (1,500 CIC-IDS-2017 Flows)';
       uploadFilename.classList.add('show');
     }
     await executePrediction('/predict?sample=true', { method: 'POST' });
@@ -351,7 +344,7 @@ function setLoading(loading) {
     btnIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>`;
-    btnText.textContent = 'Execute AI Classification';
+    btnText.textContent = 'Run flow classification';
   }
 }
 
@@ -390,13 +383,13 @@ function renderResults(data) {
   if (elClasses) elClasses.textContent = classCount.toLocaleString();
 
   if (elBenignPct) {
-    elBenignPct.textContent = total > 0 ? `${((benign / total) * 100).toFixed(1)}% safe traffic` : '0% safe';
+    elBenignPct.textContent = `${((benign / Math.max(1, total)) * 100).toFixed(1)}% predicted benign`;
   }
   if (elAttackPct) {
-    elAttackPct.textContent = total > 0 ? `${((attack / total) * 100).toFixed(1)}% anomaly threats` : '0% anomalies';
+    elAttackPct.textContent = `${((attack / Math.max(1, total)) * 100).toFixed(1)}% predicted non-benign`;
   }
   if (elTableCount) {
-    elTableCount.textContent = `${classCount} vector types identified`;
+    elTableCount.textContent = `${classCount} predicted non-benign labels`;
   }
   if (ingestionSummary && data.ingestion) {
     const ingestion = data.ingestion;
@@ -435,7 +428,7 @@ function renderDonutChart(benign, attack) {
   donutChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Benign Traffic', 'Malicious Threats'],
+      labels: ['Predicted benign', 'Predicted non-benign'],
       datasets: [{
         data: [benign, attack],
         backgroundColor: ['rgba(72, 187, 120, 0.85)', 'rgba(245, 101, 101, 0.85)'],
@@ -459,7 +452,7 @@ function renderDonutChart(benign, attack) {
           position: 'bottom',
           labels: {
             color: legendColor,
-            font: { family: 'Inter', size: 12 },
+            font: { family: 'IBM Plex Sans', size: 12 },
             padding: 16,
             usePointStyle: true
           }
@@ -521,7 +514,7 @@ function renderBarChart(attackTypes, total) {
           callbacks: {
             label: (ctx) => {
               const pct = total > 0 ? ((ctx.parsed.x / total) * 100).toFixed(1) : '0';
-              return ` ${ctx.parsed.x.toLocaleString()} flows (${pct}%) — Click to filter table`;
+              return ` ${ctx.parsed.x.toLocaleString()} flows (${pct}%): Click to filter table`;
             }
           }
         }
@@ -533,7 +526,7 @@ function renderBarChart(attackTypes, total) {
           border: { display: false }
         },
         y: {
-          ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+          ticks: { color: textColor, font: { family: 'IBM Plex Sans', size: 11 } },
           grid: { display: false },
           border: { display: false }
         }
@@ -549,7 +542,7 @@ function renderAttackTable(attackTypes, total) {
 
   const sorted = Object.entries(attackTypes || {}).sort((a, b) => b[1] - a[1]);
   if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No attack vectors identified.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No non-benign predictions in this analysis.</td></tr>';
     return;
   }
 
@@ -560,7 +553,7 @@ function renderAttackTable(attackTypes, total) {
     tr.style.cursor = 'pointer';
     tr.title = `Click to filter flows for ${type}`;
     tr.innerHTML = `
-      <td><strong>${type}</strong></td>
+      <td><strong>${escapeHtml(type)}</strong></td>
       <td class="mono">${count.toLocaleString()}</td>
       <td class="mono">${pct}%</td>
       <td><span class="badge ${sev.cls}">${sev.label}</span></td>
@@ -588,46 +581,39 @@ function renderFlowSamples(flows) {
     tr.setAttribute('data-flow-id', flow.id);
     
     // Ingress vector chip
-    const ifaceKey = (flow.interface || 'eth0').toLowerCase();
+    const ifaceKey = (flow.interface || 'unknown').toLowerCase().replace(/[^a-z0-9_-]/g, '');
     const ifaceBadge = `<span class="vector-chip ${ifaceKey}">${ifaceKey}</span>`;
 
-    // CVSS severity badge
-    const cvss = flow.incident?.cvss || (flow.is_attack ? 'CVSS 8.4 · High' : 'CVSS 0.0 · Benign');
-    let cvssCls = 'cvss-benign';
-    if (cvss.includes('Critical') || cvss.includes('9.')) cvssCls = 'cvss-critical';
-    else if (cvss.includes('High') || cvss.includes('7.')) cvssCls = 'cvss-high';
-    else if (cvss.includes('Medium') || cvss.includes('5.')) cvssCls = 'cvss-medium';
-
     // Threat intelligence enrichment
-    const asn = flow.threat_intel?.asn || 'Internal Enterprise Subnet';
-    const geo = flow.threat_intel?.geo || 'US 🇺🇸 Local VPC';
+    const asn = flow.threat_intel?.asn || 'Not enriched';
+    const geo = flow.threat_intel?.geo || 'Not available';
     const geoParts = geo.split(' ');
-    const flagIcon = geoParts[1] || '🌐';
+    const flagIcon = geoParts[0] || 'INTL';
 
     // Incident triage status
-    const status = flow.incident?.status || (flow.is_attack ? 'New' : 'Verified');
-    const statusColor = status === 'New' ? 'var(--red)' : status === 'Investigating' ? 'var(--orange)' : 'var(--green)';
+    const status = flow.review?.status || 'Unreviewed';
+    const statusColor = status === 'New' ? 'var(--red)' : status === 'Investigating' ? 'var(--orange)' : 'var(--text-med)';
 
     tr.innerHTML = `
-      <td class="mono">#${flow.id}</td>
+      <td class="mono">#${escapeHtml(flow.id)}</td>
       <td>${ifaceBadge}</td>
       <td>
         <div class="host-cell">
-          <span class="host-ip ip-clickable" data-ip="${flow.src_ip}" title="Click to copy IP">${flow.src_ip}:${flow.src_port}</span>
-          <span class="asn-sub"><span class="geo-flag">${flagIcon}</span> ${asn}</span>
+          <span class="host-ip ip-clickable" data-ip="${escapeHtml(flow.src_ip)}" title="Click to copy IP">${escapeHtml(flow.src_ip)}${flow.src_port ? `:${escapeHtml(flow.src_port)}` : ''}</span>
+          <span class="asn-sub"><span class="geo-flag">${escapeHtml(flagIcon)}</span> ${escapeHtml(asn)}</span>
         </div>
       </td>
-      <td class="mono"><span class="ip-clickable" data-ip="${flow.dst_ip}" title="Click to copy IP">${flow.dst_ip}</span>:${flow.dst_port}</td>
-      <td><span class="live-pill" style="font-size:0.65rem;">${flow.protocol}</span></td>
+      <td class="mono"><span class="ip-clickable" data-ip="${escapeHtml(flow.dst_ip)}" title="Click to copy IP">${escapeHtml(flow.dst_ip)}</span>${flow.dst_port ? `:${escapeHtml(flow.dst_port)}` : ''}</td>
+      <td><span class="live-pill" style="font-size:0.65rem;">${escapeHtml(flow.protocol)}</span></td>
       <td>
         <div style="display:flex; flex-direction:column; gap:3px;">
-          <strong>${flow.predicted_label}</strong>
-          <span class="cvss-pill ${cvssCls}">${cvss.split('·')[0].trim()}</span>
+          <strong>${escapeHtml(flow.predicted_label)}</strong>
+          <span class="cvss-pill">No risk score calculated</span>
         </div>
       </td>
       <td>
         <span class="badge" style="background:transparent; border:1px solid ${statusColor}; color:${statusColor}; font-size:0.68rem;">
-          ● ${status}
+          ● ${escapeHtml(status)}
         </span>
       </td>
       <td><button type="button" class="btn-inspect-pill">Inspect ➔</button></td>
@@ -660,41 +646,38 @@ function openFlowInspector(flow, trElement) {
   // Fill Header
   if (drawerFlowId) drawerFlowId.textContent = `Flow Record #${flow.id}`;
   if (drawerRouteText) drawerRouteText.textContent = `${flow.src_ip}:${flow.src_port} ➔ ${flow.dst_ip}:${flow.dst_port} (${flow.protocol})`;
-  if (drawerMitre) drawerMitre.textContent = flow.mitre || 'MITRE ATT&CK: T1046 · Network Service Discovery';
+  if (drawerMitre) drawerMitre.textContent = flow.mitre || 'No technique mapping available';
 
   if (drawerThreatBadge) {
     const sev = getSeverity(flow.predicted_label);
     drawerThreatBadge.className = `badge ${sev.cls}`;
-    drawerThreatBadge.textContent = `${flow.predicted_label} (${sev.label})`;
+    drawerThreatBadge.textContent = `${sev.label}: ${flow.predicted_label}`;
   }
 
   // Fill CVSS Rating Pill
   if (drawerCvssBadge) {
-    const cvss = flow.incident?.cvss || (flow.is_attack ? 'CVSS 8.4' : 'CVSS 0.0');
-    let cvssCls = 'cvss-benign';
-    if (cvss.includes('Critical') || cvss.includes('9.')) cvssCls = 'cvss-critical';
-    else if (cvss.includes('High') || cvss.includes('7.')) cvssCls = 'cvss-high';
-    else if (cvss.includes('Medium') || cvss.includes('5.')) cvssCls = 'cvss-medium';
-    drawerCvssBadge.className = `cvss-pill ${cvssCls}`;
-    drawerCvssBadge.textContent = cvss;
+    drawerCvssBadge.className = 'cvss-pill';
+    drawerCvssBadge.textContent = 'No risk score calculated';
   }
 
-  // Fill Incident Lifecycle Triage Bar
-  if (drawerTriageStatus) {
-    drawerTriageStatus.value = flow.incident?.status || (flow.is_attack ? 'New' : 'Mitigated');
+  // Persistent review is available only for records loaded from flow storage.
+  const reviewable = flow.persisted === true && Number.isSafeInteger(Number(flow.id));
+  if (reviewControls) reviewControls.hidden = !reviewable;
+  if (reviewUnavailable) reviewUnavailable.hidden = reviewable;
+  if (btnDrawerFlagFP) btnDrawerFlagFP.hidden = !reviewable;
+  if (drawerTriageStatus) drawerTriageStatus.value = flow.review?.status || 'Unreviewed';
+  if (drawerReviewNote) drawerReviewNote.value = flow.review?.note || '';
+  if (reviewUpdatedMeta) {
+    reviewUpdatedMeta.textContent = flow.review?.updated_at
+      ? `Saved by ${flow.review.updated_by || 'unknown'} at ${new Date(flow.review.updated_at).toLocaleString()}`
+      : 'No review saved';
   }
-  if (drawerSlaBadge) {
-    updateSlaCountdown();
-    if (slaTimer) clearInterval(slaTimer);
-    slaTimer = window.setInterval(updateSlaCountdown, 1000);
-  }
-  if (drawerAnalystName) {
-    drawerAnalystName.textContent = flow.incident?.analyst || 'SecOps Tier-2 (On-Call)';
-  }
+  if (reviewable) loadFlowReviewAudit(flow.id);
+  else if (reviewAuditList) reviewAuditList.replaceChildren(Object.assign(document.createElement('li'), { textContent: 'No persistent review history for this record.' }));
 
-  // Fill Threat Intelligence Attribution
-  if (drawerThreatAsn) drawerThreatAsn.textContent = flow.threat_intel?.asn || 'Internal Enterprise Fabric';
-  if (drawerThreatGeo) drawerThreatGeo.textContent = flow.threat_intel?.geo || 'US 🇺🇸 Local VPC Subnet';
+  // Fill optional public-IP reputation-provider fields
+  if (drawerThreatAsn) drawerThreatAsn.textContent = flow.threat_intel?.asn || 'Not enriched';
+  if (drawerThreatGeo) drawerThreatGeo.textContent = flow.threat_intel?.geo || 'Not available';
   if (drawerAbuseScore) {
     const score = flow.threat_intel?.abuse_score;
     const providerStatus = flow.threat_intel?.provider_status;
@@ -705,19 +688,19 @@ function openFlowInspector(flow, trElement) {
           : providerStatus === 'unavailable' ? 'Provider unavailable' : 'Not queried';
     drawerAbuseScore.className = `abuse-badge ${Number.isFinite(score) && score <= 50 ? 'badge-safe' : ''}`;
   }
-  if (drawerThreatTag) drawerThreatTag.textContent = flow.threat_intel?.tag || (flow.is_attack ? 'Automated Attack Tool' : 'Legitimate Traffic');
+  if (drawerThreatTag) drawerThreatTag.textContent = flow.threat_intel?.tag || 'No reputation tag available';
 
   // Fill Layer-2 Ingress Hardware Telemetry
-  if (drawerL2Interface) drawerL2Interface.textContent = flow.interface || 'eth0';
-  if (drawerL2Vector) drawerL2Vector.textContent = flow.l2_meta?.vector || 'Ethernet 802.3';
+  if (drawerL2Interface) drawerL2Interface.textContent = flow.interface || 'Not provided';
+  if (drawerL2Vector) drawerL2Vector.textContent = flow.l2_meta?.vector || 'Not available from flow data';
   if (drawerL2Port) {
-    drawerL2Port.textContent = flow.l2_meta?.switch_port || flow.l2_meta?.ssid || flow.l2_meta?.apn || flow.l2_meta?.peer || 'Trunk Gi0/1 (VLAN 10)';
+    drawerL2Port.textContent = flow.l2_meta?.switch_port || flow.l2_meta?.ssid || flow.l2_meta?.apn || flow.l2_meta?.peer || 'Not provided';
   }
   if (drawerL2Signal) {
-    drawerL2Signal.textContent = flow.l2_meta?.duplex || flow.l2_meta?.rssi || flow.l2_meta?.rsrp || flow.l2_meta?.mtls || 'Full Duplex 10 Gbps';
+    drawerL2Signal.textContent = flow.l2_meta?.duplex || flow.l2_meta?.rssi || flow.l2_meta?.rsrp || flow.l2_meta?.mtls || 'Not provided';
   }
   if (drawerL2Health) {
-    drawerL2Health.textContent = flow.l2_meta?.l2_health || 'ARP Table Clean · 0 Broadcast Storms';
+    drawerL2Health.textContent = flow.l2_meta?.l2_health || 'Not measured';
   }
 
   renderPacketDissector(flow.packet_dissector);
@@ -743,63 +726,47 @@ function openFlowInspector(flow, trElement) {
   // Render SHAP Waterfall mini-bars
   if (drawerShapList) {
     drawerShapList.innerHTML = '';
-    const shapItems = flow.shap || [
-      { feature: 'Flow Packets/s', value: 'Elevated', impact: 42, direction: '+' },
-      { feature: 'Subflow Fwd Bytes', value: 'High', impact: 26, direction: '+' },
-      { feature: 'Flow Duration', value: 'Short Burst', impact: 18, direction: '+' },
-      { feature: 'SYN Flag Count', value: '1', impact: 9, direction: '+' },
-      { feature: 'RST Anomaly', value: '0', impact: 5, direction: '+' },
-    ];
+    const shapItems = Array.isArray(flow.shap) ? flow.shap : [];
+    if (shapItems.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'table-sub';
+      empty.textContent = 'Per-flow explanations are unavailable for this model artifact.';
+      drawerShapList.appendChild(empty);
+    }
 
     shapItems.forEach(item => {
       const row = document.createElement('div');
       row.className = 'shap-row';
       const isPos = item.direction === '+';
+      const impact = Math.max(0, Math.min(100, Number(item.impact) || 0));
       row.innerHTML = `
         <div class="shap-row-header">
-          <span class="shap-feat-name">${item.feature} (${item.value})</span>
+          <span class="shap-feat-name">${escapeHtml(item.feature)} (${escapeHtml(item.value)})</span>
           <span class="shap-feat-val" style="color:${isPos ? 'var(--red)' : 'var(--green)'}; font-weight:700;">
-            ${item.direction}${item.impact}% contribution
+            ${escapeHtml(item.direction)}${impact}% contribution
           </span>
         </div>
         <div class="shap-bar-track">
-          <div class="shap-bar-fill ${isPos ? 'positive' : 'negative'}" style="width: ${item.impact}%;"></div>
+          <div class="shap-bar-fill ${isPos ? 'positive' : 'negative'}" style="width: ${impact}%;"></div>
         </div>
       `;
       drawerShapList.appendChild(row);
     });
   }
 
-  // Slide open drawer
+  // Slide open drawer (mobile / full-screen mode)
   if (flowDrawer) {
     flowDrawer.classList.add('open');
     flowDrawer.setAttribute('aria-hidden', 'false');
   }
   if (drawerBackdrop) drawerBackdrop.classList.add('open');
-}
 
-function updateSlaCountdown() {
-  if (!drawerSlaBadge || !activeInspectedFlow) return;
-  const incident = activeInspectedFlow.incident || {};
-  const deadline = Number(incident.sla_deadline);
-  if (!Number.isFinite(deadline)) {
-    drawerSlaBadge.textContent = 'No active SLA';
-    drawerSlaBadge.classList.remove('sla-breached');
-    return;
+  // Sync the docked inline inspector panel (desktop workbench layout)
+  if (typeof window.syncDockedInspector === 'function') {
+    window.syncDockedInspector(flow);
   }
-
-  const isActive = ['New', 'Investigating'].includes(incident.status);
-  const remaining = Math.max(0, Math.ceil(
-    isActive || !Number.isFinite(incident.sla_remaining_at_stop)
-      ? deadline - Date.now() / 1000
-      : incident.sla_remaining_at_stop
-  ));
-  const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
-  const seconds = String(remaining % 60).padStart(2, '0');
-  drawerSlaBadge.textContent = remaining === 0
-    ? 'SLA BREACHED · 00:00'
-    : `${isActive ? 'SLA' : 'SLA stopped'} · ${minutes}:${seconds}`;
-  drawerSlaBadge.classList.toggle('sla-breached', remaining === 0);
+  // Expose the active flow for the docked inspector to reference
+  window.activeInspectedFlow = flow;
 }
 
 function renderPacketDissector(header) {
@@ -865,8 +832,6 @@ function closeFlowInspector() {
   if (drawerBackdrop) drawerBackdrop.classList.remove('open');
   document.querySelectorAll('.flow-records-table tr.selected-row').forEach(r => r.classList.remove('selected-row'));
   activeInspectedFlow = null;
-  if (slaTimer) clearInterval(slaTimer);
-  slaTimer = null;
 }
 
 if (btnCloseDrawer) btnCloseDrawer.addEventListener('click', closeFlowInspector);
@@ -885,40 +850,64 @@ if (btnDrawerFlagFP) {
   btnDrawerFlagFP.addEventListener('click', () => {
     if (!activeInspectedFlow) return;
     if (drawerTriageStatus) drawerTriageStatus.value = 'Suppressed';
-    if (activeInspectedFlow.incident) {
-      const incident = activeInspectedFlow.incident;
-      if (['New', 'Investigating'].includes(incident.status)) {
-        incident.sla_remaining_at_stop = Math.max(0, Number(incident.sla_deadline) - Date.now() / 1000);
-      }
-      incident.status = 'Suppressed';
-      updateSlaCountdown();
-    }
-    filterFlowTable();
-    showToast(`Flow #${activeInspectedFlow.id} marked as Suppressed / False Positive`, 'info');
+    saveFlowReview();
   });
 }
 
-// Drawer Triage Status Change Dropdown
-if (drawerTriageStatus) {
-  drawerTriageStatus.addEventListener('change', () => {
-    if (!activeInspectedFlow) return;
-    const newStatus = drawerTriageStatus.value;
-    if (!activeInspectedFlow.incident) activeInspectedFlow.incident = {};
-    const incident = activeInspectedFlow.incident;
-    if (['New', 'Investigating'].includes(incident.status) && !['New', 'Investigating'].includes(newStatus)) {
-      incident.sla_remaining_at_stop = Math.max(0, Number(incident.sla_deadline) - Date.now() / 1000);
-    } else if (['New', 'Investigating'].includes(newStatus)) {
-      if (!['New', 'Investigating'].includes(incident.status) && Number.isFinite(incident.sla_remaining_at_stop)) {
-        incident.sla_deadline = Date.now() / 1000 + incident.sla_remaining_at_stop;
-      }
-      delete incident.sla_remaining_at_stop;
+async function loadFlowReviewAudit(flowId) {
+  if (!reviewAuditList) return;
+  try {
+    const response = await apiFetch(`/api/flows/${encodeURIComponent(flowId)}/review/audit`);
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    reviewAuditList.replaceChildren();
+    if (!payload.events?.length) {
+      reviewAuditList.appendChild(Object.assign(document.createElement('li'), { textContent: 'No review events' }));
+      return;
     }
-    incident.status = newStatus;
-    updateSlaCountdown();
-    filterFlowTable();
-    showToast(`Incident #${activeInspectedFlow.id} state updated to: ${newStatus}`, 'success');
-  });
+    payload.events.forEach((event) => {
+      const item = document.createElement('li');
+      const noteChange = event.note_changed ? ' · note updated' : '';
+      item.textContent = `${event.changed_at} · ${event.actor}: ${event.previous_status} → ${event.new_status}${noteChange}`;
+      reviewAuditList.appendChild(item);
+    });
+  } catch (error) {
+    reviewAuditList.replaceChildren(Object.assign(document.createElement('li'), { textContent: 'Review history could not be loaded.' }));
+  }
 }
+
+async function saveFlowReview() {
+  if (!activeInspectedFlow || activeInspectedFlow.persisted !== true) return;
+  if (!drawerTriageStatus || !drawerReviewNote || !btnSaveFlowReview) return;
+  const flowId = activeInspectedFlow.id;
+  btnSaveFlowReview.disabled = true;
+  const originalText = btnSaveFlowReview.textContent;
+  btnSaveFlowReview.textContent = 'Saving…';
+  try {
+    const response = await apiFetch(`/api/flows/${encodeURIComponent(flowId)}/review`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: drawerTriageStatus.value, note: drawerReviewNote.value })
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    if (activeInspectedFlow?.id !== flowId) return;
+    activeInspectedFlow.review = payload.review;
+    if (reviewUpdatedMeta) {
+      reviewUpdatedMeta.textContent = `Saved by ${payload.review.updated_by || 'unknown'} at ${new Date(payload.review.updated_at).toLocaleString()}`;
+    }
+    filterFlowTable();
+    await loadFlowReviewAudit(flowId);
+    showToast(payload.changed ? 'Review saved with audit history' : 'Review is unchanged', 'success');
+  } catch (error) {
+    showToast(`Review could not be saved: ${error.message}`, 'danger');
+  } finally {
+    btnSaveFlowReview.disabled = false;
+    btnSaveFlowReview.textContent = originalText;
+  }
+}
+
+if (btnSaveFlowReview) btnSaveFlowReview.addEventListener('click', saveFlowReview);
 
 // ============================================================
 // AUTOMATED SOAR PLAYBOOK EXECUTION TERMINAL
@@ -929,7 +918,7 @@ function dispatchSoarPlaybook(actionType, commandText, successMsg) {
     `[DISPATCHING ${actionType.toUpperCase()} PLAYBOOK]`,
     `[EXEC] ${commandText}`,
     `[SIMULATED OK] ${successMsg}`,
-    `[AUDIT] Dispatched by SecOps Tier-2 · no external enforcement performed.`
+    '[INFO] Local preview only · no external enforcement performed.'
   ]);
 
   showToast(successMsg, 'danger');
@@ -941,7 +930,7 @@ async function dispatchMockWebhook(channel) {
   const message = `${flow.predicted_label} alert for ${flow.src_ip} → ${flow.dst_ip}:${flow.dst_port}`;
   renderSoarTerminal([`[POST] Mock ${channel} webhook · Flow #${flow.id}`, '[WAIT] Awaiting local simulation response']);
   try {
-    const response = await fetch('/api/soar/webhook', {
+    const response = await apiFetch('/api/soar/webhook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel, message, flow_id: flow.id })
@@ -968,7 +957,7 @@ if (btnSoarIptables) {
   btnSoarIptables.addEventListener('click', () => {
     if (!activeInspectedFlow) return;
     const cmd = activeInspectedFlow.soar?.iptables || `sudo iptables -I INPUT -s ${activeInspectedFlow.src_ip} -j DROP`;
-    dispatchSoarPlaybook('iptables', cmd, `Host ${activeInspectedFlow.src_ip} null-routed in kernel netfilter`);
+    dispatchSoarPlaybook('iptables', cmd, 'Preview only. No host firewall action was performed.');
   });
 }
 
@@ -976,7 +965,7 @@ if (btnSoarCloudflare) {
   btnSoarCloudflare.addEventListener('click', () => {
     if (!activeInspectedFlow) return;
     const cmd = activeInspectedFlow.soar?.waf_cmd || `cloudflare-cli waf rule create --action block --ip ${activeInspectedFlow.src_ip}`;
-    dispatchSoarPlaybook('cloudflare', cmd, `Cloudflare Edge WAF block rule synchronized for ${activeInspectedFlow.src_ip}`);
+    dispatchSoarPlaybook('cloudflare', cmd, 'Preview only. No Cloudflare request was sent.');
   });
 }
 
@@ -984,7 +973,7 @@ if (btnSoarAwsSg) {
   btnSoarAwsSg.addEventListener('click', () => {
     if (!activeInspectedFlow) return;
     const cmd = activeInspectedFlow.soar?.aws_sg_cmd || `aws ec2 revoke-security-group-ingress --group-id sg-prod --cidr ${activeInspectedFlow.src_ip}/32`;
-    dispatchSoarPlaybook('aws', cmd, `AWS VPC Security Group ingress revoked for CIDR ${activeInspectedFlow.src_ip}/32`);
+    dispatchSoarPlaybook('aws', cmd, 'Preview only. No AWS request was sent.');
   });
 }
 
@@ -993,7 +982,7 @@ if (btnSoarStix) {
     if (!activeInspectedFlow) return;
     const stixId = activeInspectedFlow.soar?.stix_id || `indicator--${Date.now()}`;
     const cmd = `export_stix_bundle --indicator-id "${stixId}" --threat-pattern "[network-traffic:src_ref.value = '${activeInspectedFlow.src_ip}']"`;
-    dispatchSoarPlaybook('stix', cmd, `STIX 2.1 Threat Indicator ${stixId} published to TAXII server`);
+    dispatchSoarPlaybook('stix', cmd, 'Preview only. No STIX bundle was exported or published.');
   });
 }
 
@@ -1006,7 +995,7 @@ function setChartCrossFilter(filterValue, labelText) {
     activeFilterChips.hidden = false;
     filterChipsList.innerHTML = `
       <div class="filter-chip">
-        <span>${labelText}</span>
+        <span>${escapeHtml(labelText)}</span>
         <button type="button" class="filter-chip-remove" id="btnRemoveChip">✕</button>
       </div>
     `;
@@ -1036,7 +1025,7 @@ function filterFlowTable() {
     // 1. Ingestion Vector (Topology) filter
     let matchesVector = true;
     if (activeTopologyFilter !== 'all') {
-      matchesVector = (flow.interface || 'eth0').toLowerCase() === activeTopologyFilter.toLowerCase();
+      matchesVector = (flow.interface || 'unknown').toLowerCase() === activeTopologyFilter.toLowerCase();
     }
 
     // 2. Search filter
@@ -1074,29 +1063,19 @@ const topologyTabs = document.querySelectorAll('.topology-tab');
 
 const TOPOLOGY_BANNER = {
   'all': {
-    iface: 'Global Multi-Vector Ingestion (All Interfaces)',
-    link: 'eth0 + wlan0 + wwan0 + wg0 aggregated · 4.34 Gbps total wire rate',
-    health: 'ARP Cache Clean · Airspace Monitored · Zero-Trust Active · eBPF Ring Buffers Online'
+    iface: 'All uploaded inputs',
+    link: 'Interface metadata is not available unless included in the upload',
+    health: 'Link-layer inspection is not implemented'
   },
-  'eth0': {
-    iface: 'eth0 · Enterprise 10GbE Fiber Backbone',
-    link: 'Trunk Gi0/1 (VLAN 10, 20, 50) · Full Duplex 10 Gbps · Cisco Catalyst 9500 SPAN',
-    health: 'ARP Cache Clean · MAC Table Stable · 0 Broadcast Storms Detected'
+  'pcap': {
+    iface: 'Uploaded packet capture',
+    link: 'Packet capture file processed locally by the configured parser',
+    health: 'No live interface health data is collected'
   },
-  'wlan0': {
-    iface: 'wlan0 · Corporate 802.11ax Wi-Fi 6 Controller',
-    link: 'SSID: Corp-Secure-WPA3 · BSSID: 00:14:22:01:FA:0C · RSSI: -58 dBm',
-    health: '0 Rogue APs / Evil Twins · 0 Deauth Floods · Airspace Health: CLEAN'
-  },
-  'wwan0': {
-    iface: 'wwan0 · 5G NR Cellular / Remote Edge IoT Gateway',
-    link: 'Carrier: Verizon Private 5G · APN: iot.edge.internal · RSRP: -84 dBm · Latency: 18ms',
-    health: 'SIM Verified · eNodeB Stable · 0 Abnormal Handoff Events Detected'
-  },
-  'wg0': {
-    iface: 'wg0 · WireGuard Zero-Trust VPN / Kubernetes CNI Mesh',
-    link: 'Cilium eBPF Overlay · Mutual TLS (SPIFFE ID enforced) · 8 Active Peers',
-    health: 'Zero-Trust Policy Enforced · 0 Lateral Movement Alerts · SPIRE Attestation Valid'
+  'batch': {
+    iface: 'Uploaded CSV file',
+    link: 'Flow rows processed by the model pipeline',
+    health: 'No live interface health data is collected'
   }
 };
 

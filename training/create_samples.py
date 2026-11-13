@@ -28,7 +28,7 @@ CANDIDATE_FILES = [
 def load_and_sample(raw_dir=DEFAULT_RAW_DIR, output_dir=DEFAULT_OUTPUT_DIR, n_per_class=2000, random_state=42):
     os.makedirs(output_dir, exist_ok=True)
     sampled_frames = []
-    encodings = ["utf-8", "latin1", "ISO-8859-1"]
+    encodings = ["utf-8-sig", "cp1252", "latin1"]
 
     print(f"Scanning raw files in {raw_dir}...")
     for filename in CANDIDATE_FILES:

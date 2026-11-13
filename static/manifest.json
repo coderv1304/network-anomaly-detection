@@ -1,14 +1,14 @@
 {
-  "name": "NetShield — AI Network Anomaly Detection",
+  "name": "NetShield: Network-Flow Research Prototype",
   "short_name": "NetShield",
-  "description": "AI-driven network traffic anomaly detection: batch CSV analysis and live monitoring dashboard.",
+  "description": "Educational network-flow classification, batch analysis, and stored-prediction review.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#0d1b2a",
-  "theme_color": "#0d1b2a",
+  "background_color": "#101516",
+  "theme_color": "#101516",
   "categories": ["security", "utilities", "productivity"],
   "icons": [
     {
@@ -22,19 +22,13 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/static/icons/maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Live Dashboard",
+      "name": "Stored Flow Review",
       "short_name": "Dashboard",
-      "description": "Jump straight to the live monitoring dashboard",
+      "description": "Review stored flow records and model predictions",
       "url": "/dashboard?source=pwa_shortcut",
       "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
     },

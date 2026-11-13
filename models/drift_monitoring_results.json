@@ -1,0 +1,415 @@
+[
+  {
+    "window": "Tue_KnownAttacks",
+    "flow_count": 445905,
+    "attack_count": 1558,
+    "benign_count": 48442,
+    "attack_prevalence": 0.03116,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 2,
+      "feature_drift_flag": true,
+      "drift_warning_triggered": true,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.06976000000000004,
+          "ks_pvalue": 3.114453816092943e-106,
+          "feature_psi": 0.0722342662935133,
+          "drift_flag": false
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.023540000000000005,
+          "ks_pvalue": 1.819798499770071e-12,
+          "feature_psi": 0.013254586162103772,
+          "drift_flag": false
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.02061999999999997,
+          "ks_pvalue": 1.1521438256338816e-09,
+          "feature_psi": 0.00641744040650927,
+          "drift_flag": false
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.14044,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.15831223904150385,
+          "drift_flag": true
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.031352610232993294,
+          "ks_pvalue": 9.069281304332495e-22,
+          "feature_psi": 0.020092407105616668,
+          "drift_flag": false
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.1392156698426847,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.1251690202103021,
+          "drift_flag": true
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 1.0,
+      "test_fpr": 0.0,
+      "performance_degraded": false
+    },
+    "monitor_evaluation": "False Warning (Type I Error)"
+  },
+  {
+    "window": "Wed_DoS_Heartbleed",
+    "flow_count": 692686,
+    "attack_count": 18268,
+    "benign_count": 31732,
+    "attack_prevalence": 0.36536,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 6,
+      "feature_drift_flag": true,
+      "drift_warning_triggered": true,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.21595999999999993,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.6389383806637345,
+          "drift_flag": true
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.19340000000000002,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.2979561708518119,
+          "drift_flag": true
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.13395999999999997,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.15982097654373753,
+          "drift_flag": true
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.22904000000000002,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.3633288022812261,
+          "drift_flag": true
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.20756692060957882,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.29120254578770044,
+          "drift_flag": true
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.2219430960681295,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.2682329791742785,
+          "drift_flag": true
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": true
+    },
+    "monitor_evaluation": "True Warning (Valid Alert)"
+  },
+  {
+    "window": "Thu_AM_WebAttacks",
+    "flow_count": 170365,
+    "attack_count": 652,
+    "benign_count": 49348,
+    "attack_prevalence": 0.01304,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 0,
+      "feature_drift_flag": false,
+      "drift_warning_triggered": false,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.08355999999999997,
+          "ks_pvalue": 2.653736537612907e-152,
+          "feature_psi": 0.08052137034264507,
+          "drift_flag": false
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.03725999999999999,
+          "ks_pvalue": 1.3629549197350885e-30,
+          "feature_psi": 0.021497650827607944,
+          "drift_flag": false
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.02499999999999991,
+          "ks_pvalue": 5.251977551557825e-14,
+          "feature_psi": 0.013046599902936376,
+          "drift_flag": false
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.03071999999999997,
+          "ks_pvalue": 6.2435383168814494e-21,
+          "feature_psi": 0.012158025061706646,
+          "drift_flag": false
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.04045983798873881,
+          "ks_pvalue": 5.711343832623311e-36,
+          "feature_psi": 0.01825864711176112,
+          "drift_flag": false
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.03057290986981842,
+          "ks_pvalue": 1.0156711302334634e-20,
+          "feature_psi": 0.022790336033556277,
+          "drift_flag": false
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": true
+    },
+    "monitor_evaluation": "Missed Degradation (Type II Error)"
+  },
+  {
+    "window": "Thu_PM_Infiltration",
+    "flow_count": 288460,
+    "attack_count": 6,
+    "benign_count": 49994,
+    "attack_prevalence": 0.00012,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 5,
+      "feature_drift_flag": true,
+      "drift_warning_triggered": true,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.14448000000000005,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.10376684706897688,
+          "drift_flag": true
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.16734000000000002,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.1773428315916764,
+          "drift_flag": true
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.08196000000000003,
+          "ks_pvalue": 1.5582259190784506e-146,
+          "feature_psi": 0.07540452064558525,
+          "drift_flag": false
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.19704000000000002,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.212602016614548,
+          "drift_flag": true
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.18294491833976922,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.1604553320594675,
+          "drift_flag": true
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.16808757022082732,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.2174156072643514,
+          "drift_flag": true
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": false
+    },
+    "monitor_evaluation": "False Warning (Type I Error)"
+  },
+  {
+    "window": "Fri_AM_Botnet",
+    "flow_count": 191031,
+    "attack_count": 495,
+    "benign_count": 49505,
+    "attack_prevalence": 0.0099,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 1,
+      "feature_drift_flag": false,
+      "drift_warning_triggered": false,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.09289999999999998,
+          "ks_pvalue": 3.218654898227319e-188,
+          "feature_psi": 0.1873244605596237,
+          "drift_flag": true
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.04002,
+          "ks_pvalue": 3.1553471302156244e-35,
+          "feature_psi": 0.026687407739455236,
+          "drift_flag": false
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.030099999999999905,
+          "ks_pvalue": 4.118769558870955e-20,
+          "feature_psi": 0.007979283362063916,
+          "drift_flag": false
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.05557999999999996,
+          "ks_pvalue": 1.4442758832443093e-67,
+          "feature_psi": 0.016399668176025096,
+          "drift_flag": false
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.037580490890833596,
+          "ks_pvalue": 4.293973297780004e-31,
+          "feature_psi": 0.01772417284806945,
+          "drift_flag": false
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.027764226174085554,
+          "ks_pvalue": 3.648719091000215e-17,
+          "feature_psi": 0.013807926511904935,
+          "drift_flag": false
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": true
+    },
+    "monitor_evaluation": "Missed Degradation (Type II Error)"
+  },
+  {
+    "window": "Fri_PM_PortScan",
+    "flow_count": 286466,
+    "attack_count": 27666,
+    "benign_count": 22334,
+    "attack_prevalence": 0.55332,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 6,
+      "feature_drift_flag": true,
+      "drift_warning_triggered": true,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.38094000000000006,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.46652229641087894,
+          "drift_flag": true
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.4261999999999999,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.9282633808986628,
+          "drift_flag": true
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.41963999999999996,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.7743667875538338,
+          "drift_flag": true
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.47462,
+          "ks_pvalue": 0.0,
+          "feature_psi": 1.0381830021235494,
+          "drift_flag": true
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.38804028066399593,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.827097963660473,
+          "drift_flag": true
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.3866795857892588,
+          "ks_pvalue": 0.0,
+          "feature_psi": 1.1413939174834704,
+          "drift_flag": true
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": true
+    },
+    "monitor_evaluation": "True Warning (Valid Alert)"
+  },
+  {
+    "window": "Fri_PM_DDoS",
+    "flow_count": 225743,
+    "attack_count": 28299,
+    "benign_count": 21701,
+    "attack_prevalence": 0.56598,
+    "unsupervised_metrics": {
+      "score_psi": 0.0,
+      "score_drift_flag": false,
+      "features_flagged": 6,
+      "feature_drift_flag": true,
+      "drift_warning_triggered": true,
+      "feature_drifts": {
+        "Destination Port": {
+          "ks_statistic": 0.26612,
+          "ks_pvalue": 0.0,
+          "feature_psi": 1.4080430919002256,
+          "drift_flag": true
+        },
+        "Flow Duration": {
+          "ks_statistic": 0.40787999999999996,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.7833963487652412,
+          "drift_flag": true
+        },
+        "Total Fwd Packets": {
+          "ks_statistic": 0.38643999999999995,
+          "ks_pvalue": 0.0,
+          "feature_psi": 1.0918575491109754,
+          "drift_flag": true
+        },
+        "Packet Length Mean": {
+          "ks_statistic": 0.41000000000000003,
+          "ks_pvalue": 0.0,
+          "feature_psi": 1.3559376528194957,
+          "drift_flag": true
+        },
+        "Flow Packets/s": {
+          "ks_statistic": 0.40845602004193715,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.7413956807790907,
+          "drift_flag": true
+        },
+        "Flow Bytes/s": {
+          "ks_statistic": 0.2090098558911045,
+          "ks_pvalue": 0.0,
+          "feature_psi": 0.3737825379939007,
+          "drift_flag": true
+        }
+      }
+    },
+    "ground_truth_performance": {
+      "frozen_threshold": 0.5,
+      "test_recall": 0.0,
+      "test_fpr": 0.0,
+      "performance_degraded": true
+    },
+    "monitor_evaluation": "True Warning (Valid Alert)"
+  }
+]

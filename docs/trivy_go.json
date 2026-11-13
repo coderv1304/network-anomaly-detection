@@ -1,0 +1,64 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.76.1"
+  },
+  "ReportID": "01a1c32f-821e-7bb6-8681-30a67d46ac83",
+  "CreatedAt": "2026-11-10T07:30:33.0547676+05:30",
+  "ArtifactName": "capture",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "go.mod",
+      "Class": "lang-pkgs",
+      "Type": "gomod",
+      "Packages": [
+        {
+          "ID": "capture",
+          "Name": "capture",
+          "Identifier": {
+            "PURL": "pkg:golang/capture",
+            "UID": "b4be94bad6f8aa63"
+          },
+          "Relationship": "root",
+          "DependsOn": [
+            "github.com/google/gopacket@v1.1.19"
+          ],
+          "AnalyzedBy": "gomod"
+        },
+        {
+          "ID": "github.com/google/gopacket@v1.1.19",
+          "Name": "github.com/google/gopacket",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/google/gopacket@v1.1.19",
+            "UID": "c82d135debfade1d"
+          },
+          "Version": "v1.1.19",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "golang.org/x/sys@v0.50.0"
+          ],
+          "AnalyzedBy": "gomod"
+        },
+        {
+          "ID": "golang.org/x/sys@v0.50.0",
+          "Name": "golang.org/x/sys",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/sys@v0.50.0",
+            "UID": "73e092bc63f24c76"
+          },
+          "Version": "v0.50.0",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "gomod"
+        }
+      ]
+    }
+  ]
+}

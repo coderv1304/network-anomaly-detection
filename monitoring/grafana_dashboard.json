@@ -1,0 +1,66 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Ingest requests by outcome",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "sum by (outcome) (rate(netshield_ingest_requests_total[5m]))", "legendFormat": "{{outcome}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Bounded admission: queue depth and in-flight",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "netshield_ingest_queue_depth", "legendFormat": "waiting"},
+        {"expr": "netshield_ingest_inflight", "legendFormat": "in-flight"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest stage p95 latency",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(netshield_ingest_stage_seconds_bucket[5m])) by (le, stage))", "legendFormat": "{{stage}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API p95 latency by route",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(netshield_api_latency_seconds_bucket[5m])) by (le, route))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Prediction errors and alert delivery failures",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "targets": [
+        {"expr": "sum(rate(netshield_prediction_errors_total[5m]))", "legendFormat": "prediction errors"},
+        {"expr": "sum(rate(netshield_alert_delivery_failures_total[5m]))", "legendFormat": "alert delivery failures"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Flow store rows and predicted attack rate",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "targets": [
+        {"expr": "netshield_flow_store_rows", "legendFormat": "stored rows"},
+        {"expr": "sum(rate(netshield_prediction_labels_total{label!=\"BENIGN\"}[5m]))", "legendFormat": "attack predictions/s"}
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["netshield", "slo"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "NetShield Reliability SLOs",
+  "uid": "netshield-slo",
+  "version": 1
+}

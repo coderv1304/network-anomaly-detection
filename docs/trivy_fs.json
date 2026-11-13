@@ -1,0 +1,1192 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.76.1"
+  },
+  "ReportID": "01a1c019-0da3-72ad-99ff-a2cbec6a54ca",
+  "CreatedAt": "2026-11-09T17:07:09.7951755+05:30",
+  "ArtifactID": "sha256:9a8ccc50ffefa497e99b27cd9ad8f5b1c603d736d31ba771b36c9c4cb750ed91",
+  "ArtifactName": ".",
+  "ArtifactType": "repository",
+  "Metadata": {
+    "RepoURL": "https://github.com/coderv1304/network-anomaly-detection.git",
+    "Branch": "main",
+    "Commit": "4e6fbe3140be30271c6af9d8437abe6e02e5a3db",
+    "CommitMsg": "Made my final move for Project Presentation",
+    "Author": "Varun Nair \u003ccoderv13@gmail.com\u003e",
+    "Committer": "Varun Nair \u003ccoderv13@gmail.com\u003e"
+  },
+  "Results": [
+    {
+      "Target": "capture/go.mod",
+      "Class": "lang-pkgs",
+      "Type": "gomod",
+      "Packages": [
+        {
+          "ID": "capture",
+          "Name": "capture",
+          "Identifier": {
+            "PURL": "pkg:golang/capture",
+            "UID": "e1ad66595a44c2fd"
+          },
+          "Relationship": "root",
+          "DependsOn": [
+            "github.com/google/gopacket@v1.1.19"
+          ],
+          "AnalyzedBy": "gomod"
+        },
+        {
+          "ID": "github.com/google/gopacket@v1.1.19",
+          "Name": "github.com/google/gopacket",
+          "Identifier": {
+            "PURL": "pkg:golang/github.com/google/gopacket@v1.1.19",
+            "UID": "2ae73eb04c38d4e8"
+          },
+          "Version": "v1.1.19",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "golang.org/x/sys@v0.0.0-20190412213103-97732733099d"
+          ],
+          "AnalyzedBy": "gomod"
+        },
+        {
+          "ID": "golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+          "Name": "golang.org/x/sys",
+          "Identifier": {
+            "PURL": "pkg:golang/golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+            "UID": "8d94d2069fd8c9f6"
+          },
+          "Version": "v0.0.0-20190412213103-97732733099d",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "gomod"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2022-29526",
+          "VendorIDs": [
+            "GHSA-p782-xgp4-8hr8",
+            "GO-2022-0493"
+          ],
+          "PkgID": "golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+          "PkgName": "golang.org/x/sys",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+            "UID": "8d94d2069fd8c9f6"
+          },
+          "InstalledVersion": "v0.0.0-20190412213103-97732733099d",
+          "FixedVersion": "0.0.0-20220412211240-33da011f77ad",
+          "Status": "fixed",
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-29526",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:ffd9d55b5429807db251ceda6e56a374116f10572e6fd3d1df6e13b203141940",
+          "Title": "golang: syscall: faccessat checks wrong group",
+          "Description": "Go before 1.17.10 and 1.18.x before 1.18.2 has Incorrect Privilege Assignment. When called with a non-zero flags parameter, the Faccessat function could incorrectly report that a file is accessible.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-269"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "nvd": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 3,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V3Score": 5.3
+            },
+            "nvd": {
+              "V2Vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V2Score": 5,
+              "V3Score": 5.3
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 6.2
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2022:5799",
+            "https://access.redhat.com/security/cve/CVE-2022-29526",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107342",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107371",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107374",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107376",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107383",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107386",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107388",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107390",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2107392",
+            "https://creativecommons.org/licenses/by/4.0/",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1705",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1962",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-24675",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-24921",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-28131",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-28327",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-29526",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30629",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30630",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30631",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30632",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30633",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30635",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32148",
+            "https://errata.rockylinux.org/RLSA-2022:5799",
+            "https://github.com/golang/go/commit/f66925e854e71e0c54b581885380a490d7afa30c",
+            "https://github.com/golang/go/issues/52313",
+            "https://go.dev/cl/399539",
+            "https://go.dev/cl/400074",
+            "https://go.dev/issue/52313",
+            "https://groups.google.com/g/golang-announce",
+            "https://groups.google.com/g/golang-announce/c/Y5qrqw_lWdU",
+            "https://linux.oracle.com/cve/CVE-2022-29526.html",
+            "https://linux.oracle.com/errata/ELSA-2022-5337.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/Q6GE5EQGE4L2KRVGW4T75QVIYAXCLO5X/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/RQXU752ALW53OJAF5MG3WMR5CCZVLWW6/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/Z55VUVGO7E5PJFXIOVAY373NZRHBNCI5/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZY2SLWOQR4ZURQ7UBRZ7JIX6H6F5JHJR/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-29526",
+            "https://pkg.go.dev/vuln/GO-2022-0493",
+            "https://security.gentoo.org/glsa/202208-02",
+            "https://security.netapp.com/advisory/ntap-20220729-0001/",
+            "https://ubuntu.com/security/notices/USN-6038-1",
+            "https://ubuntu.com/security/notices/USN-6038-2",
+            "https://www.cve.org/CVERecord?id=CVE-2022-29526"
+          ],
+          "PublishedDate": "2022-06-23T17:15:12.747Z",
+          "LastModifiedDate": "2026-06-17T04:40:22.153Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-39824",
+          "VendorIDs": [
+            "GO-2026-5024"
+          ],
+          "PkgID": "golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+          "PkgName": "golang.org/x/sys",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/golang.org/x/sys@v0.0.0-20190412213103-97732733099d",
+            "UID": "8d94d2069fd8c9f6"
+          },
+          "InstalledVersion": "v0.0.0-20190412213103-97732733099d",
+          "FixedVersion": "0.44.0",
+          "Status": "fixed",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39824",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:f41933ddeb505f0f24b7111c3dfe9cf3b6f50c9ad659b5abbb57bf8dafd2358c",
+          "Title": "Invoking integer overflow in NewNTUnicodeString in golang.org/x/sys/windows",
+          "Description": "NewNTUnicodeString does not check for string length overflow. When provided with a string that overflows the maximum size of a NTUnicodeString (a 16-bit number of bytes), it returns a truncated string rather than an error.",
+          "Severity": "UNKNOWN",
+          "CweIDs": [
+            "CWE-190"
+          ],
+          "References": [
+            "https://go.dev/cl/770080",
+            "https://go.dev/issue/78916",
+            "https://groups.google.com/g/golang-announce/c/6MMI8Lj-Atg",
+            "https://pkg.go.dev/vuln/GO-2026-5024"
+          ],
+          "PublishedDate": "2026-05-22T20:16:33.057Z",
+          "LastModifiedDate": "2026-07-23T16:10:00.137Z"
+        }
+      ]
+    },
+    {
+      "Target": "requirements.txt",
+      "Class": "lang-pkgs",
+      "Type": "pip",
+      "Packages": [
+        {
+          "Name": "Flask",
+          "Identifier": {
+            "PURL": "pkg:pypi/flask@2.3.2",
+            "UID": "6c0587d963ac9b73"
+          },
+          "Version": "2.3.2",
+          "Locations": [
+            {
+              "StartLine": 1,
+              "EndLine": 1
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "Flask-Limiter",
+          "Identifier": {
+            "PURL": "pkg:pypi/flask-limiter@3.5.1",
+            "UID": "778907aaf4975314"
+          },
+          "Version": "3.5.1",
+          "Locations": [
+            {
+              "StartLine": 24,
+              "EndLine": 24
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "Flask-SQLAlchemy",
+          "Identifier": {
+            "PURL": "pkg:pypi/flask-sqlalchemy@3.1.1",
+            "UID": "15185f752892779c"
+          },
+          "Version": "3.1.1",
+          "Locations": [
+            {
+              "StartLine": 9,
+              "EndLine": 9
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "Flask-SocketIO",
+          "Identifier": {
+            "PURL": "pkg:pypi/flask-socketio@5.3.6",
+            "UID": "ec0e7d626f9bfaa9"
+          },
+          "Version": "5.3.6",
+          "Locations": [
+            {
+              "StartLine": 8,
+              "EndLine": 8
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "bandit",
+          "Identifier": {
+            "PURL": "pkg:pypi/bandit@1.7.9",
+            "UID": "f1066e971ed5efec"
+          },
+          "Version": "1.7.9",
+          "Locations": [
+            {
+              "StartLine": 22,
+              "EndLine": 22
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "eventlet",
+          "Identifier": {
+            "PURL": "pkg:pypi/eventlet@0.36.1",
+            "UID": "d402e15d4cfe780c"
+          },
+          "Version": "0.36.1",
+          "Locations": [
+            {
+              "StartLine": 13,
+              "EndLine": 13
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "gunicorn",
+          "Identifier": {
+            "PURL": "pkg:pypi/gunicorn@22.0.0",
+            "UID": "4bb190bdd5336f1b"
+          },
+          "Version": "22.0.0",
+          "Locations": [
+            {
+              "StartLine": 7,
+              "EndLine": 7
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "joblib",
+          "Identifier": {
+            "PURL": "pkg:pypi/joblib@1.4.2",
+            "UID": "7dad5ecd29d8f946"
+          },
+          "Version": "1.4.2",
+          "Locations": [
+            {
+              "StartLine": 6,
+              "EndLine": 6
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "lightgbm",
+          "Identifier": {
+            "PURL": "pkg:pypi/lightgbm@4.5.0",
+            "UID": "42b816df9f49e22d"
+          },
+          "Version": "4.5.0",
+          "Locations": [
+            {
+              "StartLine": 19,
+              "EndLine": 19
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "numpy",
+          "Identifier": {
+            "PURL": "pkg:pypi/numpy@1.26.1",
+            "UID": "7bf37af6124c1449"
+          },
+          "Version": "1.26.1",
+          "Locations": [
+            {
+              "StartLine": 4,
+              "EndLine": 4
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "pandas",
+          "Identifier": {
+            "PURL": "pkg:pypi/pandas@2.2.3",
+            "UID": "e061c6a354efd5c1"
+          },
+          "Version": "2.2.3",
+          "Locations": [
+            {
+              "StartLine": 3,
+              "EndLine": 3
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "prometheus-client",
+          "Identifier": {
+            "PURL": "pkg:pypi/prometheus-client@0.20.0",
+            "UID": "b81d8c24a0743c7"
+          },
+          "Version": "0.20.0",
+          "Locations": [
+            {
+              "StartLine": 23,
+              "EndLine": 23
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "psycopg",
+          "Identifier": {
+            "PURL": "pkg:pypi/psycopg@3.3.8",
+            "UID": "910a49cf313deb1a"
+          },
+          "Version": "3.3.8",
+          "Locations": [
+            {
+              "StartLine": 10,
+              "EndLine": 10
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "pyflowmeter",
+          "Identifier": {
+            "PURL": "pkg:pypi/pyflowmeter@0.2.4",
+            "UID": "99b8726e6b1e930"
+          },
+          "Version": "0.2.4",
+          "Locations": [
+            {
+              "StartLine": 14,
+              "EndLine": 14
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "pytest",
+          "Identifier": {
+            "PURL": "pkg:pypi/pytest@8.2.2",
+            "UID": "58d0985c7f961fba"
+          },
+          "Version": "8.2.2",
+          "Locations": [
+            {
+              "StartLine": 18,
+              "EndLine": 18
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "python-dotenv",
+          "Identifier": {
+            "PURL": "pkg:pypi/python-dotenv@1.0.0",
+            "UID": "6d7ea0a1b7a53f4b"
+          },
+          "Version": "1.0.0",
+          "Locations": [
+            {
+              "StartLine": 25,
+              "EndLine": 25
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "python-socketio",
+          "Identifier": {
+            "PURL": "pkg:pypi/python-socketio@5.11.2",
+            "UID": "3c3f3f48ad3ca26b"
+          },
+          "Version": "5.11.2",
+          "Locations": [
+            {
+              "StartLine": 11,
+              "EndLine": 11
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "redis",
+          "Identifier": {
+            "PURL": "pkg:pypi/redis@5.0.8",
+            "UID": "cb742587ab8ee6a1"
+          },
+          "Version": "5.0.8",
+          "Locations": [
+            {
+              "StartLine": 17,
+              "EndLine": 17
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "requests",
+          "Identifier": {
+            "PURL": "pkg:pypi/requests@2.32.0",
+            "UID": "7a9e95e911efc67"
+          },
+          "Version": "2.32.0",
+          "Locations": [
+            {
+              "StartLine": 15,
+              "EndLine": 15
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "ruff",
+          "Identifier": {
+            "PURL": "pkg:pypi/ruff@0.6.5",
+            "UID": "98c53e14de574517"
+          },
+          "Version": "0.6.5",
+          "Locations": [
+            {
+              "StartLine": 21,
+              "EndLine": 21
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "scapy",
+          "Identifier": {
+            "PURL": "pkg:pypi/scapy@2.5.0",
+            "UID": "1b7462d5ff7a20fd"
+          },
+          "Version": "2.5.0",
+          "Locations": [
+            {
+              "StartLine": 16,
+              "EndLine": 16
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "scikit-learn",
+          "Identifier": {
+            "PURL": "pkg:pypi/scikit-learn@1.5.2",
+            "UID": "a515a74879f86f6b"
+          },
+          "Version": "1.5.2",
+          "Locations": [
+            {
+              "StartLine": 5,
+              "EndLine": 5
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "shap",
+          "Identifier": {
+            "PURL": "pkg:pypi/shap@0.46.0",
+            "UID": "9ec21eafa4750f0b"
+          },
+          "Version": "0.46.0",
+          "Locations": [
+            {
+              "StartLine": 20,
+              "EndLine": 20
+            }
+          ],
+          "AnalyzedBy": "pip"
+        },
+        {
+          "Name": "simple-websocket",
+          "Identifier": {
+            "PURL": "pkg:pypi/simple-websocket@1.0.0",
+            "UID": "c52a979dd013919c"
+          },
+          "Version": "1.0.0",
+          "Locations": [
+            {
+              "StartLine": 12,
+              "EndLine": 12
+            }
+          ],
+          "AnalyzedBy": "pip"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-27205",
+          "VendorIDs": [
+            "GHSA-68rp-wp8r-4726"
+          ],
+          "PkgName": "Flask",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/flask@2.3.2",
+            "UID": "6c0587d963ac9b73"
+          },
+          "InstalledVersion": "2.3.2",
+          "FixedVersion": "3.1.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-27205",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:17bdeb2f0d75341855fd09a7e93cc87afd6ee822e2dd54f0e40be27206b9e465",
+          "Title": "flask: Flask: Information disclosure via improper caching of session data",
+          "Description": "Flask is a web server gateway interface (WSGI) web application framework. In versions 3.1.2 and below, when the session object is accessed, Flask should set the Vary: Cookie header., resulting in a Use of Cache Containing Sensitive Information vulnerability. The logic instructs caches not to cache the response, as it may contain information specific to a logged in user. This is handled in most cases, but some forms of access such as the Python in operator were overlooked. The severity and risk depend on the application being hosted behind a caching proxy that doesn't ignore responses with cookies, not setting a Cache-Control header to mark pages as private or non-cacheable, and accessing the session in a way that only touches keys without reading values or mutating the session. The issue has been fixed in version 3.1.3.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-524"
+          ],
+          "VendorSeverity": {
+            "amazon": 2,
+            "ghsa": 1,
+            "nvd": 2,
+            "redhat": 2,
+            "ubuntu": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 2.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+              "V3Score": 4.3
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+              "V3Score": 4.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-27205",
+            "https://github.com/pallets/flask",
+            "https://github.com/pallets/flask/commit/089cb86dd22bff589a4eafb7ab8e42dc357623b4",
+            "https://github.com/pallets/flask/releases/tag/3.1.3",
+            "https://github.com/pallets/flask/security/advisories/GHSA-68rp-wp8r-4726",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-27205",
+            "https://ubuntu.com/security/notices/USN-8104-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-27205"
+          ],
+          "PublishedDate": "2026-02-21T06:17:00.91Z",
+          "LastModifiedDate": "2026-06-17T10:26:50.7Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58068",
+          "VendorIDs": [
+            "GHSA-hw6f-rjfj-j7j7"
+          ],
+          "PkgName": "eventlet",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/eventlet@0.36.1",
+            "UID": "d402e15d4cfe780c"
+          },
+          "InstalledVersion": "0.36.1",
+          "FixedVersion": "0.40.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58068",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:368b6bf437582a94a4d4da81e5b26cdae077acc5e4d315db5fb346d2b50322b9",
+          "Title": "python-eventlet: Eventlet HTTP request smuggling",
+          "Description": "Eventlet is a concurrent networking library for Python. Prior to version 0.40.3, the Eventlet WSGI parser is vulnerable to HTTP Request Smuggling due to improper handling of HTTP trailer sections. This vulnerability could enable attackers to, bypass front-end security controls, launch targeted attacks against active site users, and poison web caches. This problem has been patched in Eventlet 0.40.3 by dropping trailers which is a breaking change if a backend behind eventlet.wsgi proxy requires trailers. A workaround involves not using eventlet.wsgi facing untrusted clients.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-444"
+          ],
+          "VendorSeverity": {
+            "ghsa": 2,
+            "nvd": 4,
+            "redhat": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N",
+              "V40Score": 6.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-58068",
+            "https://github.com/eventlet/eventlet",
+            "https://github.com/eventlet/eventlet/commit/0bfebd1117d392559e25b4bfbfcc941754de88fb",
+            "https://github.com/eventlet/eventlet/commit/0bfebd1117d392559e25b4bfbfcc941754de88fb%20%280.40.3%29",
+            "https://github.com/eventlet/eventlet/issues/380",
+            "https://github.com/eventlet/eventlet/pull/1062",
+            "https://github.com/eventlet/eventlet/security/advisories/GHSA-hw6f-rjfj-j7j7",
+            "https://lists.debian.org/debian-lts-announce/2025/09/msg00003.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58068",
+            "https://ubuntu.com/security/notices/USN-7772-1",
+            "https://www.cve.org/CVERecord?id=CVE-2025-58068"
+          ],
+          "PublishedDate": "2025-08-29T22:15:32.327Z",
+          "LastModifiedDate": "2026-10-19T17:10:00.173Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2024-43598",
+          "VendorIDs": [
+            "GHSA-2586-f3p4-hq84"
+          ],
+          "PkgName": "lightgbm",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/lightgbm@4.5.0",
+            "UID": "42b816df9f49e22d"
+          },
+          "InstalledVersion": "4.5.0",
+          "FixedVersion": "4.6.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-43598",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:d1d8aef24dc279fe6e0e08d257eb0e33ae89957a60658bf92b92f360652bc8c3",
+          "Title": "LightGBM Remote Code Execution Vulnerability",
+          "Description": "LightGBM Remote Code Execution Vulnerability",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-122"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://github.com/microsoft/LightGBM",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/lightgbm/PYSEC-2024-231.yaml",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2024-43598",
+            "https://nvd.nist.gov/vuln/detail/CVE-2024-43598"
+          ],
+          "PublishedDate": "2024-11-12T18:15:28.277Z",
+          "LastModifiedDate": "2026-11-03T22:17:23.853Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-71176",
+          "VendorIDs": [
+            "GHSA-6w46-j5rx-g56g"
+          ],
+          "PkgName": "pytest",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/pytest@8.2.2",
+            "UID": "58d0985c7f961fba"
+          },
+          "InstalledVersion": "8.2.2",
+          "FixedVersion": "9.0.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-71176",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:68a68ddfcfbd92a5960e2cf353e76c69cc5ae0d3beb02237102d99016599ad41",
+          "Title": "pytest: pytest: Denial of Service or Privilege Escalation via insecure temporary directory handling",
+          "Description": "pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-379"
+          ],
+          "VendorSeverity": {
+            "amazon": 2,
+            "ghsa": 2,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:L",
+              "V3Score": 6.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:L",
+              "V3Score": 6.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-71176",
+            "https://github.com/pytest-dev/pytes",
+            "https://github.com/pytest-dev/pytest/commit/95d8423bd24992deea5b9df32555fa1741679e2c",
+            "https://github.com/pytest-dev/pytest/issues/13669",
+            "https://github.com/pytest-dev/pytest/pull/14343",
+            "https://github.com/pytest-dev/pytest/releases/tag/9.0.3",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-71176",
+            "https://www.cve.org/CVERecord?id=CVE-2025-71176",
+            "https://www.openwall.com/lists/oss-security/2026/01/21/5"
+          ],
+          "PublishedDate": "2026-01-22T05:16:17.577Z",
+          "LastModifiedDate": "2026-06-17T10:03:47.83Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-28684",
+          "VendorIDs": [
+            "GHSA-mf9w-mj56-hr94"
+          ],
+          "PkgName": "python-dotenv",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/python-dotenv@1.0.0",
+            "UID": "6d7ea0a1b7a53f4b"
+          },
+          "InstalledVersion": "1.0.0",
+          "FixedVersion": "1.2.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-28684",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:8b2c0eeb378fdb15b6adde1226027e1c69ded8b92a00abced065c36b381f7394",
+          "Title": "python-dotenv: python-dotenv: Arbitrary file overwrite via symbolic link following",
+          "Description": "python-dotenv reads key-value pairs from a .env file and can set them as environment variables. Prior to version 1.2.2, `set_key()` and `unset_key()` in python-dotenv follow symbolic links when rewriting `.env` files, allowing a local attacker to overwrite arbitrary files via a crafted symlink when a cross-device rename fallback is triggered. Users should upgrade to v.1.2.2 or, as a workaround, apply the patch manually.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-59",
+            "CWE-61"
+          ],
+          "VendorSeverity": {
+            "ghsa": 2,
+            "redhat": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:H/A:H",
+              "V3Score": 6.6
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:H",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-28684",
+            "https://advisory.echohq.com/cve/CVE-2026-28684",
+            "https://github.com/theskumar/python-dotenv",
+            "https://github.com/theskumar/python-dotenv/commit/790c5c02991100aa1bf41ee5330aca75edc51311",
+            "https://github.com/theskumar/python-dotenv/commit/790c5c02991100aa1bf41ee5330aca75edc51311.patch",
+            "https://github.com/theskumar/python-dotenv/releases/tag/v1.2.2",
+            "https://github.com/theskumar/python-dotenv/security/advisories/GHSA-mf9w-mj56-hr94",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-28684",
+            "https://www.cve.org/CVERecord?id=CVE-2026-28684"
+          ],
+          "PublishedDate": "2026-04-20T17:16:33.087Z",
+          "LastModifiedDate": "2026-10-26T21:10:00.17Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-48804",
+          "VendorIDs": [
+            "GHSA-5w7q-77mv-v69f"
+          ],
+          "PkgName": "python-socketio",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/python-socketio@5.11.2",
+            "UID": "3c3f3f48ad3ca26b"
+          },
+          "InstalledVersion": "5.11.2",
+          "FixedVersion": "5.16.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-48804",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:9716ad016bef9c0944fefd81e8dd30e7a0eb8382a0d8f9314b72afb8fce7b0f9",
+          "Title": "socketio: python-socketio: Denial of Service via binary attachment accumulation",
+          "Description": "python-socketio is a Python implementation of the Socket.IO realtime client and server. The python-socketio server stores binary `EVENT` and `ACK` messages in memory while it waits to receive their binary attachments. Once all the attachments are received, these messages are then processed. Prior to version 5.16.4, an attacker can submit a binary message and intentionally omit sending one or more of its attachments to cause the message along with the partial list of received attachments to stay in memory for a long time. Version 5.16.4 takes the following measures to address this issue: Binary packets are only accepted from authenticated clients and, when a client disconnects, the server checks if there is a partial binary message being held for the client and deletes it.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-48804",
+            "https://github.com/miguelgrinberg/python-socketio",
+            "https://github.com/miguelgrinberg/python-socketio/commit/4bec3ef87bcfd6ab5b94cd3ac09d873283a6960e",
+            "https://github.com/miguelgrinberg/python-socketio/security/advisories/GHSA-5w7q-77mv-v69f",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-48804",
+            "https://www.cve.org/CVERecord?id=CVE-2026-48804"
+          ],
+          "PublishedDate": "2026-08-11T20:17:42.58Z",
+          "LastModifiedDate": "2026-09-10T20:30:11.423Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61765",
+          "VendorIDs": [
+            "GHSA-g8c6-8fjj-2r4m"
+          ],
+          "PkgName": "python-socketio",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/python-socketio@5.11.2",
+            "UID": "3c3f3f48ad3ca26b"
+          },
+          "InstalledVersion": "5.11.2",
+          "FixedVersion": "5.14.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61765",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:d995752ac38a14bb593a38cddd20af9a02e0aebea12384ddd2bf6efd256b5be1",
+          "Title": "python-socketio is a Python implementation of the Socket.IO realtime c ...",
+          "Description": "python-socketio is a Python implementation of the Socket.IO realtime client and server. A remote code execution vulnerability in python-socketio versions prior to 5.14.0 allows attackers to execute arbitrary Python code through malicious pickle deserialization in multi-server deployments on which the attacker previously gained access to the message queue that the servers use for internal communications. When Socket.IO servers are configured to use a message queue backend such as Redis for inter-server communication, messages sent between the servers are encoded using the `pickle` Python module. When a server receives one of these messages through the message queue, it assumes it is trusted and immediately deserializes it. The vulnerability stems from deserialization of messages using Python's `pickle.loads()` function. Having previously obtained access to the message queue, the attacker can send a python-socketio server a crafted pickle payload that executes arbitrary code during deserialization via Python's `__reduce__` method. This vulnerability only affects deployments with a compromised message queue. The attack can lead to the attacker executing random code in the context of, and with the privileges of a Socket.IO server process. Single-server systems that do not use a message queue, and multi-server systems with a secure message queue are not vulnerable. In addition to making sure standard security practices are followed in the deployment of the message queue, users of the python-socketio package can upgrade to version 5.14.0 or newer, which remove the `pickle` module and use the much safer JSON encoding for inter-server messaging.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-502"
+          ],
+          "VendorSeverity": {
+            "ghsa": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:A/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:L",
+              "V3Score": 6.4
+            }
+          },
+          "References": [
+            "https://github.com/miguelgrinberg/python-socketio",
+            "https://github.com/miguelgrinberg/python-socketio/commit/53f6be094257ed81476b0e212c8cddd6d06ca39a",
+            "https://github.com/miguelgrinberg/python-socketio/security/advisories/GHSA-g8c6-8fjj-2r4m",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61765",
+            "https://www.bluerock.io/post/cve-2025-61765-bluerock-discovers-critical-rce-in-socket-io-ecosystem"
+          ],
+          "PublishedDate": "2025-10-06T16:15:35.4Z",
+          "LastModifiedDate": "2026-10-09T10:10:00.193Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2024-47081",
+          "VendorIDs": [
+            "GHSA-9hjg-9r4m-mvj7"
+          ],
+          "PkgName": "requests",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/requests@2.32.0",
+            "UID": "7a9e95e911efc67"
+          },
+          "InstalledVersion": "2.32.0",
+          "FixedVersion": "2.32.4",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-47081",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:1498237356dc54e624afa599bcbec78d59397122ff395abe39f9d765800ae9c5",
+          "Title": "requests: Requests vulnerable to .netrc credentials leak via malicious URLs",
+          "Description": "Requests is a HTTP library. Due to a URL parsing issue, Requests releases prior to 2.32.4 may leak .netrc credentials to third parties for specific maliciously-crafted URLs. Users should upgrade to version 2.32.4 to receive a fix. For older versions of Requests, use of the .netrc file can be disabled with `trust_env=False` on one's Requests Session.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-522"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "cbl-mariner": 2,
+            "ghsa": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+              "V3Score": 5.3
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://seclists.org/fulldisclosure/2025/Jun/2",
+            "http://www.openwall.com/lists/oss-security/2025/06/03/11",
+            "http://www.openwall.com/lists/oss-security/2025/06/03/9",
+            "http://www.openwall.com/lists/oss-security/2025/06/04/1",
+            "http://www.openwall.com/lists/oss-security/2025/06/04/6",
+            "https://access.redhat.com/errata/RHSA-2025:12519",
+            "https://access.redhat.com/security/cve/CVE-2024-47081",
+            "https://bugzilla.redhat.com/2371272",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2371272",
+            "https://creativecommons.org/licenses/by/4.0/",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-47081",
+            "https://errata.almalinux.org/9/ALSA-2025-12519.html",
+            "https://errata.rockylinux.org/RLSA-2025:12519",
+            "https://github.com/advisories/GHSA-9hjg-9r4m-mvj7",
+            "https://github.com/psf/requests",
+            "https://github.com/psf/requests/commit/96ba401c1296ab1dda74a2365ef36d88f7d144ef",
+            "https://github.com/psf/requests/pull/6965",
+            "https://github.com/psf/requests/releases/tag/v2.32.4",
+            "https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/requests/PYSEC-2026-1872.yaml",
+            "https://linux.oracle.com/cve/CVE-2024-47081.html",
+            "https://linux.oracle.com/errata/ELSA-2025-14999.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2024-47081",
+            "https://pypi.org/project/requests",
+            "https://requests.readthedocs.io/en/latest/api/#requests.Session.trust_env",
+            "https://seclists.org/fulldisclosure/2025/Jun/2",
+            "https://ubuntu.com/security/notices/USN-7568-1",
+            "https://ubuntu.com/security/notices/USN-7762-1",
+            "https://www.cve.org/CVERecord?id=CVE-2024-47081",
+            "https://www.openwall.com/lists/oss-security/2025/06/03/9"
+          ],
+          "PublishedDate": "2025-06-09T18:15:24.983Z",
+          "LastModifiedDate": "2026-06-17T07:56:30.697Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-25645",
+          "VendorIDs": [
+            "GHSA-gc5v-m9x4-r6x2"
+          ],
+          "PkgName": "requests",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/requests@2.32.0",
+            "UID": "7a9e95e911efc67"
+          },
+          "InstalledVersion": "2.32.0",
+          "FixedVersion": "2.33.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25645",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:b8b132abc5583658e1f8955c7d45c977856843eb46ff0e97c61bbbdf1c20812a",
+          "Title": "requests: Requests: Security bypass due to predictable temporary file creation",
+          "Description": "Requests is a HTTP library. Prior to version 2.33.0, the `requests.utils.extract_zipped_paths()` utility function uses a predictable filename when extracting files from zip archives into the system temporary directory. If the target file already exists, it is reused without validation. A local attacker with write access to the temp directory could pre-create a malicious file that would be loaded in place of the legitimate one. Standard usage of the Requests library is not affected by this vulnerability. Only applications that call `extract_zipped_paths()` directly are impacted. Starting in version 2.33.0, the library extracts files to a non-deterministic location. If developers are unable to upgrade, they can set `TMPDIR` in their environment to a directory with restricted write access.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-377"
+          ],
+          "VendorSeverity": {
+            "azure": 2,
+            "ghsa": 2,
+            "nvd": 2,
+            "photon": 2,
+            "redhat": 2,
+            "ubuntu": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:N/I:H/A:N",
+              "V3Score": 4.4
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 5.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 4.7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25645",
+            "https://github.com/psf/requests",
+            "https://github.com/psf/requests/commit/66d21cb07bd6255b1280291c4fafb71803cdb3b7",
+            "https://github.com/psf/requests/releases/tag/v2.33.0",
+            "https://github.com/psf/requests/security/advisories/GHSA-gc5v-m9x4-r6x2",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25645",
+            "https://ubuntu.com/security/notices/USN-8825-1",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25645"
+          ],
+          "PublishedDate": "2026-03-25T17:16:52.97Z",
+          "LastModifiedDate": "2026-06-17T10:25:00.443Z"
+        },
+        {
+          "VulnerabilityID": "GHSA-cq46-m9x9-j8w2",
+          "PkgName": "scapy",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/scapy@2.5.0",
+            "UID": "1b7462d5ff7a20fd"
+          },
+          "InstalledVersion": "2.5.0",
+          "Status": "affected",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-cq46-m9x9-j8w2",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Fingerprint": "sha256:c850ca3c2a93b802982936a8fb9fbf7f481648df030a12c0aa838ea4373d26f8",
+          "Title": "Scapy Session Loading Vulnerable to Arbitrary Code Execution via Untrusted Pickle Deserialization",
+          "Description": "### Summary\n\nAn unsafe deserialization vulnerability in Scapy \u003cv2.7.0 allows attackers to execute arbitrary code **when a malicious session file is locally loaded via the `-s` option**. This requires convincing a user to manually load a malicious session file.\n\n---\n\n### Details\n\nScapy’s interactive shell supports session loading using gzip-compressed pickle files:\n\n```bash\n./run_scapy -s \u003csession_file.pkl.gz\u003e\n```\n\nInternally, this triggers:\n\n```python\n# main.py\nSESSION = pickle.load(gzip.open(session_name, \"rb\"))\n```\n\nSince no validation or restriction is performed on the deserialized object, **any code embedded via `__reduce__()` will be executed immediately**. This makes it trivial for an attacker to drop a malicious `.pkl.gz` in a shared folder and have it executed by unsuspecting users.\n\nThe vulnerability exists in the `load_session` function, which deserializes data using `pickle.load()` on `.pkl.gz` files provided via the `-s` CLI flag or programmatically through `conf.session`.\n\n**Affected lines in source code**:\nhttps://github.com/secdev/scapy/blob/master/scapy/main.py#L569-L572\n\n```python\ntry:\n    s = pickle.load(gzip.open(fname, \"rb\"))\nexcept IOError:\n    try:\n        s = pickle.load(open(fname, \"rb\"))\n```\n\n### Impact\n\nThis is a classic deserialization vulnerability which leads to Code Execution (CE) when untrusted data is deserialized.\n\nAny user who can trick another user into loading a crafted `.pkl.gz` session file (e.g. via `-s` option) can execute arbitrary Python code.\n\n- **Vulnerability type:** Insecure deserialization (Python `pickle`)\n- **CWE**: [CWE-502: Deserialization of Untrusted Data](https://cwe.mitre.org/data/definitions/502.html)\n- **CVSS v4.0 Vector**: `CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`\n- **CVSS Score**: 5.4 (Medium)\n- **Impact:** Arbitrary Code Execution\n- **Attack vector:** Local or supply chain (malicious `.pkl.gz`)\n- **Affected users:** Any user who loads session files (even interactively)\n- **Affected version:** **Scapy v2.6.1**\n\n---\n\n### Mitigations\n\n- Do not use 'sessions' (the -s option when launching Scapy).\n- Use the Scapy 2.7.0+ where the session mechanism has been removed.",
+          "Severity": "MEDIUM",
+          "VendorSeverity": {
+            "ghsa": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+              "V40Score": 5.4
+            }
+          },
+          "References": [
+            "https://github.com/secdev/scapy",
+            "https://github.com/secdev/scapy/commit/13621d1145b3435e9d03caf20997107a84435c0b",
+            "https://github.com/secdev/scapy/security/advisories/GHSA-cq46-m9x9-j8w2"
+          ],
+          "PublishedDate": "2025-10-22T16:45:49Z",
+          "LastModifiedDate": "2025-10-23T20:10:45Z"
+        }
+      ]
+    },
+    {
+      "Target": "Dockerfile",
+      "Class": "config",
+      "Type": "dockerfile",
+      "MisconfSummary": {
+        "Successes": 27,
+        "Failures": 0
+      }
+    },
+    {
+      "Target": "Dockerfile.capture",
+      "Class": "config",
+      "Type": "dockerfile",
+      "MisconfSummary": {
+        "Successes": 26,
+        "Failures": 1
+      },
+      "Misconfigurations": [
+        {
+          "Type": "Dockerfile Security Check",
+          "ID": "DS-0026",
+          "Title": "No HEALTHCHECK defined",
+          "Description": "You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.",
+          "Message": "Add HEALTHCHECK instruction in your Dockerfile",
+          "Namespace": "builtin.dockerfile.DS026",
+          "Query": "data.builtin.dockerfile.DS026.deny",
+          "Resolution": "Add HEALTHCHECK instruction in Dockerfile",
+          "Severity": "LOW",
+          "PrimaryURL": "https://avd.aquasec.com/misconfig/ds-0026",
+          "References": [
+            "https://blog.aquasec.com/docker-security-best-practices",
+            "https://avd.aquasec.com/misconfig/ds-0026"
+          ],
+          "Status": "FAIL",
+          "CauseMetadata": {
+            "Provider": "Dockerfile",
+            "Service": "general"
+          }
+        }
+      ]
+    }
+  ]
+}

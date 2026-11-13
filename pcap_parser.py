@@ -1,7 +1,30 @@
-"""PCAP/PCAPNG packet dissection and bidirectional flow feature extraction."""
+"""PCAP/PCAPNG packet dissection and bidirectional flow feature extraction.
+
+The upload path emits the full 80-feature CIC-IDS-2017 serving schema. Features
+that this module computes per packet (bulk statistics, active/idle times,
+per-direction header bytes, initial TCP windows, data-packet counts) port the
+PyFlowMeter reference implementation semantics so the upload path and the
+live capture path measure the same things; see ``training/parity_live_capture.py``.
+
+Known, documented divergences from PyFlowMeter (kept deliberately because the
+upload path follows the training CSV semantics):
+
+* TCP flag features are true per-flow counts here; PyFlowMeter's
+  ``FlagCount.has_flag`` returns a 0/1 indicator, so it under-counts flags on
+  flows with retransmissions.
+* ``CWE Flag Count`` counts CWR packets here; PyFlowMeter aliases it to
+  ``fwd_urg_flags`` (an upstream bug).
+* IPv6 flows are retained here; the live path's BPF filter drops them.
+"""
 
 import numpy as np
 import pandas as pd
+
+# Reference state-machine constants, mirrored from pyflowmeter.constants so the
+# upload path and the live path agree by construction.
+CLUMP_TIMEOUT = 1.0  # seconds between packets that split subflows/bulks
+ACTIVE_TIMEOUT = 0.005  # seconds
+BULK_BOUND = 4  # packets that must pile up before a bulk is recognised
 
 
 def pcap_to_flows(file_stream, max_packets=250_000):
@@ -55,22 +78,29 @@ def pcap_to_flows(file_stream, max_packets=250_000):
             tcp_window = None
             udp_length = None
             icmp_type = icmp_code = None
+            payload_size = 0
 
             if TCP in packet:
                 transport = packet[TCP]
                 source_port, destination_port = int(transport.sport), int(transport.dport)
                 tcp_flags = int(transport.flags)
                 tcp_window = int(transport.window)
+                payload_size = len(bytes(transport.payload))
             elif UDP in packet:
                 transport = packet[UDP]
                 source_port, destination_port = int(transport.sport), int(transport.dport)
                 udp_length = int(transport.len or 8)
+                payload_size = len(bytes(transport.payload))
             elif ICMP in packet:
                 transport = packet[ICMP]
                 icmp_type, icmp_code = int(transport.type), int(transport.code)
             elif ICMPv6EchoRequest in packet or ICMPv6EchoReply in packet:
                 transport = packet[ICMPv6EchoRequest] if ICMPv6EchoRequest in packet else packet[ICMPv6EchoReply]
                 icmp_type, icmp_code = int(transport.type), int(transport.code)
+
+            # PyFlowMeter's _header_size(): IP header bytes for TCP packets,
+            # the fixed 8-byte UDP/transport header otherwise.
+            header_size = ip_header_length if TCP in packet else 8
 
             source_endpoint = (source_ip, source_port)
             destination_endpoint = (destination_ip, destination_port)
@@ -120,6 +150,29 @@ def pcap_to_flows(file_stream, max_packets=250_000):
                     "ack": 0,
                     "rst": 0,
                     "fin": 0,
+                    # True per-direction flag counts (training-CSV semantics).
+                    "fwd_psh": 0, "bwd_psh": 0, "fwd_urg": 0, "bwd_urg": 0,
+                    "psh": 0, "urg": 0, "ece": 0, "cwr": 0,
+                    # Initial TCP windows, PyFlowMeter semantics: forward is the
+                    # first forward window while it is still 0; backward is
+                    # overwritten by every reverse packet.
+                    "init_fwd_win": 0,
+                    "init_bwd_win": 0,
+                    # Per-packet measurements in arrival order.
+                    "fwd_header_bytes": 0,
+                    "bwd_header_bytes": 0,
+                    "fwd_header_sizes": [],
+                    "fwd_payload_pkts": 0,
+                    # Bulk state machines (PyFlowMeter semantics).
+                    "bulk": {
+                        "fwd": _new_bulk_state(),
+                        "bwd": _new_bulk_state(),
+                    },
+                    # Active/idle state machine (PyFlowMeter semantics).
+                    "latest_ts": 0.0,
+                    "active_state": {"start_active": 0.0, "last_active": 0.0},
+                    "active_list": [],
+                    "idle_list": [],
                     "header": header,
                 }
 
@@ -134,6 +187,39 @@ def pcap_to_flows(file_stream, max_packets=250_000):
             flow["ack"] += int(bool(tcp_flags & 0x10))
             flow["rst"] += int(bool(tcp_flags & 0x04))
             flow["fin"] += int(bool(tcp_flags & 0x01))
+            flow["psh"] += int(bool(tcp_flags & 0x08))
+            flow["urg"] += int(bool(tcp_flags & 0x20))
+            flow["ece"] += int(bool(tcp_flags & 0x40))
+            flow["cwr"] += int(bool(tcp_flags & 0x80))
+            if forward:
+                flow["fwd_psh"] += int(bool(tcp_flags & 0x08))
+                flow["fwd_urg"] += int(bool(tcp_flags & 0x20))
+                flow["fwd_header_bytes"] += header_size
+                flow["fwd_header_sizes"].append(header_size)
+                if payload_size > 0:
+                    flow["fwd_payload_pkts"] += 1
+            else:
+                flow["bwd_psh"] += int(bool(tcp_flags & 0x08))
+                flow["bwd_urg"] += int(bool(tcp_flags & 0x20))
+                flow["bwd_header_bytes"] += header_size
+
+            # Bulk accounting runs before the subflow/active-idle update, in
+            # the same per-packet order as PyFlowMeter's Flow.add_packet().
+            _update_bulk(flow, forward, payload_size, timestamp)
+
+            # Subflow / active-idle update uses the previous packet's time.
+            last_ts = flow["latest_ts"] if flow["latest_ts"] != 0 else timestamp
+            gap = timestamp - last_ts
+            if gap > CLUMP_TIMEOUT:
+                _update_active_idle(flow, gap)
+
+            flow["latest_ts"] = max(timestamp, flow["latest_ts"])
+
+            if TCP in packet:
+                if forward and flow["init_fwd_win"] == 0:
+                    flow["init_fwd_win"] = tcp_window
+                elif not forward:
+                    flow["init_bwd_win"] = tcp_window
     except (Scapy_Exception, EOFError, OSError) as exc:
         raise ValueError("Capture could not be fully decoded as PCAP/PCAPNG.") from exc
     finally:
@@ -151,6 +237,17 @@ def pcap_to_flows(file_stream, max_packets=250_000):
         ordered = sorted(values)
         return [max(0.0, (right - left) * 1_000_000) for left, right in zip(ordered, ordered[1:])]
 
+    def pyfm_stats(values):
+        """PyFlowMeter get_statistics(): zeroed unless the list has 2+ entries."""
+        if len(values) > 1:
+            return {
+                "mean": float(np.mean(values)),
+                "std": float(np.sqrt(np.var(values))),
+                "max": max(values),
+                "min": min(values),
+            }
+        return {"mean": 0.0, "std": 0.0, "max": 0, "min": 0}
+
     records = []
     details = []
     for flow in flows.values():
@@ -166,6 +263,12 @@ def pcap_to_flows(file_stream, max_packets=250_000):
         bwd_iat_mean, bwd_iat_std, bwd_iat_max, bwd_iat_min = stats(inter_arrivals(flow["bwd_times"]))
         total_packets = len(timestamps)
         total_bytes = flow["fwd_bytes"] + flow["bwd_bytes"]
+
+        active_stat = pyfm_stats(flow["active_list"])
+        idle_stat = pyfm_stats(flow["idle_list"])
+        fwd_bulk = _bulk_summary(flow["bulk"]["fwd"])
+        bwd_bulk = _bulk_summary(flow["bulk"]["bwd"])
+
         row = {
             "Source IP": flow["src_ip"], "Destination IP": flow["dst_ip"],
             "Source Port": flow["src_port"], "Destination Port": flow["dst_port"],
@@ -195,11 +298,107 @@ def pcap_to_flows(file_stream, max_packets=250_000):
             "Down/Up Ratio": len(flow["bwd_sizes"]) / max(1, len(flow["fwd_sizes"])),
             "SYN Flag Count": flow["syn"], "ACK Flag Count": flow["ack"],
             "RST Flag Count": flow["rst"], "FIN Flag Count": flow["fin"],
-            "Active Mean": duration_us, "Active Std": 0, "Active Max": duration_us,
-            "Active Min": duration_us, "Idle Mean": 0, "Idle Std": 0, "Idle Max": 0, "Idle Min": 0,
+            "Fwd PSH Flags": flow["fwd_psh"], "Bwd PSH Flags": flow["bwd_psh"],
+            "Fwd URG Flags": flow["fwd_urg"], "Bwd URG Flags": flow["bwd_urg"],
+            "PSH Flag Count": flow["psh"], "URG Flag Count": flow["urg"],
+            "ECE Flag Count": flow["ece"], "CWE Flag Count": flow["cwr"],
+            "Init_Win_bytes_forward": flow["init_fwd_win"],
+            "Init_Win_bytes_backward": flow["init_bwd_win"],
+            "act_data_pkt_fwd": flow["fwd_payload_pkts"],
+            "Fwd Header Length": flow["fwd_header_bytes"],
+            "Bwd Header Length": flow["bwd_header_bytes"],
+            "min_seg_size_forward": min(flow["fwd_header_sizes"]) if flow["fwd_header_sizes"] else 0,
+            "Fwd Avg Bytes/Bulk": fwd_bulk["bytes_per_bulk"],
+            "Fwd Avg Packets/Bulk": fwd_bulk["packets_per_bulk"],
+            "Fwd Avg Bulk Rate": fwd_bulk["bulk_rate"],
+            "Bwd Avg Bytes/Bulk": bwd_bulk["bytes_per_bulk"],
+            "Bwd Avg Packets/Bulk": bwd_bulk["packets_per_bulk"],
+            "Bwd Avg Bulk Rate": bwd_bulk["bulk_rate"],
+            "Active Mean": float(active_stat["mean"]), "Active Std": float(active_stat["std"]),
+            "Active Max": float(active_stat["max"]), "Active Min": float(active_stat["min"]),
+            "Idle Mean": float(idle_stat["mean"]), "Idle Std": float(idle_stat["std"]),
+            "Idle Max": float(idle_stat["max"]), "Idle Min": float(idle_stat["min"]),
             "Packet Dissector": flow["header"],
         }
+        # The training CSV duplicates the packet-length extremes under second
+        # names; emit both so the schema is complete without mapper tricks.
+        row["Max Packet Length"] = packet_max
+        row["Min Packet Length"] = packet_min
         records.append(row)
         details.append(flow["header"])
 
     return pd.DataFrame(records), details, packet_count
+
+
+def _new_bulk_state():
+    return {
+        "start_tmp": 0.0,
+        "last_timestamp": 0.0,
+        "count_tmp": 0,
+        "size_tmp": 0,
+        "count": 0,
+        "packet_count": 0,
+        "size": 0,
+        "duration": 0.0,
+    }
+
+
+def _update_bulk(flow, forward, payload_size, timestamp):
+    """Port of PyFlowMeter Flow.update_flow_bulk()."""
+    if payload_size == 0:
+        return
+    state = flow["bulk"]["fwd" if forward else "bwd"]
+    other_last = flow["bulk"]["bwd" if forward else "fwd"]["last_timestamp"]
+    if other_last > state["start_tmp"]:
+        state["start_tmp"] = 0.0
+    if state["start_tmp"] == 0:
+        state["start_tmp"] = timestamp
+        state["last_timestamp"] = timestamp
+        state["count_tmp"] = 1
+        state["size_tmp"] = payload_size
+    else:
+        if (timestamp - state["last_timestamp"]) > CLUMP_TIMEOUT:
+            state["start_tmp"] = timestamp
+            state["last_timestamp"] = timestamp
+            state["count_tmp"] = 1
+            state["size_tmp"] = payload_size
+        else:  # Add to bulk
+            state["count_tmp"] += 1
+            state["size_tmp"] += payload_size
+            if state["count_tmp"] == BULK_BOUND:
+                state["count"] += 1
+                state["packet_count"] += state["count_tmp"]
+                state["size"] += state["size_tmp"]
+                state["duration"] += timestamp - state["start_tmp"]
+            elif state["count_tmp"] > BULK_BOUND:
+                state["packet_count"] += 1
+                state["size"] += payload_size
+                state["duration"] += timestamp - state["last_timestamp"]
+        state["last_timestamp"] = timestamp
+
+
+def _update_active_idle(flow, gap):
+    """Port of PyFlowMeter Flow.update_active_idle(), gap in seconds."""
+    state = flow["active_state"]
+    if (gap - state["last_active"]) > ACTIVE_TIMEOUT:
+        duration = abs(float(state["last_active"] - state["start_active"]))
+        if duration > 0:
+            flow["active_list"].append(1e6 * duration)
+        flow["idle_list"].append(1e6 * (gap - state["last_active"]))
+        state["start_active"] = gap
+        state["last_active"] = gap
+    else:
+        state["last_active"] = gap
+
+
+def _bulk_summary(state):
+    """Port of PyFlowMeter FlowBytes bulk aggregators (patched rate guard)."""
+    count = state["count"]
+    bytes_per_bulk = state["size"] / count if count != 0 else 0
+    packets_per_bulk = state["packet_count"] / count if count != 0 else 0
+    bulk_rate = state["size"] / state["duration"] if count != 0 and state["duration"] != 0 else 0
+    return {
+        "bytes_per_bulk": float(bytes_per_bulk),
+        "packets_per_bulk": float(packets_per_bulk),
+        "bulk_rate": float(bulk_rate),
+    }

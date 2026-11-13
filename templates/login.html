@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Sign in | NetShield</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.7">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}?v=2.7">
+  <style>
+    body { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+    main { width: min(100%, 420px); padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+    h1 { margin-bottom: 8px; font-size: 1.5rem; }
+    p { margin-bottom: 20px; color: var(--text-med); }
+    label { display: block; margin-bottom: 6px; }
+    input { width: 100%; margin-bottom: 14px; }
+    button { width: 100%; }
+    .error { color: var(--red); margin-bottom: 14px; }
+    .hint { margin-top: -6px; margin-bottom: 14px; font-size: 0.85rem; color: var(--text-lo); }
+    .otp { font-family: var(--mono); font-size: 1.25rem; letter-spacing: 0.25em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sign in to NetShield</h1>
+    {% if mfa_step %}
+      <p>Enter the 6-digit code from your authenticator app, or one of your recovery codes.</p>
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="otp">Authentication code</label>
+        <input id="otp" name="otp" type="text" class="otp" inputmode="numeric" autocomplete="one-time-code"
+               autocapitalize="characters" spellcheck="false" maxlength="14" required autofocus>
+        <p class="hint">Recovery codes are single use. {{ mfa_attempts_remaining }} attempt(s) remaining before you must sign in again.</p>
+        <button class="btn-primary" type="submit">Verify and sign in</button>
+      </form>
+    {% else %}
+      <p>Access is restricted to provisioned tenant users. Leave email blank only for the legacy administrator password.</p>
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="analyst@example.com">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+        <button class="btn-primary" type="submit">Sign in</button>
+      </form>
+      {% if oidc_enabled %}
+        <p class="hint" style="margin-top:16px;margin-bottom:8px;text-align:center">or</p>
+        <a class="btn-primary" href="{{ url_for('oidc_login') }}"
+           style="display:block;padding:10px 16px;text-align:center;text-decoration:none;border-radius:6px;font-weight:600">
+          Sign in with SSO
+        </a>
+      {% endif %}
+    {% endif %}
+  </main>
+</body>
+</html>

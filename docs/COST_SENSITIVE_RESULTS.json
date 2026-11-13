@@ -1,0 +1,3002 @@
+{
+  "phase": "D9",
+  "generated_at_utc": "2026-11-12T04:53:03.582082+00:00",
+  "cost_model": {
+    "definition": "cost_per_10k = (alerts + r * false_negatives) * 10000 / n_flows",
+    "no_detector": "cost_per_10k = r * attacks * 10000 / n_flows",
+    "C_FP": "one analyst review of one alert (all alerts are reviewed under the threshold policy)",
+    "C_FN": "one missed attack",
+    "r": "C_FN / C_FP; absolute currency not established",
+    "analyst_minutes_per_alert": 5.0,
+    "cost_ratios": [
+      1,
+      2,
+      3,
+      5,
+      10,
+      30,
+      100,
+      300,
+      1000
+    ],
+    "break_even": "detector beats no detector iff r > alerts / true_positives = 1 / precision"
+  },
+  "data": {
+    "test_rows": 1162065,
+    "test_attacks": 291139,
+    "test_benign": 870926,
+    "partition": "Thursday + Friday (frozen final test)",
+    "thresholds_selected_on": "Wednesday validation only"
+  },
+  "models": {
+    "lr": "Logistic Regression (legacy comparison; no longer served)",
+    "rf": "Random Forest (evaluated model and registry-active serving artifact; D6 reference)",
+    "if": "Isolation Forest (benign-only baseline)"
+  },
+  "threshold_results": {
+    "lr": {
+      "42": {
+        "threshold": 0.13454342680553322,
+        "validation_fpr": 0.009208776973512267,
+        "validation_recall": 0.0032809463689936714,
+        "test_fpr": 0.02664061010924005,
+        "test_recall": 0.035213420393695107,
+        "test_precision": 0.3064506486518802,
+        "alert_rate": 0.028788406844711786,
+        "true_positives": 10252,
+        "false_positives": 23202,
+        "false_negatives": 280887,
+        "true_negatives": 847724,
+        "alerts": 33454,
+        "review_hours_per_10k_flows": 23.99,
+        "curve": {
+          "1": {
+            "detector": 2705.021,
+            "no_detector": 2505.359,
+            "delta": 199.662,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5122.158,
+            "no_detector": 5010.718,
+            "delta": 111.44,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7539.294,
+            "no_detector": 7516.077,
+            "delta": 23.217,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12373.568,
+            "no_detector": 12526.795,
+            "delta": -153.227,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24459.251,
+            "no_detector": 25053.59,
+            "delta": -594.339,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 72801.986,
+            "no_detector": 75160.77,
+            "delta": -2358.784,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 242001.558,
+            "no_detector": 250535.899,
+            "delta": -8534.342,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 725428.905,
+            "no_detector": 751607.698,
+            "delta": -26178.794,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2417424.619,
+            "no_detector": 2505358.995,
+            "delta": -87934.375,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 3.2632
+      },
+      "43": {
+        "threshold": 0.13454342680553322,
+        "validation_fpr": 0.009208776973512267,
+        "validation_recall": 0.0032809463689936714,
+        "test_fpr": 0.02664061010924005,
+        "test_recall": 0.035213420393695107,
+        "test_precision": 0.3064506486518802,
+        "alert_rate": 0.028788406844711786,
+        "true_positives": 10252,
+        "false_positives": 23202,
+        "false_negatives": 280887,
+        "true_negatives": 847724,
+        "alerts": 33454,
+        "review_hours_per_10k_flows": 23.99,
+        "curve": {
+          "1": {
+            "detector": 2705.021,
+            "no_detector": 2505.359,
+            "delta": 199.662,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5122.158,
+            "no_detector": 5010.718,
+            "delta": 111.44,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7539.294,
+            "no_detector": 7516.077,
+            "delta": 23.217,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12373.568,
+            "no_detector": 12526.795,
+            "delta": -153.227,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24459.251,
+            "no_detector": 25053.59,
+            "delta": -594.339,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 72801.986,
+            "no_detector": 75160.77,
+            "delta": -2358.784,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 242001.558,
+            "no_detector": 250535.899,
+            "delta": -8534.342,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 725428.905,
+            "no_detector": 751607.698,
+            "delta": -26178.794,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2417424.619,
+            "no_detector": 2505358.995,
+            "delta": -87934.375,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 3.2632
+      },
+      "44": {
+        "threshold": 0.13454342680553322,
+        "validation_fpr": 0.009208776973512267,
+        "validation_recall": 0.0032809463689936714,
+        "test_fpr": 0.02664061010924005,
+        "test_recall": 0.035213420393695107,
+        "test_precision": 0.3064506486518802,
+        "alert_rate": 0.028788406844711786,
+        "true_positives": 10252,
+        "false_positives": 23202,
+        "false_negatives": 280887,
+        "true_negatives": 847724,
+        "alerts": 33454,
+        "review_hours_per_10k_flows": 23.99,
+        "curve": {
+          "1": {
+            "detector": 2705.021,
+            "no_detector": 2505.359,
+            "delta": 199.662,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5122.158,
+            "no_detector": 5010.718,
+            "delta": 111.44,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7539.294,
+            "no_detector": 7516.077,
+            "delta": 23.217,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12373.568,
+            "no_detector": 12526.795,
+            "delta": -153.227,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24459.251,
+            "no_detector": 25053.59,
+            "delta": -594.339,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 72801.986,
+            "no_detector": 75160.77,
+            "delta": -2358.784,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 242001.558,
+            "no_detector": 250535.899,
+            "delta": -8534.342,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 725428.905,
+            "no_detector": 751607.698,
+            "delta": -26178.794,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2417424.619,
+            "no_detector": 2505358.995,
+            "delta": -87934.375,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 3.2632
+      },
+      "45": {
+        "threshold": 0.13454342680553322,
+        "validation_fpr": 0.009208776973512267,
+        "validation_recall": 0.0032809463689936714,
+        "test_fpr": 0.02664061010924005,
+        "test_recall": 0.035213420393695107,
+        "test_precision": 0.3064506486518802,
+        "alert_rate": 0.028788406844711786,
+        "true_positives": 10252,
+        "false_positives": 23202,
+        "false_negatives": 280887,
+        "true_negatives": 847724,
+        "alerts": 33454,
+        "review_hours_per_10k_flows": 23.99,
+        "curve": {
+          "1": {
+            "detector": 2705.021,
+            "no_detector": 2505.359,
+            "delta": 199.662,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5122.158,
+            "no_detector": 5010.718,
+            "delta": 111.44,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7539.294,
+            "no_detector": 7516.077,
+            "delta": 23.217,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12373.568,
+            "no_detector": 12526.795,
+            "delta": -153.227,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24459.251,
+            "no_detector": 25053.59,
+            "delta": -594.339,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 72801.986,
+            "no_detector": 75160.77,
+            "delta": -2358.784,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 242001.558,
+            "no_detector": 250535.899,
+            "delta": -8534.342,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 725428.905,
+            "no_detector": 751607.698,
+            "delta": -26178.794,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2417424.619,
+            "no_detector": 2505358.995,
+            "delta": -87934.375,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 3.2632
+      },
+      "46": {
+        "threshold": 0.13454342680553322,
+        "validation_fpr": 0.009208776973512267,
+        "validation_recall": 0.0032809463689936714,
+        "test_fpr": 0.02664061010924005,
+        "test_recall": 0.035213420393695107,
+        "test_precision": 0.3064506486518802,
+        "alert_rate": 0.028788406844711786,
+        "true_positives": 10252,
+        "false_positives": 23202,
+        "false_negatives": 280887,
+        "true_negatives": 847724,
+        "alerts": 33454,
+        "review_hours_per_10k_flows": 23.99,
+        "curve": {
+          "1": {
+            "detector": 2705.021,
+            "no_detector": 2505.359,
+            "delta": 199.662,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5122.158,
+            "no_detector": 5010.718,
+            "delta": 111.44,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7539.294,
+            "no_detector": 7516.077,
+            "delta": 23.217,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12373.568,
+            "no_detector": 12526.795,
+            "delta": -153.227,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24459.251,
+            "no_detector": 25053.59,
+            "delta": -594.339,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 72801.986,
+            "no_detector": 75160.77,
+            "delta": -2358.784,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 242001.558,
+            "no_detector": 250535.899,
+            "delta": -8534.342,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 725428.905,
+            "no_detector": 751607.698,
+            "delta": -26178.794,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2417424.619,
+            "no_detector": 2505358.995,
+            "delta": -87934.375,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 3.2632
+      }
+    },
+    "rf": {
+      "42": {
+        "threshold": 0.002515048908954043,
+        "validation_fpr": 0.0052225492312762065,
+        "validation_recall": 0.0458699257136751,
+        "test_fpr": 0.007254347671329137,
+        "test_recall": 0.5794276960489663,
+        "test_precision": 0.9638996183118872,
+        "alert_rate": 0.15060431215121356,
+        "true_positives": 168694,
+        "false_positives": 6318,
+        "false_negatives": 122445,
+        "true_negatives": 864608,
+        "alerts": 175012,
+        "review_hours_per_10k_flows": 125.504,
+        "curve": {
+          "1": {
+            "detector": 2559.728,
+            "no_detector": 2505.359,
+            "delta": 54.369,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 3613.412,
+            "no_detector": 5010.718,
+            "delta": -1397.306,
+            "beats_no_detector": true
+          },
+          "3": {
+            "detector": 4667.097,
+            "no_detector": 7516.077,
+            "delta": -2848.98,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 6774.466,
+            "no_detector": 12526.795,
+            "delta": -5752.329,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 12042.889,
+            "no_detector": 25053.59,
+            "delta": -13010.701,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 33116.581,
+            "no_detector": 75160.77,
+            "delta": -42044.189,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 106874.504,
+            "no_detector": 250535.899,
+            "delta": -143661.396,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 317611.424,
+            "no_detector": 751607.698,
+            "delta": -433996.274,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 1055190.648,
+            "no_detector": 2505358.995,
+            "delta": -1450168.347,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 1.0375
+      },
+      "43": {
+        "threshold": 0.00185520361990954,
+        "validation_fpr": 0.009165596627387702,
+        "validation_recall": 0.03264323962781641,
+        "test_fpr": 0.009934253886093652,
+        "test_recall": 0.5609966373450482,
+        "test_precision": 0.9496918246307711,
+        "alert_rate": 0.14799516378171618,
+        "true_positives": 163328,
+        "false_positives": 8652,
+        "false_negatives": 127811,
+        "true_negatives": 862274,
+        "alerts": 171980,
+        "review_hours_per_10k_flows": 123.329,
+        "curve": {
+          "1": {
+            "detector": 2579.813,
+            "no_detector": 2505.359,
+            "delta": 74.454,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 3679.674,
+            "no_detector": 5010.718,
+            "delta": -1331.044,
+            "beats_no_detector": true
+          },
+          "3": {
+            "detector": 4779.535,
+            "no_detector": 7516.077,
+            "delta": -2736.542,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 6979.257,
+            "no_detector": 12526.795,
+            "delta": -5547.538,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 12478.562,
+            "no_detector": 25053.59,
+            "delta": -12575.028,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 34475.782,
+            "no_detector": 75160.77,
+            "delta": -40684.988,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 111466.054,
+            "no_detector": 250535.899,
+            "delta": -139069.845,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 331438.259,
+            "no_detector": 751607.698,
+            "delta": -420169.44,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 1101340.975,
+            "no_detector": 2505358.995,
+            "delta": -1404018.02,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 1.053
+      },
+      "44": {
+        "threshold": 0.009363636363636352,
+        "validation_fpr": 0.0035862413781348364,
+        "validation_recall": 0.029746191688005352,
+        "test_fpr": 0.0689587863951702,
+        "test_recall": 0.46781777776251204,
+        "test_precision": 0.6939844490415678,
+        "alert_rate": 0.16888728255304136,
+        "true_positives": 136200,
+        "false_positives": 60058,
+        "false_negatives": 154939,
+        "true_negatives": 810868,
+        "alerts": 196258,
+        "review_hours_per_10k_flows": 140.739,
+        "curve": {
+          "1": {
+            "detector": 3022.18,
+            "no_detector": 2505.359,
+            "delta": 516.821,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 4355.488,
+            "no_detector": 5010.718,
+            "delta": -655.23,
+            "beats_no_detector": true
+          },
+          "3": {
+            "detector": 5688.795,
+            "no_detector": 7516.077,
+            "delta": -1827.282,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 8355.41,
+            "no_detector": 12526.795,
+            "delta": -4171.385,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 15021.948,
+            "no_detector": 25053.59,
+            "delta": -10031.642,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 41688.098,
+            "no_detector": 75160.77,
+            "delta": -33472.671,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 135019.625,
+            "no_detector": 250535.899,
+            "delta": -115516.275,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 401681.128,
+            "no_detector": 751607.698,
+            "delta": -349926.57,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 1334996.39,
+            "no_detector": 2505358.995,
+            "delta": -1170362.605,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 1.441
+      },
+      "45": {
+        "threshold": 0.010000000000000009,
+        "validation_fpr": 0.003445337090780996,
+        "validation_recall": 0.028028543046095516,
+        "test_fpr": 0.07846935330900673,
+        "test_recall": 0.831946252477339,
+        "test_precision": 0.779937723995582,
+        "alert_rate": 0.26724236596059603,
+        "true_positives": 242212,
+        "false_positives": 68341,
+        "false_negatives": 48927,
+        "true_negatives": 802585,
+        "alerts": 310553,
+        "review_hours_per_10k_flows": 222.702,
+        "curve": {
+          "1": {
+            "detector": 3093.459,
+            "no_detector": 2505.359,
+            "delta": 588.1,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 3514.494,
+            "no_detector": 5010.718,
+            "delta": -1496.224,
+            "beats_no_detector": true
+          },
+          "3": {
+            "detector": 3935.529,
+            "no_detector": 7516.077,
+            "delta": -3580.548,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 4777.598,
+            "no_detector": 12526.795,
+            "delta": -7749.196,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 6882.773,
+            "no_detector": 25053.59,
+            "delta": -18170.817,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 15303.473,
+            "no_detector": 75160.77,
+            "delta": -59857.297,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 44775.92,
+            "no_detector": 250535.899,
+            "delta": -205759.979,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 128982.914,
+            "no_detector": 751607.698,
+            "delta": -622624.784,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 423707.392,
+            "no_detector": 2505358.995,
+            "delta": -2081651.603,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 1.2822
+      },
+      "46": {
+        "threshold": 0.00712097468444628,
+        "validation_fpr": 0.004286217515311978,
+        "validation_recall": 0.04489632763554187,
+        "test_fpr": 0.04070839543198848,
+        "test_recall": 0.47476978350547333,
+        "test_precision": 0.7958636096684669,
+        "alert_rate": 0.1494563557115996,
+        "true_positives": 138224,
+        "false_positives": 35454,
+        "false_negatives": 152915,
+        "true_negatives": 835472,
+        "alerts": 173678,
+        "review_hours_per_10k_flows": 124.547,
+        "curve": {
+          "1": {
+            "detector": 2810.454,
+            "no_detector": 2505.359,
+            "delta": 305.095,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 4126.344,
+            "no_detector": 5010.718,
+            "delta": -884.374,
+            "beats_no_detector": true
+          },
+          "3": {
+            "detector": 5442.234,
+            "no_detector": 7516.077,
+            "delta": -2073.843,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 8074.015,
+            "no_detector": 12526.795,
+            "delta": -4452.78,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 14653.466,
+            "no_detector": 25053.59,
+            "delta": -10400.124,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 40971.271,
+            "no_detector": 75160.77,
+            "delta": -34189.499,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 133083.588,
+            "no_detector": 250535.899,
+            "delta": -117452.311,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 396261.638,
+            "no_detector": 751607.698,
+            "delta": -355346.061,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 1317384.811,
+            "no_detector": 2505358.995,
+            "delta": -1187974.184,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 1.2565
+      }
+    },
+    "if": {
+      "42": {
+        "threshold": 0.17652457913290387,
+        "validation_fpr": 0.009999659102530596,
+        "validation_recall": 0.1770642456000095,
+        "test_fpr": 0.011669188886311811,
+        "test_recall": 0.020763278021838368,
+        "test_precision": 0.37296396841066143,
+        "alert_rate": 0.013947584687603534,
+        "true_positives": 6045,
+        "false_positives": 10163,
+        "false_negatives": 285094,
+        "true_negatives": 860763,
+        "alerts": 16208,
+        "review_hours_per_10k_flows": 11.623,
+        "curve": {
+          "1": {
+            "detector": 2592.815,
+            "no_detector": 2505.359,
+            "delta": 87.456,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5046.155,
+            "no_detector": 5010.718,
+            "delta": 35.437,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7499.494,
+            "no_detector": 7516.077,
+            "delta": -16.583,
+            "beats_no_detector": true
+          },
+          "5": {
+            "detector": 12406.173,
+            "no_detector": 12526.795,
+            "delta": -120.621,
+            "beats_no_detector": true
+          },
+          "10": {
+            "detector": 24672.871,
+            "no_detector": 25053.59,
+            "delta": -380.719,
+            "beats_no_detector": true
+          },
+          "30": {
+            "detector": 73739.662,
+            "no_detector": 75160.77,
+            "delta": -1421.108,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 245473.429,
+            "no_detector": 250535.899,
+            "delta": -5062.471,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 736141.335,
+            "no_detector": 751607.698,
+            "delta": -15466.364,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2453479.005,
+            "no_detector": 2505358.995,
+            "delta": -51879.99,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 2.6812
+      },
+      "43": {
+        "threshold": 0.17943857524982043,
+        "validation_fpr": 0.009990568503346477,
+        "validation_recall": 7.519659953061491e-05,
+        "test_fpr": 0.011452178485887435,
+        "test_recall": 3.4347854461271074e-05,
+        "test_precision": 0.001001602564102564,
+        "alert_rate": 0.008591602018819946,
+        "true_positives": 10,
+        "false_positives": 9974,
+        "false_negatives": 291129,
+        "true_negatives": 860952,
+        "alerts": 9984,
+        "review_hours_per_10k_flows": 7.16,
+        "curve": {
+          "1": {
+            "detector": 2591.189,
+            "no_detector": 2505.359,
+            "delta": 85.83,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5096.462,
+            "no_detector": 5010.718,
+            "delta": 85.744,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7601.735,
+            "no_detector": 7516.077,
+            "delta": 85.658,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12612.281,
+            "no_detector": 12526.795,
+            "delta": 85.486,
+            "beats_no_detector": false
+          },
+          "10": {
+            "detector": 25138.645,
+            "no_detector": 25053.59,
+            "delta": 85.055,
+            "beats_no_detector": false
+          },
+          "30": {
+            "detector": 75244.104,
+            "no_detector": 75160.77,
+            "delta": 83.334,
+            "beats_no_detector": false
+          },
+          "100": {
+            "detector": 250613.21,
+            "no_detector": 250535.899,
+            "delta": 77.311,
+            "beats_no_detector": false
+          },
+          "300": {
+            "detector": 751667.798,
+            "no_detector": 751607.698,
+            "delta": 60.1,
+            "beats_no_detector": false
+          },
+          "1000": {
+            "detector": 2505358.857,
+            "no_detector": 2505358.995,
+            "delta": -0.138,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 998.4
+      },
+      "44": {
+        "threshold": 0.1887025435445313,
+        "validation_fpr": 0.009990568503346477,
+        "validation_recall": 6.728116800107649e-05,
+        "test_fpr": 0.011444141063649495,
+        "test_recall": 2.747828356901686e-05,
+        "test_precision": 0.0008020050125313284,
+        "alert_rate": 0.008583857185269326,
+        "true_positives": 8,
+        "false_positives": 9967,
+        "false_negatives": 291131,
+        "true_negatives": 860959,
+        "alerts": 9975,
+        "review_hours_per_10k_flows": 7.153,
+        "curve": {
+          "1": {
+            "detector": 2591.129,
+            "no_detector": 2505.359,
+            "delta": 85.77,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5096.419,
+            "no_detector": 5010.718,
+            "delta": 85.701,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7601.709,
+            "no_detector": 7516.077,
+            "delta": 85.632,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12612.289,
+            "no_detector": 12526.795,
+            "delta": 85.494,
+            "beats_no_detector": false
+          },
+          "10": {
+            "detector": 25138.74,
+            "no_detector": 25053.59,
+            "delta": 85.15,
+            "beats_no_detector": false
+          },
+          "30": {
+            "detector": 75244.543,
+            "no_detector": 75160.77,
+            "delta": 83.773,
+            "beats_no_detector": false
+          },
+          "100": {
+            "detector": 250614.854,
+            "no_detector": 250535.899,
+            "delta": 78.954,
+            "beats_no_detector": false
+          },
+          "300": {
+            "detector": 751672.884,
+            "no_detector": 751607.698,
+            "delta": 65.186,
+            "beats_no_detector": false
+          },
+          "1000": {
+            "detector": 2505375.99,
+            "no_detector": 2505358.995,
+            "delta": 16.996,
+            "beats_no_detector": false
+          }
+        },
+        "break_even_ratio": 1246.875
+      },
+      "45": {
+        "threshold": 0.17752543597333958,
+        "validation_fpr": 0.009997386452734566,
+        "validation_recall": 0.019206794606424955,
+        "test_fpr": 0.01146366051765592,
+        "test_recall": 0.0020849147657991543,
+        "test_precision": 0.05731281276555566,
+        "alert_rate": 0.009113948014956134,
+        "true_positives": 607,
+        "false_positives": 9984,
+        "false_negatives": 290532,
+        "true_negatives": 860942,
+        "alerts": 10591,
+        "review_hours_per_10k_flows": 7.595,
+        "curve": {
+          "1": {
+            "detector": 2591.275,
+            "no_detector": 2505.359,
+            "delta": 85.916,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5091.411,
+            "no_detector": 5010.718,
+            "delta": 80.693,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7591.546,
+            "no_detector": 7516.077,
+            "delta": 75.469,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12591.817,
+            "no_detector": 12526.795,
+            "delta": 65.022,
+            "beats_no_detector": false
+          },
+          "10": {
+            "detector": 25092.495,
+            "no_detector": 25053.59,
+            "delta": 38.905,
+            "beats_no_detector": false
+          },
+          "30": {
+            "detector": 75095.206,
+            "no_detector": 75160.77,
+            "delta": -65.564,
+            "beats_no_detector": true
+          },
+          "100": {
+            "detector": 250104.693,
+            "no_detector": 250535.899,
+            "delta": -431.207,
+            "beats_no_detector": true
+          },
+          "300": {
+            "detector": 750131.8,
+            "no_detector": 751607.698,
+            "delta": -1475.899,
+            "beats_no_detector": true
+          },
+          "1000": {
+            "detector": 2500226.674,
+            "no_detector": 2505358.995,
+            "delta": -5132.32,
+            "beats_no_detector": true
+          }
+        },
+        "break_even_ratio": 17.4481
+      },
+      "46": {
+        "threshold": 0.19289935912955158,
+        "validation_fpr": 0.009999659102530596,
+        "validation_recall": 0.036656363413292384,
+        "test_fpr": 0.01214454500152711,
+        "test_recall": 2.4043498122889755e-05,
+        "test_precision": 0.0006613756613756613,
+        "alert_rate": 0.009107924255527875,
+        "true_positives": 7,
+        "false_positives": 10577,
+        "false_negatives": 291132,
+        "true_negatives": 860349,
+        "alerts": 10584,
+        "review_hours_per_10k_flows": 7.59,
+        "curve": {
+          "1": {
+            "detector": 2596.378,
+            "no_detector": 2505.359,
+            "delta": 91.019,
+            "beats_no_detector": false
+          },
+          "2": {
+            "detector": 5101.677,
+            "no_detector": 5010.718,
+            "delta": 90.959,
+            "beats_no_detector": false
+          },
+          "3": {
+            "detector": 7606.976,
+            "no_detector": 7516.077,
+            "delta": 90.899,
+            "beats_no_detector": false
+          },
+          "5": {
+            "detector": 12617.573,
+            "no_detector": 12526.795,
+            "delta": 90.778,
+            "beats_no_detector": false
+          },
+          "10": {
+            "detector": 25144.067,
+            "no_detector": 25053.59,
+            "delta": 90.477,
+            "beats_no_detector": false
+          },
+          "30": {
+            "detector": 75250.042,
+            "no_detector": 75160.77,
+            "delta": 89.272,
+            "beats_no_detector": false
+          },
+          "100": {
+            "detector": 250620.955,
+            "no_detector": 250535.899,
+            "delta": 85.055,
+            "beats_no_detector": false
+          },
+          "300": {
+            "detector": 751680.706,
+            "no_detector": 751607.698,
+            "delta": 73.008,
+            "beats_no_detector": false
+          },
+          "1000": {
+            "detector": 2505389.836,
+            "no_detector": 2505358.995,
+            "delta": 30.842,
+            "beats_no_detector": false
+          }
+        },
+        "break_even_ratio": 1512.0
+      }
+    }
+  },
+  "cache_results": {
+    "rf": {
+      "42": {
+        "threshold": {
+          "true_positives": 168694,
+          "false_positives": 6318,
+          "false_negatives": 122445,
+          "true_negatives": 864608,
+          "alerts": 175012,
+          "alert_rate": 0.15060431215121356,
+          "curve": {
+            "1": {
+              "detector": 2559.728,
+              "no_detector": 2505.359,
+              "delta": 54.369,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 3613.412,
+              "no_detector": 5010.718,
+              "delta": -1397.306,
+              "beats_no_detector": true
+            },
+            "3": {
+              "detector": 4667.097,
+              "no_detector": 7516.077,
+              "delta": -2848.98,
+              "beats_no_detector": true
+            },
+            "5": {
+              "detector": 6774.466,
+              "no_detector": 12526.795,
+              "delta": -5752.329,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 12042.889,
+              "no_detector": 25053.59,
+              "delta": -13010.701,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 33116.581,
+              "no_detector": 75160.77,
+              "delta": -42044.189,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 106874.504,
+              "no_detector": 250535.899,
+              "delta": -143661.396,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 317611.424,
+              "no_detector": 751607.698,
+              "delta": -433996.274,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 1055190.648,
+              "no_detector": 2505358.995,
+              "delta": -1450168.347,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 1.0375
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.05000000074505806,
+              "true_positives": 5145,
+              "false_positives": 665,
+              "precision": 0.8855421686746988,
+              "recall": 0.017671971120323968,
+              "fp_per_10k_benign": 7.635551126042856,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.010997680176837698,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.012093374441578052,
+                "Web Attack - Brute Force": 0.8254810882548109,
+                "Web Attack - Sql Injection": 0.09523809523809523,
+                "Web Attack - XSS": 0.8711656441717791
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.03999999910593033,
+              "true_positives": 10689,
+              "false_positives": 932,
+              "precision": 0.9198003614146804,
+              "recall": 0.036714421633652655,
+              "fp_per_10k_benign": 10.701253608228482,
+              "per_family_recall": {
+                "Bot": 0.000508646998982706,
+                "DDoS": 0.05255922578831028,
+                "Infiltration": 0.08333333333333333,
+                "PortScan": 0.01301830994777575,
+                "Web Attack - Brute Force": 0.8633045786330458,
+                "Web Attack - Sql Injection": 0.19047619047619047,
+                "Web Attack - XSS": 0.8926380368098159
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.0036107618079876036,
+              "recall": 0.5769288010992548,
+              "alerts": 168184
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.01056045763443121,
+              "recall": 0.9052346570397112,
+              "alerts": 6828
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 5145,
+            "false_positives": 665,
+            "false_negatives": 285994,
+            "precision": 0.8855421686746988,
+            "recall": 0.017671971120323968,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.010997680176837698,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.012093374441578052,
+              "Web Attack - Brute Force": 0.8254810882548109,
+              "Web Attack - Sql Injection": 0.09523809523809523,
+              "Web Attack - XSS": 0.8711656441717791
+            },
+            "curve": {
+              "1": {
+                "detector": 2511.082,
+                "no_detector": 2505.359,
+                "delta": 5.723,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4972.166,
+                "no_detector": 5010.718,
+                "delta": -38.552,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7433.25,
+                "no_detector": 7516.077,
+                "delta": -82.827,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12355.419,
+                "no_detector": 12526.795,
+                "delta": -171.376,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24660.841,
+                "no_detector": 25053.59,
+                "delta": -392.749,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 73882.528,
+                "no_detector": 75160.77,
+                "delta": -1278.242,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 246158.433,
+                "no_detector": 250535.899,
+                "delta": -4377.466,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 738375.306,
+                "no_detector": 751607.698,
+                "delta": -13232.392,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2461134.36,
+                "no_detector": 2505358.995,
+                "delta": -44224.635,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.1293
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 10689,
+            "false_positives": 932,
+            "false_negatives": 280450,
+            "precision": 0.9198003614146804,
+            "recall": 0.036714421633652655,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.000508646998982706,
+              "DDoS": 0.05255922578831028,
+              "Infiltration": 0.08333333333333333,
+              "PortScan": 0.01301830994777575,
+              "Web Attack - Brute Force": 0.8633045786330458,
+              "Web Attack - Sql Injection": 0.19047619047619047,
+              "Web Attack - XSS": 0.8926380368098159
+            },
+            "curve": {
+              "1": {
+                "detector": 2513.379,
+                "no_detector": 2505.359,
+                "delta": 8.02,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4926.755,
+                "no_detector": 5010.718,
+                "delta": -83.963,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7340.132,
+                "no_detector": 7516.077,
+                "delta": -175.945,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12166.884,
+                "no_detector": 12526.795,
+                "delta": -359.911,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24233.765,
+                "no_detector": 25053.59,
+                "delta": -819.825,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 72501.289,
+                "no_detector": 75160.77,
+                "delta": -2659.481,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 241437.622,
+                "no_detector": 250535.899,
+                "delta": -9098.278,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 724112.859,
+                "no_detector": 751607.698,
+                "delta": -27494.839,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2413476.191,
+                "no_detector": 2505358.995,
+                "delta": -91882.803,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.0872
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.002515048908954043,
+          "fpr": 0.007254347671329137,
+          "recall": 0.5794276960489663,
+          "precision": 0.9638996183118872,
+          "alert_rate": 0.15060431215121356,
+          "validation_fpr": 0.0052225492312762065,
+          "validation_recall": 0.0458699257136751
+        }
+      },
+      "43": {
+        "threshold": {
+          "true_positives": 163328,
+          "false_positives": 8652,
+          "false_negatives": 127811,
+          "true_negatives": 862274,
+          "alerts": 171980,
+          "alert_rate": 0.14799516378171618,
+          "curve": {
+            "1": {
+              "detector": 2579.813,
+              "no_detector": 2505.359,
+              "delta": 74.454,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 3679.674,
+              "no_detector": 5010.718,
+              "delta": -1331.044,
+              "beats_no_detector": true
+            },
+            "3": {
+              "detector": 4779.535,
+              "no_detector": 7516.077,
+              "delta": -2736.542,
+              "beats_no_detector": true
+            },
+            "5": {
+              "detector": 6979.257,
+              "no_detector": 12526.795,
+              "delta": -5547.538,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 12478.562,
+              "no_detector": 25053.59,
+              "delta": -12575.028,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 34475.782,
+              "no_detector": 75160.77,
+              "delta": -40684.988,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 111466.054,
+              "no_detector": 250535.899,
+              "delta": -139069.845,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 331438.259,
+              "no_detector": 751607.698,
+              "delta": -420169.44,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 1101340.975,
+              "no_detector": 2505358.995,
+              "delta": -1404018.02,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 1.053
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.03999999910593033,
+              "true_positives": 4870,
+              "false_positives": 940,
+              "precision": 0.8382099827882961,
+              "recall": 0.016727405122639014,
+              "fp_per_10k_benign": 10.793109862376367,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.0016559007084443126,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.0244321399358208,
+                "Web Attack - Brute Force": 0.37027206370272064,
+                "Web Attack - Sql Injection": 0.0,
+                "Web Attack - XSS": 0.3312883435582822
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.029999999329447746,
+              "true_positives": 10488,
+              "false_positives": 1133,
+              "precision": 0.9025040874279322,
+              "recall": 0.036024029758981106,
+              "fp_per_10k_benign": 13.009141993694069,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.018355503136057237,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.044742968602529416,
+                "Web Attack - Brute Force": 0.48971466489714666,
+                "Web Attack - Sql Injection": 0.047619047619047616,
+                "Web Attack - XSS": 0.4401840490797546
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.008360747929725307,
+              "recall": 0.5581590942915586,
+              "alerts": 164729
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.011362018707471819,
+              "recall": 0.930956678700361,
+              "alerts": 7251
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 4870,
+            "false_positives": 940,
+            "false_negatives": 286269,
+            "precision": 0.8382099827882961,
+            "recall": 0.016727405122639014,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.0016559007084443126,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.0244321399358208,
+              "Web Attack - Brute Force": 0.37027206370272064,
+              "Web Attack - Sql Injection": 0.0,
+              "Web Attack - XSS": 0.3312883435582822
+            },
+            "curve": {
+              "1": {
+                "detector": 2513.448,
+                "no_detector": 2505.359,
+                "delta": 8.089,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4976.899,
+                "no_detector": 5010.718,
+                "delta": -33.819,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7440.35,
+                "no_detector": 7516.077,
+                "delta": -75.727,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12367.251,
+                "no_detector": 12526.795,
+                "delta": -159.544,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24684.506,
+                "no_detector": 25053.59,
+                "delta": -369.084,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 73953.522,
+                "no_detector": 75160.77,
+                "delta": -1207.247,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 246395.081,
+                "no_detector": 250535.899,
+                "delta": -4140.818,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 739085.249,
+                "no_detector": 751607.698,
+                "delta": -12522.449,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2463500.837,
+                "no_detector": 2505358.995,
+                "delta": -41858.158,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.193
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 10488,
+            "false_positives": 1133,
+            "false_negatives": 280651,
+            "precision": 0.9025040874279322,
+            "recall": 0.036024029758981106,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.018355503136057237,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.044742968602529416,
+              "Web Attack - Brute Force": 0.48971466489714666,
+              "Web Attack - Sql Injection": 0.047619047619047616,
+              "Web Attack - XSS": 0.4401840490797546
+            },
+            "curve": {
+              "1": {
+                "detector": 2515.109,
+                "no_detector": 2505.359,
+                "delta": 9.75,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4930.215,
+                "no_detector": 5010.718,
+                "delta": -80.503,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7345.321,
+                "no_detector": 7516.077,
+                "delta": -170.756,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12175.532,
+                "no_detector": 12526.795,
+                "delta": -351.263,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24251.062,
+                "no_detector": 25053.59,
+                "delta": -802.528,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 72553.179,
+                "no_detector": 75160.77,
+                "delta": -2607.591,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 241610.59,
+                "no_detector": 250535.899,
+                "delta": -8925.31,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 724631.763,
+                "no_detector": 751607.698,
+                "delta": -26975.935,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2415205.871,
+                "no_detector": 2505358.995,
+                "delta": -90153.124,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.108
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.00185520361990954,
+          "fpr": 0.009934253886093652,
+          "recall": 0.5609966373450482,
+          "precision": 0.9496918246307711,
+          "alert_rate": 0.14799516378171618,
+          "validation_fpr": 0.009165596627387702,
+          "validation_recall": 0.03264323962781641
+        }
+      },
+      "44": {
+        "threshold": {
+          "true_positives": 136200,
+          "false_positives": 60058,
+          "false_negatives": 154939,
+          "true_negatives": 810868,
+          "alerts": 196258,
+          "alert_rate": 0.16888728255304136,
+          "curve": {
+            "1": {
+              "detector": 3022.18,
+              "no_detector": 2505.359,
+              "delta": 516.821,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 4355.488,
+              "no_detector": 5010.718,
+              "delta": -655.23,
+              "beats_no_detector": true
+            },
+            "3": {
+              "detector": 5688.795,
+              "no_detector": 7516.077,
+              "delta": -1827.282,
+              "beats_no_detector": true
+            },
+            "5": {
+              "detector": 8355.41,
+              "no_detector": 12526.795,
+              "delta": -4171.385,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 15021.948,
+              "no_detector": 25053.59,
+              "delta": -10031.642,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 41688.098,
+              "no_detector": 75160.77,
+              "delta": -33472.671,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 135019.625,
+              "no_detector": 250535.899,
+              "delta": -115516.275,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 401681.128,
+              "no_detector": 751607.698,
+              "delta": -349926.57,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 1334996.39,
+              "no_detector": 2505358.995,
+              "delta": -1170362.605,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 1.441
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.03999999910593033,
+              "true_positives": 4377,
+              "false_positives": 1433,
+              "precision": 0.753356282271945,
+              "recall": 0.01503405589769835,
+              "fp_per_10k_benign": 16.453751524239717,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.0027728526014043913,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.013446171270370604,
+                "Web Attack - Brute Force": 0.8546781685467817,
+                "Web Attack - Sql Injection": 0.09523809523809523,
+                "Web Attack - XSS": 0.911042944785276
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.029999999329447746,
+              "true_positives": 10093,
+              "false_positives": 1528,
+              "precision": 0.8685138972549694,
+              "recall": 0.0346672895077609,
+              "fp_per_10k_benign": 17.544544542245838,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.046146515969287726,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.014295601837286856,
+                "Web Attack - Brute Force": 0.8706038487060385,
+                "Web Attack - Sql Injection": 0.23809523809523808,
+                "Web Attack - XSS": 0.9125766871165644
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.0069029269858586545,
+              "recall": 0.46453207255912476,
+              "alerts": 137074
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.12526691326714978,
+              "recall": 0.8962093862815884,
+              "alerts": 59184
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 4377,
+            "false_positives": 1433,
+            "false_negatives": 286762,
+            "precision": 0.753356282271945,
+            "recall": 0.01503405589769835,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.0027728526014043913,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.013446171270370604,
+              "Web Attack - Brute Force": 0.8546781685467817,
+              "Web Attack - Sql Injection": 0.09523809523809523,
+              "Web Attack - XSS": 0.911042944785276
+            },
+            "curve": {
+              "1": {
+                "detector": 2517.69,
+                "no_detector": 2505.359,
+                "delta": 12.331,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4985.384,
+                "no_detector": 5010.718,
+                "delta": -25.334,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7453.077,
+                "no_detector": 7516.077,
+                "delta": -63.0,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12388.464,
+                "no_detector": 12526.795,
+                "delta": -138.331,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24726.93,
+                "no_detector": 25053.59,
+                "delta": -326.66,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 74080.796,
+                "no_detector": 75160.77,
+                "delta": -1079.974,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 246819.326,
+                "no_detector": 250535.899,
+                "delta": -3716.574,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 740357.983,
+                "no_detector": 751607.698,
+                "delta": -11249.715,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2467743.285,
+                "no_detector": 2505358.995,
+                "delta": -37615.71,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.3274
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 10093,
+            "false_positives": 1528,
+            "false_negatives": 281046,
+            "precision": 0.8685138972549694,
+            "recall": 0.0346672895077609,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.046146515969287726,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.014295601837286856,
+              "Web Attack - Brute Force": 0.8706038487060385,
+              "Web Attack - Sql Injection": 0.23809523809523808,
+              "Web Attack - XSS": 0.9125766871165644
+            },
+            "curve": {
+              "1": {
+                "detector": 2518.508,
+                "no_detector": 2505.359,
+                "delta": 13.149,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4937.013,
+                "no_detector": 5010.718,
+                "delta": -73.705,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7355.518,
+                "no_detector": 7516.077,
+                "delta": -160.559,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12192.528,
+                "no_detector": 12526.795,
+                "delta": -334.267,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24285.053,
+                "no_detector": 25053.59,
+                "delta": -768.537,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 72655.153,
+                "no_detector": 75160.77,
+                "delta": -2505.617,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 241950.502,
+                "no_detector": 250535.899,
+                "delta": -8585.398,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 725651.5,
+                "no_detector": 751607.698,
+                "delta": -25956.199,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2418604.992,
+                "no_detector": 2505358.995,
+                "delta": -86754.003,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.1514
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.009363636363636352,
+          "fpr": 0.0689587863951702,
+          "recall": 0.46781777776251204,
+          "precision": 0.6939844490415678,
+          "alert_rate": 0.16888728255304136,
+          "validation_fpr": 0.0035862413781348364,
+          "validation_recall": 0.029746191688005352
+        }
+      },
+      "45": {
+        "threshold": {
+          "true_positives": 242212,
+          "false_positives": 68341,
+          "false_negatives": 48927,
+          "true_negatives": 802585,
+          "alerts": 310553,
+          "alert_rate": 0.26724236596059603,
+          "curve": {
+            "1": {
+              "detector": 3093.459,
+              "no_detector": 2505.359,
+              "delta": 588.1,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 3514.494,
+              "no_detector": 5010.718,
+              "delta": -1496.224,
+              "beats_no_detector": true
+            },
+            "3": {
+              "detector": 3935.529,
+              "no_detector": 7516.077,
+              "delta": -3580.548,
+              "beats_no_detector": true
+            },
+            "5": {
+              "detector": 4777.598,
+              "no_detector": 12526.795,
+              "delta": -7749.196,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 6882.773,
+              "no_detector": 25053.59,
+              "delta": -18170.817,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 15303.473,
+              "no_detector": 75160.77,
+              "delta": -59857.297,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 44775.92,
+              "no_detector": 250535.899,
+              "delta": -205759.979,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 128982.914,
+              "no_detector": 751607.698,
+              "delta": -622624.784,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 423707.392,
+              "no_detector": 2505358.995,
+              "delta": -2081651.603,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 1.2822
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.05999999865889549,
+              "true_positives": 4995,
+              "false_positives": 815,
+              "precision": 0.8597246127366609,
+              "recall": 0.017156753303404902,
+              "fp_per_10k_benign": 9.35785589131568,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.00784990666031384,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.013383250487636066,
+                "Web Attack - Brute Force": 0.8467153284671532,
+                "Web Attack - Sql Injection": 0.047619047619047616,
+                "Web Attack - XSS": 0.897239263803681
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.03999999910593033,
+              "true_positives": 10254,
+              "false_positives": 1367,
+              "precision": 0.8823681266672403,
+              "recall": 0.03522028996458736,
+              "fp_per_10k_benign": 15.695937427519674,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.039132370515594365,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.020984081041968163,
+                "Web Attack - Brute Force": 0.8725945587259456,
+                "Web Attack - Sql Injection": 0.23809523809523808,
+                "Web Attack - XSS": 0.901840490797546
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.008249721831351357,
+              "recall": 0.8311557058455021,
+              "alerts": 243558
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.14218510804649054,
+              "recall": 0.9350180505415162,
+              "alerts": 66995
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 4995,
+            "false_positives": 815,
+            "false_negatives": 286144,
+            "precision": 0.8597246127366609,
+            "recall": 0.017156753303404902,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.00784990666031384,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.013383250487636066,
+              "Web Attack - Brute Force": 0.8467153284671532,
+              "Web Attack - Sql Injection": 0.047619047619047616,
+              "Web Attack - XSS": 0.897239263803681
+            },
+            "curve": {
+              "1": {
+                "detector": 2512.372,
+                "no_detector": 2505.359,
+                "delta": 7.013,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4974.748,
+                "no_detector": 5010.718,
+                "delta": -35.97,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7437.123,
+                "no_detector": 7516.077,
+                "delta": -78.954,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12361.873,
+                "no_detector": 12526.795,
+                "delta": -164.922,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24673.749,
+                "no_detector": 25053.59,
+                "delta": -379.841,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 73921.252,
+                "no_detector": 75160.77,
+                "delta": -1239.518,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 246287.514,
+                "no_detector": 250535.899,
+                "delta": -4248.385,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 738762.548,
+                "no_detector": 751607.698,
+                "delta": -12845.151,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2462425.166,
+                "no_detector": 2505358.995,
+                "delta": -42933.829,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.1632
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 10254,
+            "false_positives": 1367,
+            "false_negatives": 280885,
+            "precision": 0.8823681266672403,
+            "recall": 0.03522028996458736,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.039132370515594365,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.020984081041968163,
+              "Web Attack - Brute Force": 0.8725945587259456,
+              "Web Attack - Sql Injection": 0.23809523809523808,
+              "Web Attack - XSS": 0.901840490797546
+            },
+            "curve": {
+              "1": {
+                "detector": 2517.123,
+                "no_detector": 2505.359,
+                "delta": 11.764,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4934.242,
+                "no_detector": 5010.718,
+                "delta": -76.476,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7351.362,
+                "no_detector": 7516.077,
+                "delta": -164.715,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12185.601,
+                "no_detector": 12526.795,
+                "delta": -341.194,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24271.198,
+                "no_detector": 25053.59,
+                "delta": -782.392,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 72613.589,
+                "no_detector": 75160.77,
+                "delta": -2547.181,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 241811.955,
+                "no_detector": 250535.899,
+                "delta": -8723.944,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 725235.86,
+                "no_detector": 751607.698,
+                "delta": -26371.838,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2417219.527,
+                "no_detector": 2505358.995,
+                "delta": -88139.467,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.1333
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.010000000000000009,
+          "fpr": 0.07846935330900673,
+          "recall": 0.831946252477339,
+          "precision": 0.779937723995582,
+          "alert_rate": 0.26724236596059603,
+          "validation_fpr": 0.003445337090780996,
+          "validation_recall": 0.028028543046095516
+        }
+      },
+      "46": {
+        "threshold": {
+          "true_positives": 138224,
+          "false_positives": 35454,
+          "false_negatives": 152915,
+          "true_negatives": 835472,
+          "alerts": 173678,
+          "alert_rate": 0.1494563557115996,
+          "curve": {
+            "1": {
+              "detector": 2810.454,
+              "no_detector": 2505.359,
+              "delta": 305.095,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 4126.344,
+              "no_detector": 5010.718,
+              "delta": -884.374,
+              "beats_no_detector": true
+            },
+            "3": {
+              "detector": 5442.234,
+              "no_detector": 7516.077,
+              "delta": -2073.843,
+              "beats_no_detector": true
+            },
+            "5": {
+              "detector": 8074.015,
+              "no_detector": 12526.795,
+              "delta": -4452.78,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 14653.466,
+              "no_detector": 25053.59,
+              "delta": -10400.124,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 40971.271,
+              "no_detector": 75160.77,
+              "delta": -34189.499,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 133083.588,
+              "no_detector": 250535.899,
+              "delta": -117452.311,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 396261.638,
+              "no_detector": 751607.698,
+              "delta": -355346.061,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 1317384.811,
+              "no_detector": 2505358.995,
+              "delta": -1187974.184,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 1.2565
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.05999999865889549,
+              "true_positives": 5313,
+              "false_positives": 497,
+              "precision": 0.9144578313253012,
+              "recall": 0.018249015075273323,
+              "fp_per_10k_benign": 5.706569788937292,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.014949971490388746,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.01065248851695715,
+                "Web Attack - Brute Force": 0.7903118779031187,
+                "Web Attack - Sql Injection": 0.0,
+                "Web Attack - XSS": 0.7883435582822086
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.05000000074505806,
+              "true_positives": 10953,
+              "false_positives": 668,
+              "precision": 0.9425178556062301,
+              "recall": 0.03762120499143021,
+              "fp_per_10k_benign": 7.669997221348312,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.05589445976239387,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.012382810042156925,
+                "Web Attack - Brute Force": 0.8374253483742535,
+                "Web Attack - Sql Injection": 0.0,
+                "Web Attack - XSS": 0.8680981595092024
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.0034321546062555967,
+              "recall": 0.4714958656804754,
+              "alerts": 137648
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.07453203944731707,
+              "recall": 0.9016245487364621,
+              "alerts": 36030
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 5313,
+            "false_positives": 497,
+            "false_negatives": 285826,
+            "precision": 0.9144578313253012,
+            "recall": 0.018249015075273323,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.014949971490388746,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.01065248851695715,
+              "Web Attack - Brute Force": 0.7903118779031187,
+              "Web Attack - Sql Injection": 0.0,
+              "Web Attack - XSS": 0.7883435582822086
+            },
+            "curve": {
+              "1": {
+                "detector": 2509.636,
+                "no_detector": 2505.359,
+                "delta": 4.277,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4969.275,
+                "no_detector": 5010.718,
+                "delta": -41.443,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7428.913,
+                "no_detector": 7516.077,
+                "delta": -87.164,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12348.191,
+                "no_detector": 12526.795,
+                "delta": -178.604,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24646.384,
+                "no_detector": 25053.59,
+                "delta": -407.206,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 73839.157,
+                "no_detector": 75160.77,
+                "delta": -1321.613,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 246013.863,
+                "no_detector": 250535.899,
+                "delta": -4522.036,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 737941.595,
+                "no_detector": 751607.698,
+                "delta": -13666.103,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2459688.658,
+                "no_detector": 2505358.995,
+                "delta": -45670.337,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.0935
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 10953,
+            "false_positives": 668,
+            "false_negatives": 280186,
+            "precision": 0.9425178556062301,
+            "recall": 0.03762120499143021,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.05589445976239387,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.012382810042156925,
+              "Web Attack - Brute Force": 0.8374253483742535,
+              "Web Attack - Sql Injection": 0.0,
+              "Web Attack - XSS": 0.8680981595092024
+            },
+            "curve": {
+              "1": {
+                "detector": 2511.107,
+                "no_detector": 2505.359,
+                "delta": 5.748,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 4922.212,
+                "no_detector": 5010.718,
+                "delta": -88.506,
+                "beats_no_detector": true
+              },
+              "3": {
+                "detector": 7333.316,
+                "no_detector": 7516.077,
+                "delta": -182.761,
+                "beats_no_detector": true
+              },
+              "5": {
+                "detector": 12155.525,
+                "no_detector": 12526.795,
+                "delta": -371.27,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24211.047,
+                "no_detector": 25053.59,
+                "delta": -842.543,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 72433.134,
+                "no_detector": 75160.77,
+                "delta": -2727.636,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 241210.44,
+                "no_detector": 250535.899,
+                "delta": -9325.459,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 723431.314,
+                "no_detector": 751607.698,
+                "delta": -28176.384,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2411204.373,
+                "no_detector": 2505358.995,
+                "delta": -94154.621,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 1.061
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.00712097468444628,
+          "fpr": 0.04070839543198848,
+          "recall": 0.47476978350547333,
+          "precision": 0.7958636096684669,
+          "alert_rate": 0.1494563557115996,
+          "validation_fpr": 0.004286217515311978,
+          "validation_recall": 0.04489632763554187
+        }
+      }
+    },
+    "lr": {
+      "42": {
+        "threshold": {
+          "true_positives": 10252,
+          "false_positives": 23202,
+          "false_negatives": 280887,
+          "true_negatives": 847724,
+          "alerts": 33454,
+          "alert_rate": 0.028788406844711786,
+          "curve": {
+            "1": {
+              "detector": 2705.021,
+              "no_detector": 2505.359,
+              "delta": 199.662,
+              "beats_no_detector": false
+            },
+            "2": {
+              "detector": 5122.158,
+              "no_detector": 5010.718,
+              "delta": 111.44,
+              "beats_no_detector": false
+            },
+            "3": {
+              "detector": 7539.294,
+              "no_detector": 7516.077,
+              "delta": 23.217,
+              "beats_no_detector": false
+            },
+            "5": {
+              "detector": 12373.568,
+              "no_detector": 12526.795,
+              "delta": -153.227,
+              "beats_no_detector": true
+            },
+            "10": {
+              "detector": 24459.251,
+              "no_detector": 25053.59,
+              "delta": -594.339,
+              "beats_no_detector": true
+            },
+            "30": {
+              "detector": 72801.986,
+              "no_detector": 75160.77,
+              "delta": -2358.784,
+              "beats_no_detector": true
+            },
+            "100": {
+              "detector": 242001.558,
+              "no_detector": 250535.899,
+              "delta": -8534.342,
+              "beats_no_detector": true
+            },
+            "300": {
+              "detector": 725428.905,
+              "no_detector": 751607.698,
+              "delta": -26178.794,
+              "beats_no_detector": true
+            },
+            "1000": {
+              "detector": 2417424.619,
+              "no_detector": 2505358.995,
+              "delta": -87934.375,
+              "beats_no_detector": true
+            }
+          },
+          "break_even_ratio": 3.2632
+        },
+        "budgets": {
+          "total_flows": 1162065,
+          "total_attacks": 291139,
+          "total_benign": 870926,
+          "budgets_per_10k": {
+            "50_per_10k": {
+              "budget_k": 5810,
+              "alerts_generated": 5810,
+              "alert_rate": 0.004999720325455117,
+              "effective_threshold": 0.5824175477027893,
+              "true_positives": 367,
+              "false_positives": 5443,
+              "precision": 0.06316695352839931,
+              "recall": 0.0012605662587286486,
+              "fp_per_10k_benign": 62.49669891586656,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.0,
+                "Infiltration": 0.027777777777777776,
+                "PortScan": 0.002302900648084062,
+                "Web Attack - Brute Force": 0.0,
+                "Web Attack - Sql Injection": 0.0,
+                "Web Attack - XSS": 0.0
+              }
+            },
+            "100_per_10k": {
+              "budget_k": 11621,
+              "alerts_generated": 11621,
+              "alert_rate": 0.010000301187971412,
+              "effective_threshold": 0.3868558704853058,
+              "true_positives": 2359,
+              "false_positives": 9262,
+              "precision": 0.2029945787797952,
+              "recall": 0.008102658867413848,
+              "fp_per_10k_benign": 106.34657823971267,
+              "per_family_recall": {
+                "Bot": 0.0,
+                "DDoS": 0.0,
+                "Infiltration": 0.05555555555555555,
+                "PortScan": 0.014830428490530422,
+                "Web Attack - Brute Force": 0.0,
+                "Web Attack - Sql Injection": 0.0,
+                "Web Attack - XSS": 0.0
+              }
+            }
+          },
+          "fixed_budgets": {}
+        },
+        "per_day": {
+          "Friday": {
+            "threshold": {
+              "fpr": 0.008088009905458864,
+              "recall": 0.035130467287131865,
+              "alerts": 13501
+            }
+          },
+          "Thursday": {
+            "threshold": {
+              "fpr": 0.04347483295335834,
+              "recall": 0.046028880866425995,
+              "alerts": 19953
+            }
+          }
+        },
+        "budget_summary": {
+          "50_per_10k": {
+            "alerts": 5810,
+            "alert_rate": 0.004999720325455117,
+            "true_positives": 367,
+            "false_positives": 5443,
+            "false_negatives": 290772,
+            "precision": 0.06316695352839931,
+            "recall": 0.0012605662587286486,
+            "review_hours_per_10k_flows": 4.166,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.0,
+              "Infiltration": 0.027777777777777776,
+              "PortScan": 0.002302900648084062,
+              "Web Attack - Brute Force": 0.0,
+              "Web Attack - Sql Injection": 0.0,
+              "Web Attack - XSS": 0.0
+            },
+            "curve": {
+              "1": {
+                "detector": 2552.198,
+                "no_detector": 2505.359,
+                "delta": 46.839,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 5054.399,
+                "no_detector": 5010.718,
+                "delta": 43.681,
+                "beats_no_detector": false
+              },
+              "3": {
+                "detector": 7556.6,
+                "no_detector": 7516.077,
+                "delta": 40.523,
+                "beats_no_detector": false
+              },
+              "5": {
+                "detector": 12561.001,
+                "no_detector": 12526.795,
+                "delta": 34.206,
+                "beats_no_detector": false
+              },
+              "10": {
+                "detector": 25072.005,
+                "no_detector": 25053.59,
+                "delta": 18.415,
+                "beats_no_detector": false
+              },
+              "30": {
+                "detector": 75116.022,
+                "no_detector": 75160.77,
+                "delta": -44.748,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 250270.08,
+                "no_detector": 250535.899,
+                "delta": -265.82,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 750710.244,
+                "no_detector": 751607.698,
+                "delta": -897.454,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2502250.821,
+                "no_detector": 2505358.995,
+                "delta": -3108.174,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 15.8311
+          },
+          "100_per_10k": {
+            "alerts": 11621,
+            "alert_rate": 0.010000301187971412,
+            "true_positives": 2359,
+            "false_positives": 9262,
+            "false_negatives": 288780,
+            "precision": 0.2029945787797952,
+            "recall": 0.008102658867413848,
+            "review_hours_per_10k_flows": 8.334,
+            "per_family_recall": {
+              "Bot": 0.0,
+              "DDoS": 0.0,
+              "Infiltration": 0.05555555555555555,
+              "PortScan": 0.014830428490530422,
+              "Web Attack - Brute Force": 0.0,
+              "Web Attack - Sql Injection": 0.0,
+              "Web Attack - XSS": 0.0
+            },
+            "curve": {
+              "1": {
+                "detector": 2585.062,
+                "no_detector": 2505.359,
+                "delta": 79.703,
+                "beats_no_detector": false
+              },
+              "2": {
+                "detector": 5070.121,
+                "no_detector": 5010.718,
+                "delta": 59.403,
+                "beats_no_detector": false
+              },
+              "3": {
+                "detector": 7555.18,
+                "no_detector": 7516.077,
+                "delta": 39.103,
+                "beats_no_detector": false
+              },
+              "5": {
+                "detector": 12525.298,
+                "no_detector": 12526.795,
+                "delta": -1.497,
+                "beats_no_detector": true
+              },
+              "10": {
+                "detector": 24950.592,
+                "no_detector": 25053.59,
+                "delta": -102.998,
+                "beats_no_detector": true
+              },
+              "30": {
+                "detector": 74651.771,
+                "no_detector": 75160.77,
+                "delta": -508.999,
+                "beats_no_detector": true
+              },
+              "100": {
+                "detector": 248605.896,
+                "no_detector": 250535.899,
+                "delta": -1930.004,
+                "beats_no_detector": true
+              },
+              "300": {
+                "detector": 745617.681,
+                "no_detector": 751607.698,
+                "delta": -5990.018,
+                "beats_no_detector": true
+              },
+              "1000": {
+                "detector": 2485158.928,
+                "no_detector": 2505358.995,
+                "delta": -20200.066,
+                "beats_no_detector": true
+              }
+            },
+            "break_even_ratio": 4.9262
+          }
+        },
+        "threshold_metrics": {
+          "threshold": 0.13454342680553322,
+          "fpr": 0.02664061010924005,
+          "recall": 0.035213420393695107,
+          "precision": 0.3064506486518802,
+          "alert_rate": 0.028788406844711786,
+          "validation_fpr": 0.009208776973512267,
+          "validation_recall": 0.0032809463689936714
+        }
+      }
+    }
+  },
+  "d6_reference": {
+    "fpr_mean": 0.041065027338717634,
+    "fpr_values": [
+      0.007254347671329137,
+      0.009934253886093652,
+      0.0689587863951702,
+      0.07846935330900673,
+      0.04070839543198848
+    ],
+    "recall_mean": 0.5829916294278678,
+    "alert_rate_mean": 0.17683709603163336,
+    "bot_recall_mean": 0.009359104781281791,
+    "bot_recall_values": [
+      0.011190233977619531,
+      0.003051881993896236,
+      0.000508646998982706,
+      0.010681586978636826,
+      0.021363173957273652
+    ],
+    "ece_mean": 0.24999508297033773,
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ]
+  },
+  "serving_artifact_identity": {
+    "serving_model_id": "netshield-flow/serving-rf-day-based-seed42-v1",
+    "serving_artifact_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "serving_artifact_path": "models/model_bundle_rf_day_based_seed42.pkl",
+    "evaluated_model": "rf-day-based-seed42",
+    "evaluated_artifact_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "identity_matches": true,
+    "reason": "The registry-active serving artifact has the same SHA-256 as the evaluated and gated Random Forest seed42 bundle."
+  },
+  "release_gate": {
+    "gate": "9/10 detection claim",
+    "passed": false,
+    "checks": [
+      {
+        "id": "artifact_identity",
+        "requirement": "The served artifact must be the artifact that was evaluated and gated.",
+        "observed": "served=netshield-flow/serving-rf-day-based-seed42-v1; evaluated=rf-day-based-seed42",
+        "pass": true,
+        "detail": "The registry-active serving artifact has the same SHA-256 as the evaluated and gated Random Forest seed42 bundle."
+      },
+      {
+        "id": "fpr_every_day_seed",
+        "requirement": "Test FPR <= 1% on every day and every seed.",
+        "observed": "max=0.0785",
+        "pass": false,
+        "detail": "The Wednesday-frozen threshold does not transfer to Thursday/Friday."
+      },
+      {
+        "id": "alert_rate",
+        "requirement": "Alert rate <= 2% of flows at the frozen threshold.",
+        "observed": 0.1768,
+        "pass": false,
+        "detail": "A 15% alert rate is not an operating budget."
+      },
+      {
+        "id": "bot_recall",
+        "requirement": "Bot recall >= 0.50 minimum (0.70 desired) at <= 1% FPR.",
+        "observed": 0.0005,
+        "pass": false,
+        "detail": "Unseen-family recall is the core detection gap."
+      },
+      {
+        "id": "calibration",
+        "requirement": "ECE <= 0.05 on the held-out test partition.",
+        "observed": 0.25,
+        "pass": false,
+        "detail": "The serving artifact is explicitly uncalibrated."
+      },
+      {
+        "id": "external_dataset",
+        "requirement": "Pass the same gate on at least one independent external dataset.",
+        "observed": "blocked: no independent dataset on disk",
+        "pass": false,
+        "detail": "See docs/EXTERNAL_VALIDATION.md."
+      },
+      {
+        "id": "prospective_pilot",
+        "requirement": "Complete the D8/S7 prospective human-review pilot with predeclared criteria.",
+        "observed": "not run: no design partner",
+        "pass": false,
+        "detail": "See docs/D8_PROSPECTIVE_PILOT_PROTOCOL.md."
+      },
+      {
+        "id": "site_cost_model",
+        "requirement": "Use a site-supplied C_FP, C_FN, and review budget, not an illustrative ratio.",
+        "observed": "not supplied: results are a r = C_FN/C_FP sensitivity curve",
+        "pass": false,
+        "detail": "No organization has supplied its costs."
+      },
+      {
+        "id": "seeds",
+        "requirement": "Report at least five estimator seeds for the exact served artifact.",
+        "observed": "RF configuration: 5 seeds; served artifact: seed42",
+        "pass": true,
+        "detail": "Five seed runs exist for the served Random Forest configuration; the served bytes are the seed42 artifact."
+      }
+    ],
+    "verdict": "FAIL",
+    "consequence": "No 9/10 detection claim is allowed. Detection remains 4/10."
+  }
+}

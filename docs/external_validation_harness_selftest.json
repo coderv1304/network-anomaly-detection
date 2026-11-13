@@ -1,0 +1,58 @@
+{
+  "dataset": "data\\samples\\test_dataset.csv",
+  "status": "scored",
+  "schema": {
+    "expected_feature_count": 80,
+    "matched_feature_count": 80,
+    "missing_features": [],
+    "extra_columns": [
+      "Flow ID",
+      "Source IP",
+      "Destination IP",
+      "Timestamp",
+      "Label"
+    ],
+    "label_column": "Label",
+    "feature_schema": "cic-ids-2017-80f-45cd75ce849b",
+    "model_bundle": "models/model_bundle_rf_day_based_seed42.pkl",
+    "frozen_threshold": 0.002515048908954043,
+    "threshold_retuned": false
+  },
+  "comparability": {
+    "comparable_to_cic_ids_2017": true,
+    "reason": "all expected feature names are present",
+    "feature_mapping": "stripped column names matched exactly; case is not changed",
+    "label_mapping": "BENIGN/Normal/background/0 -> benign; all other labels -> attack",
+    "threshold_policy": "frozen serving threshold; not retuned on this dataset",
+    "calibration": "serving artifact is uncalibrated; Brier/ECE are diagnostics, not calibrated probabilities"
+  },
+  "metrics": {
+    "rows": 5204,
+    "benign_rows": 5200,
+    "attack_rows": 4,
+    "attack_rate": 0.0007686395080707148,
+    "frozen_threshold": 0.002515048908954043,
+    "fpr": 0.0034615384615384616,
+    "recall": 0.5,
+    "precision": 0.1,
+    "alert_rate": 0.003843197540353574,
+    "alerts": 20,
+    "pr_auc": 0.5003843197540354,
+    "roc_auc": 0.7478846153846155,
+    "calibration_uncalibrated": {
+      "brier": 0.0007250024051733998,
+      "ece_10_bins": 0.0006913453441409507
+    },
+    "per_family": {
+      "PortScan": {
+        "support": 4,
+        "detected": 2,
+        "recall": 0.5,
+        "recall_wilson_95": [
+          0.15003570882017148,
+          0.8499642911798285
+        ]
+      }
+    }
+  }
+}

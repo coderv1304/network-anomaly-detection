@@ -1,0 +1,282 @@
+{
+  "artifact_version": "cross-dataset-transfer-v1",
+  "model_type": "rf",
+  "task": "binary_attack",
+  "seed": 42,
+  "split_mode": "stratified_group",
+  "model_file": "model_bundle_rf_tierA_group_seed42.pkl",
+  "model_sha256": "bf6cb55adddd6ad2dd197fc0dea8ab77f8307ad4ca0fb560acdc3cb5220f246a",
+  "schema": {
+    "features": [
+      "flow_duration",
+      "total_fwd_packets",
+      "total_backward_packets",
+      "total_length_of_fwd_packets",
+      "total_length_of_bwd_packets",
+      "flow_packets_s",
+      "flow_bytes_s",
+      "packet_length_mean",
+      "packet_length_max",
+      "syn_flag_count",
+      "fin_flag_count",
+      "rst_flag_count"
+    ],
+    "count": 12,
+    "sha256": "159b0298563f36b697628428a0586b0c617c6ff1f1ec3326e33753b07f019cc9",
+    "version": "cic-ids-2017-12f-159b0298563f"
+  },
+  "feature_count": 12,
+  "features": [
+    "flow_duration",
+    "total_fwd_packets",
+    "total_backward_packets",
+    "total_length_of_fwd_packets",
+    "total_length_of_bwd_packets",
+    "flow_packets_s",
+    "flow_bytes_s",
+    "packet_length_mean",
+    "packet_length_max",
+    "syn_flag_count",
+    "fin_flag_count",
+    "rst_flag_count"
+  ],
+  "thresholds": {
+    "10_per_10k": {
+      "budget_per_10k": 10,
+      "n": 423480,
+      "k": 424,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    },
+    "100_per_10k": {
+      "budget_per_10k": 100,
+      "n": 423480,
+      "k": 4235,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    }
+  },
+  "threshold_comparison": ">",
+  "training": {
+    "rows": 2812512,
+    "partitions": {
+      "train": {
+        "BENIGN": 1587832,
+        "DDoS": 89633,
+        "DoS GoldenEye": 7201,
+        "DoS Hulk": 161855,
+        "DoS Slowhttptest": 3851,
+        "DoS slowloris": 4131,
+        "PortScan": 111253
+      },
+      "validation": {
+        "BENIGN": 342608,
+        "DDoS": 19246,
+        "DoS GoldenEye": 1553,
+        "DoS Hulk": 34579,
+        "DoS Slowhttptest": 820,
+        "DoS slowloris": 838,
+        "PortScan": 23836
+      },
+      "test": {
+        "BENIGN": 342455,
+        "DDoS": 19148,
+        "DoS GoldenEye": 1539,
+        "DoS Hulk": 34638,
+        "DoS Slowhttptest": 828,
+        "DoS slowloris": 827,
+        "PortScan": 23841
+      }
+    },
+    "coverage_gate": {
+      "families": {
+        "BENIGN": {
+          "train": 1587832,
+          "validation": 342608,
+          "test": 342455,
+          "required": false,
+          "observed": true,
+          "pass": true
+        },
+        "DDoS": {
+          "train": 89633,
+          "validation": 19246,
+          "test": 19148,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS GoldenEye": {
+          "train": 7201,
+          "validation": 1553,
+          "test": 1539,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Hulk": {
+          "train": 161855,
+          "validation": 34579,
+          "test": 34638,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Slowhttptest": {
+          "train": 3851,
+          "validation": 820,
+          "test": 828,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS slowloris": {
+          "train": 4131,
+          "validation": 838,
+          "test": 827,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "PortScan": {
+          "train": 111253,
+          "validation": 23836,
+          "test": 23841,
+          "required": true,
+          "observed": true,
+          "pass": true
+        }
+      },
+      "missing_required": [],
+      "train_validation_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "validation_test_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "overall_pass": true,
+      "reason": "Every required positive family is present in train, validation, and test, and validation/test families overlap."
+    },
+    "split": {
+      "mixed_groups_dropped": 0,
+      "mixed_rows_dropped": 0,
+      "per_family": {
+        "BENIGN": {
+          "groups": 1241767,
+          "train": 869237,
+          "validation": 186265,
+          "test": 186265
+        },
+        "DDoS": {
+          "groups": 45395,
+          "train": 31776,
+          "validation": 6809,
+          "test": 6810
+        },
+        "DoS GoldenEye": {
+          "groups": 7458,
+          "train": 5221,
+          "validation": 1119,
+          "test": 1118
+        },
+        "DoS Hulk": {
+          "groups": 14108,
+          "train": 9876,
+          "validation": 2116,
+          "test": 2116
+        },
+        "DoS Slowhttptest": {
+          "groups": 4216,
+          "train": 2951,
+          "validation": 632,
+          "test": 633
+        },
+        "DoS slowloris": {
+          "groups": 3873,
+          "train": 2711,
+          "validation": 581,
+          "test": 581
+        },
+        "PortScan": {
+          "groups": 158676,
+          "train": 111073,
+          "validation": 23801,
+          "test": 23802
+        }
+      },
+      "fractions": {
+        "train": 0.7,
+        "validation": 0.15,
+        "test": 0.15
+      }
+    },
+    "repairs": {
+      "flow_duration_nonfinite": 0,
+      "flow_duration_negative": 115,
+      "total_fwd_packets_nonfinite": 0,
+      "total_fwd_packets_negative": 0,
+      "total_backward_packets_nonfinite": 0,
+      "total_backward_packets_negative": 0,
+      "total_length_of_fwd_packets_nonfinite": 0,
+      "total_length_of_fwd_packets_negative": 0,
+      "total_length_of_bwd_packets_nonfinite": 0,
+      "total_length_of_bwd_packets_negative": 0,
+      "packet_length_mean_nonfinite": 0,
+      "packet_length_mean_negative": 0,
+      "packet_length_max_nonfinite": 0,
+      "packet_length_max_negative": 0,
+      "syn_flag_count_nonfinite": 0,
+      "syn_flag_count_negative": 0,
+      "fin_flag_count_nonfinite": 0,
+      "fin_flag_count_negative": 0,
+      "rst_flag_count_nonfinite": 0,
+      "rst_flag_count_negative": 0,
+      "total_packets_zero": 0,
+      "flow_packets_s_nonfinite": 2850,
+      "flow_packets_s_negative": 115,
+      "flow_packets_s_repaired": 2965,
+      "flow_packets_s_zero_duration_repair": 2965,
+      "flow_bytes_s_nonfinite": 2850,
+      "flow_bytes_s_negative": 85,
+      "flow_bytes_s_repaired": 2935,
+      "flow_bytes_s_zero_duration_repair": 2935,
+      "syn_ratio_above_one": 0,
+      "rst_ratio_above_one": 0,
+      "short_flow_flag_count": 1070427
+    }
+  },
+  "missing_feature_policy": {
+    "name": "median_imputation_from_cic2017_train",
+    "medians": {
+      "flow_duration": 31296.0,
+      "total_fwd_packets": 2.0,
+      "total_backward_packets": 2.0,
+      "total_length_of_fwd_packets": 62.0,
+      "total_length_of_bwd_packets": 124.0,
+      "flow_packets_s": 113.17082214355469,
+      "flow_bytes_s": 4644.59814453125,
+      "packet_length_mean": 57.400001525878906,
+      "packet_length_max": 88.0,
+      "syn_flag_count": 0.0,
+      "fin_flag_count": 0.0,
+      "rst_flag_count": 0.0
+    },
+    "statement": "External datasets that lack a Tier A column receive the CIC-IDS-2017 training median for that column. The result is reported as a partial-schema transfer, not a full Tier A validation."
+  },
+  "python_version": "3.12.10",
+  "scikit_learn_version": "1.5.2"
+}

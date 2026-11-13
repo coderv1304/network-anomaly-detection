@@ -1,21 +1,31 @@
-version: '3.9'
-
 services:
-  nd:
-    image: nd_inference:latest
-    container_name: nd_inference
+  netshield:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"   # Flask API
-      - "8000:8000"   # optional metrics endpoint (if exposed)
+      - "127.0.0.1:5000:5000"
+    env_file:
+      - path: .env
+        required: false
     environment:
-      - API_TOKEN=changeme
-      - LIVE_CAPTURE_API_KEY=dev-only-change-me
-    cap_add:
-      - NET_RAW
-      - NET_ADMIN
-    network_mode: host
+      NETSHIELD_ENV: development
+      ENABLE_LOCAL_CAPTURE: "false"
+      NETSHIELD_DEMO_STREAM: "false"
+    volumes:
+      # SQLite and uploads are the only writable application paths. The rest
+      # of the root filesystem is read-only.
+      - netshield-instance:/app/instance
+      - netshield-uploads:/app/uploads
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     restart: unless-stopped
-    # The container's default CMD (supervisord) runs both Flask and the capture binary.
+
+volumes:
+  netshield-instance:
+  netshield-uploads:

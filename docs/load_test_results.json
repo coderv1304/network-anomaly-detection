@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-11-12T04:11:28.388537+00:00",
+  "config": {
+    "base_url": "http://127.0.0.1:5000",
+    "rates": [
+      20.0
+    ],
+    "duration": 15.0,
+    "workers": 2,
+    "batch_size": 10
+  },
+  "steps": [
+    {
+      "declared_flow_rate": 20.0,
+      "batch_size": 10,
+      "workers": 2,
+      "duration_seconds": 16.004,
+      "requests": 32,
+      "achieved_flow_rate": 20.0,
+      "success_requests": 32,
+      "success_ratio": 1.0,
+      "rate_limited": 0,
+      "unavailable": 0,
+      "other_errors": 0,
+      "latency_ms": {
+        "p50": 130.8,
+        "p95": 164.9,
+        "p99": 291.0,
+        "max": 291.0
+      },
+      "sample_errors": []
+    }
+  ],
+  "failure_point": null,
+  "observations": [
+    "No saturation was observed inside the declared range; this does not establish a higher capacity."
+  ]
+}

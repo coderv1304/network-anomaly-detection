@@ -10,7 +10,7 @@ describe('Dashboard Header UI Component', () => {
 
   beforeAll(() => {
     const html = fs.readFileSync(
-      path.resolve(__dirname, '../templates/dashboard.html'),
+      path.resolve(__dirname, '../archive/legacy_dashboard/dashboard.html'),
       'utf8'
     );
     document.documentElement.innerHTML = html;

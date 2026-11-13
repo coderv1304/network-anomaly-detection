@@ -84,7 +84,7 @@ def run_feature_analysis(
     output_json: str = "models/selected_features.json",
     output_doc: str = "docs/FEATURE_SELECTION_SHAP.md"
 ):
-    print("\n🔍 Running Feature Importance & SHAP Explainability Analysis...")
+    print("\nRunning feature importance and SHAP explainability analysis...")
     train_df, test_df = load_split_data(data_dir, split_mode="random", seed=42)
 
     label_encoder = LabelEncoder()

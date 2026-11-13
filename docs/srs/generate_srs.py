@@ -146,11 +146,11 @@ html_content = """<!DOCTYPE html>
 
     <div class="cover-page">
         <h1>Software Requirements Specification (SRS)</h1>
-        <h2>AI-Driven Network Traffic Anomaly Detection System</h2>
+        <h2>Network-Flow Research and Review Prototype</h2>
         <div class="cover-details">
             <p><strong>Version:</strong> 1.0</p>
             <p><strong>Date:</strong> 2026</p>
-            <p><strong>Status:</strong> Formal Specification</p>
+            <p><strong>Status:</strong> Prototype Requirements Snapshot</p>
             <p><strong>Standard:</strong> IEEE 830-1998 Structure</p>
         </div>
     </div>
@@ -177,7 +177,7 @@ html_content = """<!DOCTYPE html>
 
     <h1>1. Introduction</h1>
     <h3>1.1 Purpose</h3>
-    <p>This Software Requirements Specification (SRS) document describes the functional and non-functional requirements for the AI-Driven Network Traffic Anomaly Detection System. The system uses machine learning (Random Forest) trained on the CIC-IDS-2017 dataset to classify network flows as benign or malicious.</p>
+    <p>This requirements snapshot describes an educational network-flow research prototype. Its local Random Forest artifact returns predicted CIC-IDS-2017 labels for supported batch inputs. Predictions are not verified incidents, and the current evaluation does not establish reliable performance on unseen attack families or production traffic.</p>
 
     <h3>1.2 Document Conventions</h3>
     <ul>
@@ -190,7 +190,7 @@ html_content = """<!DOCTYPE html>
     <p>This document is intended for project supervisors, developers, and future maintainers of the anomaly detection system.</p>
 
     <h3>1.4 Project Scope</h3>
-    <p>The system encompasses the preprocessing of network flow data in CIC-IDS-2017 CSV format, training a Random Forest classifier, and providing a Flask-based web interface for batch analysis and live monitoring simulation.</p>
+    <p>The prototype includes preprocessing and evaluation tools for CIC-IDS-2017 flow records, a Flask interface for batch analysis, and a dashboard that polls stored flow predictions. Optional local capture is experimental and capture-to-training feature parity has not been established.</p>
 
     <h1>2. Overall Description</h1>
     <h3>2.1 Product Perspective</h3>
@@ -209,7 +209,7 @@ html_content = """<!DOCTYPE html>
             <tr><td>F-2</td><td>Preprocess data (clean, scale, select features).</td></tr>
             <tr><td>F-3</td><td>Run inference using pre-trained Random Forest model.</td></tr>
             <tr><td>F-4</td><td>Display summary statistics and attack type distributions.</td></tr>
-            <tr><td>F-5</td><td>Provide a live monitoring dashboard.</td></tr>
+            <tr><td>F-5</td><td>Provide a dashboard that polls and displays stored flow records and model predictions.</td></tr>
         </tbody>
     </table>
 
@@ -233,7 +233,7 @@ html_content = """<!DOCTYPE html>
     
     <h2>3.1 External Interface Requirements</h2>
     <h3>3.1.1 User Interfaces</h3>
-    <p>The system shall provide a web interface including an Upload Page with drag-and-drop capabilities and a Live Dashboard with real-time Chart.js visualizations.</p>
+    <p>The prototype provides a batch upload interface and a stored-flow review dashboard. Dashboard refresh is polling-based; it does not imply a connected production sensor fleet.</p>
 
     <h3>3.1.2 Software Interfaces</h3>
     <table>

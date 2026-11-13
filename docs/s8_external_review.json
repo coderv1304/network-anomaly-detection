@@ -1,0 +1,33 @@
+{
+  "phase": "S8",
+  "status": "not_commissioned",
+  "generated_at": "2026-11-11T00:00:00Z",
+  "reviewer": null,
+  "report": null,
+  "scope": [
+    "Threat model and product boundary",
+    "Tenant isolation and RBAC tests",
+    "Audit-log samples and tamper resistance",
+    "Authentication, session, CSRF, and rate-limit behavior",
+    "Secret handling and artifact signing",
+    "Container and dependency posture",
+    "Backup, restore, retention, and deletion",
+    "Incident-response and on-call readiness",
+    "Model provenance and deployment gate",
+    "Pilot results and measured SLO compliance"
+  ],
+  "critical_open": 0,
+  "high_open": 0,
+  "medium_open": 0,
+  "low_open": 0,
+  "findings": [],
+  "blocked_reason": "No external security or readiness reviewer has been engaged. The assistant cannot commission, sign, or independently perform an external review.",
+  "what_would_unblock": [
+    "Engage an independent reviewer under a written scope and rules of engagement.",
+    "Provide the threat model, tenancy tests, audit samples, SLO evidence, model provenance, runbooks, and pilot results.",
+    "Record every finding with severity, owner, and target date.",
+    "Close all critical and high findings and publish the signed report.",
+    "Re-run scripts/release_gate.py after the report is attached."
+  ],
+  "note": "This file records the absence of an external review. It is not a review result and must not be cited as one."
+}

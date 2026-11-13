@@ -1,0 +1,95 @@
+groups:
+  - name: netshield-slo
+    rules:
+      - alert: NetShieldIngestUnavailable
+        expr: |
+          (
+            sum(rate(netshield_ingest_requests_total{outcome=~"failed|rejected_backpressure"}[5m]))
+            /
+            clamp_min(sum(rate(netshield_ingest_requests_total[5m])), 0.001)
+          ) > 0.01
+        for: 10m
+        labels:
+          severity: page
+          service: netshield-ingest
+        annotations:
+          summary: "Ingest error/backpressure ratio above 1%"
+          description: "The ingest path is rejecting or failing more than 1% of requests over 5 minutes."
+
+      - alert: NetShieldIngestBackpressure
+        expr: increase(netshield_ingest_backpressure_rejections_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: ticket
+          service: netshield-ingest
+        annotations:
+          summary: "Bounded ingest admission is rejecting work"
+          description: "Requests are receiving 503 + Retry-After. Check INGEST_MAX_INFLIGHT and upstream flow rate."
+
+      - alert: NetShieldIngestQueueWaiting
+        expr: max_over_time(netshield_ingest_queue_depth[5m]) > 0
+        for: 5m
+        labels:
+          severity: ticket
+          service: netshield-ingest
+        annotations:
+          summary: "Ingest requests are queueing for admission"
+          description: "Queue depth stayed above zero for 5 minutes; the service is close to its concurrency ceiling."
+
+      - alert: NetShieldIngestLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(netshield_ingest_stage_seconds_bucket{stage="persist"}[5m])) by (le)
+          ) > 0.25
+        for: 10m
+        labels:
+          severity: ticket
+          service: netshield-ingest
+        annotations:
+          summary: "Ingest persistence p95 above 250 ms"
+          description: "The persistence stage is outside the ingest SLO; check database latency and write volume."
+
+      - alert: NetShieldConsoleLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(netshield_api_latency_seconds_bucket{route="/api/console/snapshot"}[5m])) by (le)
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: ticket
+          service: netshield-api
+        annotations:
+          summary: "Console snapshot p95 above 500 ms"
+          description: "The console SLO is not met; check database query time and flow-store size."
+
+      - alert: NetShieldPredictionErrors
+        expr: increase(netshield_prediction_errors_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: page
+          service: netshield-inference
+        annotations:
+          summary: "Model inference is failing"
+          description: "At least one prediction failed in the last 5 minutes."
+
+      - alert: NetShieldAlertDeliveryFailures
+        expr: increase(netshield_alert_delivery_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: page
+          service: netshield-alerts
+        annotations:
+          summary: "Alert delivery is failing"
+          description: "The in-app SocketIO alert channel reported delivery failures."
+
+      - alert: NetShieldNotReady
+        expr: up{job="netshield"} == 0
+        for: 2m
+        labels:
+          severity: page
+          service: netshield-api
+        annotations:
+          summary: "NetShield is not scrapeable"
+          description: "Prometheus cannot scrape the service; check process health and /readyz."

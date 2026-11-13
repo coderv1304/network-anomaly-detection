@@ -1,0 +1,342 @@
+{
+  "artifact_version": "p2b-protocol-analysis-v1",
+  "method": "family_day_confound_audit",
+  "status": "infeasible_under_preregistered_split",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope.",
+  "label_policy": {
+    "positive_labels": [
+      "DDoS",
+      "DoS GoldenEye",
+      "DoS Hulk",
+      "DoS Slowhttptest",
+      "DoS slowloris",
+      "PortScan"
+    ],
+    "negative_labels": [
+      "BENIGN"
+    ],
+    "excluded_labels": {
+      "Bot": "excluded; botnet",
+      "FTP-Patator": "excluded; credential attack",
+      "Heartbleed": "excluded; validation-only diagnostic",
+      "Infiltration": "excluded; infiltration",
+      "SSH-Patator": "excluded; credential attack",
+      "Web Attack - Brute Force": "excluded; web attack",
+      "Web Attack - Sql Injection": "excluded; web attack",
+      "Web Attack - XSS": "excluded; web attack"
+    }
+  },
+  "family_day_matrix": {
+    "partitions": {
+      "train": {
+        "label_counts": {
+          "BENIGN": 961954,
+          "FTP-Patator": 7938,
+          "SSH-Patator": 5897
+        },
+        "primary_positives": 0,
+        "primary_positive_families": []
+      },
+      "validation": {
+        "label_counts": {
+          "BENIGN": 440015,
+          "DoS GoldenEye": 10293,
+          "DoS Hulk": 231072,
+          "DoS Slowhttptest": 5499,
+          "DoS slowloris": 5796,
+          "Heartbleed": 11
+        },
+        "primary_positives": 252660,
+        "primary_positive_families": [
+          "DoS GoldenEye",
+          "DoS Hulk",
+          "DoS Slowhttptest",
+          "DoS slowloris"
+        ]
+      },
+      "test": {
+        "label_counts": {
+          "BENIGN": 870926,
+          "Bot": 1966,
+          "DDoS": 128027,
+          "Infiltration": 36,
+          "PortScan": 158930,
+          "Web Attack - Brute Force": 1507,
+          "Web Attack - Sql Injection": 21,
+          "Web Attack - XSS": 652
+        },
+        "primary_positives": 286957,
+        "primary_positive_families": [
+          "DDoS",
+          "PortScan"
+        ]
+      }
+    },
+    "train_validation_overlap": [],
+    "train_test_overlap": [],
+    "validation_test_overlap": [],
+    "validation_test_disjoint": true,
+    "train_has_primary_positives": false
+  },
+  "coverage_gate": {
+    "minimums": {
+      "train": 1,
+      "validation": 1,
+      "test": 1
+    },
+    "families": {
+      "DDoS": {
+        "train": 0,
+        "validation": 0,
+        "test": 128027,
+        "observed": true,
+        "required": false,
+        "pass": false
+      },
+      "DoS GoldenEye": {
+        "train": 0,
+        "validation": 10293,
+        "test": 0,
+        "observed": true,
+        "required": false,
+        "pass": false
+      },
+      "DoS Hulk": {
+        "train": 0,
+        "validation": 231072,
+        "test": 0,
+        "observed": true,
+        "required": false,
+        "pass": false
+      },
+      "DoS Slowhttptest": {
+        "train": 0,
+        "validation": 5499,
+        "test": 0,
+        "observed": true,
+        "required": false,
+        "pass": false
+      },
+      "DoS slowloris": {
+        "train": 0,
+        "validation": 5796,
+        "test": 0,
+        "observed": true,
+        "required": false,
+        "pass": false
+      },
+      "PortScan": {
+        "train": 0,
+        "validation": 0,
+        "test": 158930,
+        "observed": true,
+        "required": false,
+        "pass": false
+      }
+    },
+    "missing_required": [],
+    "overall_pass": false,
+    "reason": "Families absent from at least one partition: DDoS, DoS GoldenEye, DoS Hulk, DoS Slowhttptest, DoS slowloris, PortScan. Validation and test positive families do not overlap."
+  },
+  "wednesday_time_profile": {
+    "source_file": "data/Wednesday-workingHours.pcap_ISCX.csv",
+    "raw_rows": 692703,
+    "frozen_rows": 692686,
+    "dedup_removed_rows": 17,
+    "timestamp_min": "2017-07-05T01:00:00",
+    "timestamp_max": "2017-07-05T12:59:00",
+    "families": {
+      "BENIGN": {
+        "count": 440015,
+        "first": "2017-07-05T01:00:00",
+        "last": "2017-07-05T12:59:00",
+        "is_primary": false
+      },
+      "DoS slowloris": {
+        "count": 5796,
+        "first": "2017-07-05T02:24:00",
+        "last": "2017-07-05T10:11:00",
+        "is_primary": true
+      },
+      "Heartbleed": {
+        "count": 11,
+        "first": "2017-07-05T03:12:00",
+        "last": "2017-07-05T03:32:00",
+        "is_primary": false
+      },
+      "DoS Slowhttptest": {
+        "count": 5499,
+        "first": "2017-07-05T10:15:00",
+        "last": "2017-07-05T10:37:00",
+        "is_primary": true
+      },
+      "DoS Hulk": {
+        "count": 231072,
+        "first": "2017-07-05T10:43:00",
+        "last": "2017-07-05T11:07:00",
+        "is_primary": true
+      },
+      "DoS GoldenEye": {
+        "count": 10293,
+        "first": "2017-07-05T11:10:00",
+        "last": "2017-07-05T11:19:00",
+        "is_primary": true
+      }
+    }
+  },
+  "half_split": {
+    "rule": "stable sort by Timestamp; first 50% of rows are train, the remainder is validation",
+    "fraction": 0.5,
+    "cut_timestamp": "2017-07-05T10:35:00",
+    "train": {
+      "rows": 346343,
+      "label_counts": {
+        "BENIGN": 335165,
+        "DoS Slowhttptest": 5371,
+        "DoS slowloris": 5796,
+        "Heartbleed": 11
+      },
+      "primary_positives": 11167,
+      "primary_positive_families": [
+        "DoS Slowhttptest",
+        "DoS slowloris"
+      ]
+    },
+    "validation": {
+      "rows": 346343,
+      "label_counts": {
+        "BENIGN": 104850,
+        "DoS GoldenEye": 10293,
+        "DoS Hulk": 231072,
+        "DoS Slowhttptest": 128
+      },
+      "primary_positives": 241493,
+      "primary_positive_families": [
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest"
+      ]
+    }
+  },
+  "expanding_folds": {
+    "rule": "stable sort by Timestamp; split into contiguous folds by row count; expanding-window CV fits earlier folds and validates on the next",
+    "n_folds": 3,
+    "folds": [
+      {
+        "fold": 1,
+        "start": "2017-07-05T01:00:00",
+        "end": "2017-07-05T08:49:00",
+        "rows": 230895,
+        "label_counts": {
+          "BENIGN": 230879,
+          "DoS slowloris": 5,
+          "Heartbleed": 11
+        },
+        "primary_positives": 5,
+        "primary_positive_families": [
+          "DoS slowloris"
+        ]
+      },
+      {
+        "fold": 2,
+        "start": "2017-07-05T08:49:00",
+        "end": "2017-07-05T10:50:00",
+        "rows": 230895,
+        "label_counts": {
+          "BENIGN": 121107,
+          "DoS Hulk": 98498,
+          "DoS Slowhttptest": 5499,
+          "DoS slowloris": 5791
+        },
+        "primary_positives": 109788,
+        "primary_positive_families": [
+          "DoS Hulk",
+          "DoS Slowhttptest",
+          "DoS slowloris"
+        ]
+      },
+      {
+        "fold": 3,
+        "start": "2017-07-05T10:50:00",
+        "end": "2017-07-05T12:59:00",
+        "rows": 230896,
+        "label_counts": {
+          "BENIGN": 88029,
+          "DoS GoldenEye": 10293,
+          "DoS Hulk": 132574
+        },
+        "primary_positives": 142867,
+        "primary_positive_families": [
+          "DoS GoldenEye",
+          "DoS Hulk"
+        ]
+      }
+    ]
+  },
+  "decision": {
+    "p2b_status": "blocked",
+    "execute_a1_as_proposed": false,
+    "preferred_option": "A4",
+    "conditional_exploratory_option": "A1f",
+    "reason": "The preregistered split cannot identify the supervised comparison: the training partition has no target positives, validation and test positive families are disjoint, and Wednesday's families are time-separated. A time-ordered amendment would be a family split."
+  },
+  "options": [
+    {
+      "id": "A1",
+      "name": "Early/late Wednesday holdout",
+      "verdict": "rejected as primary; family split",
+      "reason": "Trains on slowloris/Slowhttptest and validates on Hulk/GoldenEye; DDoS/PortScan still have no training or validation rows."
+    },
+    {
+      "id": "A1f",
+      "name": "Wednesday expanding-window CV with out-of-fold thresholds",
+      "verdict": "exploratory only",
+      "reason": "Uses all Wednesday rows for training and threshold selection, but the first fold has few positives and the test families remain unseen. The claim must be labelled cross-family zero-shot."
+    },
+    {
+      "id": "A2",
+      "name": "Unsupervised IsolationForest on Monday-Tuesday",
+      "verdict": "fallback only",
+      "reason": "No positives are needed, but it cannot answer rules-vs-supervised and its Friday metrics are also zero-shot."
+    },
+    {
+      "id": "A3",
+      "name": "Move Wednesday into training",
+      "verdict": "rejected",
+      "reason": "Removes the validation partition and still leaves DDoS/PortScan test-only."
+    },
+    {
+      "id": "A4",
+      "name": "External volumetric/scanning data",
+      "verdict": "preferred",
+      "reason": "The only option that can provide positives in train and validation for the families that are tested. Requires data, licensing, and human approval."
+    }
+  ],
+  "artifact_identity": {
+    "p2a_artifact": "docs/rule_baselines.json",
+    "p2a_sha256": "00a3af95718668098e3237566da2ab9e7ba2d8f597adcabb867f714a216615a4",
+    "p2b_audit_artifact": "docs/VOLUMETRIC_MODEL.json",
+    "p2b_audit_sha256": "3f867c4a49910157d446cafd0f6d3daed21493743e7ed51c6fc9b4ebb995f7af",
+    "serving_artifact": "models/model_bundle_rf_day_based_seed42.pkl",
+    "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "wednesday_source_sha256": "ed538e85b84181e8897dedb3d37d365982f44b27eccd67c477581a8b65f3d170"
+  },
+  "notes": [
+    "No model is trained, no registry row is written, and the serving artifact is untouched.",
+    "The family-day matrix uses the frozen partition label counts from the P2A and P2B audit artifacts.",
+    "The Wednesday time profile uses the frozen loader; raw and frozen row counts are both reported.",
+    "A time-ordered split is a family split because the CIC-IDS-2017 campaigns are sequential.",
+    "DDoS and PortScan appear only in the test partition, so their thresholds cannot be selected on Wednesday.",
+    "A1f and A2 are exploratory fallbacks; they do not satisfy the preregistered P2B mission."
+  ],
+  "findings": [
+    "The training partition contains 0 primary volumetric/scanning positives. No supervised binary head can be fitted on Monday-Tuesday without changing the label policy or the split.",
+    "Validation positives are DoS GoldenEye, DoS Hulk, DoS Slowhttptest, DoS slowloris; test positives are DDoS, PortScan. The positive-family sets are disjoint: a threshold selected on Wednesday DoS traffic is applied zero-shot to Friday DDoS/PortScan.",
+    "Wednesday's primary families occupy disjoint time windows. A time-ordered split is therefore also a family split, not a representative sample of the target families.",
+    "A 50/50 time split trains on DoS Slowhttptest, DoS slowloris and validates on DoS GoldenEye, DoS Hulk, DoS Slowhttptest (11,167 train positives and 241,493 validation positives).",
+    "The first expanding-window fold contains only 5 primary positives (DoS slowloris), which is too small to train or calibrate a supervised model.",
+    "No threshold for DDoS or PortScan can be selected on Wednesday because those families do not appear there. Their test metrics are zero-shot descriptors, not validated operating points.",
+    "A1 as originally proposed (early Wednesday train, late Wednesday validation) is rejected as a primary P2B protocol. It is a cross-family zero-shot experiment and would not answer the requested comparison.",
+    "The proposed coverage gate fails for DDoS, DoS GoldenEye, DoS Hulk, DoS Slowhttptest, DoS slowloris, PortScan. No evaluated family is present in train, validation, and test."
+  ]
+}

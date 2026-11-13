@@ -1,0 +1,381 @@
+{
+  "artifact_version": "volumetric-model-v1",
+  "method": "p2b_protocol_audit",
+  "status": "blocked",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope.",
+  "protocol": {
+    "train_days": [
+      "Monday",
+      "Tuesday"
+    ],
+    "validation_days": [
+      "Wednesday"
+    ],
+    "test_days": [
+      "Thursday",
+      "Friday"
+    ],
+    "cv": "expanding-window time-series CV inside training days only; 3 folds, fit on earlier windows and validate on the next",
+    "grid": {
+      "logistic_regression": {
+        "C": [
+          0.1,
+          1.0,
+          10.0
+        ]
+      },
+      "random_forest": {
+        "n_estimators": [
+          100,
+          300
+        ],
+        "max_depth": [
+          null,
+          20
+        ]
+      },
+      "isolation_forest": {
+        "n_estimators": [
+          100
+        ],
+        "contamination": [
+          "auto",
+          0.01
+        ]
+      },
+      "gradient_boosting": "optional; same protocol"
+    },
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "budgets_per_10k": [
+      10,
+      100
+    ],
+    "multiple_comparisons": "Holm-Bonferroni across families and budgets",
+    "paired_test": "McNemar on identical flows with discordant counts",
+    "threshold_partition": "Wednesday only"
+  },
+  "label_policy": {
+    "positive_labels": [
+      "DDoS",
+      "DoS GoldenEye",
+      "DoS Hulk",
+      "DoS Slowhttptest",
+      "DoS slowloris",
+      "PortScan"
+    ],
+    "negative_labels": [
+      "BENIGN"
+    ],
+    "excluded_labels": {
+      "Bot": "excluded; botnet",
+      "FTP-Patator": "excluded; credential attack",
+      "Heartbleed": "excluded; validation-only diagnostic",
+      "Infiltration": "excluded; infiltration",
+      "SSH-Patator": "excluded; credential attack",
+      "Web Attack - Brute Force": "excluded; web attack",
+      "Web Attack - Sql Injection": "excluded; web attack",
+      "Web Attack - XSS": "excluded; web attack"
+    }
+  },
+  "partitions": {
+    "train": {
+      "rows": 975789,
+      "primary_rows": 961954,
+      "positives": 0,
+      "negatives": 961954,
+      "excluded_rows": 13835,
+      "benchmark_prevalence": 0.0,
+      "label_counts": {
+        "BENIGN": 961954,
+        "FTP-Patator": 7938,
+        "SSH-Patator": 5897
+      },
+      "excluded_label_counts": {
+        "FTP-Patator": 7938,
+        "SSH-Patator": 5897
+      },
+      "days": [
+        "Monday",
+        "Tuesday"
+      ],
+      "source_files": [
+        "Monday-WorkingHours.pcap_ISCX.csv",
+        "Tuesday-WorkingHours.pcap_ISCX.csv"
+      ],
+      "rows_after_dedup": 975789,
+      "repairs": {
+        "flow_duration_nonfinite": 0,
+        "flow_duration_negative": 32,
+        "total_fwd_packets_nonfinite": 0,
+        "total_fwd_packets_negative": 0,
+        "total_backward_packets_nonfinite": 0,
+        "total_backward_packets_negative": 0,
+        "total_length_of_fwd_packets_nonfinite": 0,
+        "total_length_of_fwd_packets_negative": 0,
+        "total_length_of_bwd_packets_nonfinite": 0,
+        "total_length_of_bwd_packets_negative": 0,
+        "packet_length_mean_nonfinite": 0,
+        "packet_length_mean_negative": 0,
+        "packet_length_max_nonfinite": 0,
+        "packet_length_max_negative": 0,
+        "syn_flag_count_nonfinite": 0,
+        "syn_flag_count_negative": 0,
+        "fin_flag_count_nonfinite": 0,
+        "fin_flag_count_negative": 0,
+        "rst_flag_count_nonfinite": 0,
+        "rst_flag_count_negative": 0,
+        "total_packets_zero": 0,
+        "flow_packets_s_nonfinite": 698,
+        "flow_packets_s_negative": 32,
+        "flow_packets_s_repaired": 730,
+        "flow_packets_s_zero_duration_repair": 730,
+        "flow_bytes_s_nonfinite": 698,
+        "flow_bytes_s_negative": 9,
+        "flow_bytes_s_repaired": 707,
+        "flow_bytes_s_zero_duration_repair": 707,
+        "syn_ratio_above_one": 0,
+        "rst_ratio_above_one": 0,
+        "short_flow_flag_count": 374142
+      },
+      "raw_rows": 975827,
+      "dedup_removed_rows": 38
+    },
+    "validation": {
+      "days": [
+        "Wednesday"
+      ],
+      "source_files": [
+        "Wednesday-workingHours.pcap_ISCX.csv"
+      ],
+      "rows_after_dedup": 692686,
+      "primary_rows": 692675,
+      "positives": 252660,
+      "negatives": 440015,
+      "excluded_rows": 11,
+      "benchmark_prevalence": 0.36475980799076047,
+      "label_counts": {
+        "BENIGN": 440015,
+        "DoS GoldenEye": 10293,
+        "DoS Hulk": 231072,
+        "DoS Slowhttptest": 5499,
+        "DoS slowloris": 5796,
+        "Heartbleed": 11
+      },
+      "excluded_label_counts": {
+        "Heartbleed": 11
+      },
+      "repairs": {
+        "flow_duration_nonfinite": 0,
+        "flow_duration_negative": 21,
+        "total_fwd_packets_nonfinite": 0,
+        "total_fwd_packets_negative": 0,
+        "total_backward_packets_nonfinite": 0,
+        "total_backward_packets_negative": 0,
+        "total_length_of_fwd_packets_nonfinite": 0,
+        "total_length_of_fwd_packets_negative": 0,
+        "total_length_of_bwd_packets_nonfinite": 0,
+        "total_length_of_bwd_packets_negative": 0,
+        "packet_length_mean_nonfinite": 0,
+        "packet_length_mean_negative": 0,
+        "packet_length_max_nonfinite": 0,
+        "packet_length_max_negative": 0,
+        "syn_flag_count_nonfinite": 0,
+        "syn_flag_count_negative": 0,
+        "fin_flag_count_nonfinite": 0,
+        "fin_flag_count_negative": 0,
+        "rst_flag_count_nonfinite": 0,
+        "rst_flag_count_negative": 0,
+        "total_packets_zero": 0,
+        "flow_packets_s_nonfinite": 1296,
+        "flow_packets_s_negative": 21,
+        "flow_packets_s_repaired": 1317,
+        "flow_packets_s_zero_duration_repair": 1317,
+        "flow_bytes_s_nonfinite": 1296,
+        "flow_bytes_s_negative": 16,
+        "flow_bytes_s_repaired": 1312,
+        "flow_bytes_s_zero_duration_repair": 1312,
+        "syn_ratio_above_one": 0,
+        "rst_ratio_above_one": 0,
+        "short_flow_flag_count": 226258
+      }
+    },
+    "test": {
+      "days": [
+        "Thursday",
+        "Friday"
+      ],
+      "source_files": [
+        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      ],
+      "rows_after_dedup": 1162065,
+      "primary_rows": 1157883,
+      "positives": 286957,
+      "negatives": 870926,
+      "excluded_rows": 4182,
+      "benchmark_prevalence": 0.24782901208498614,
+      "label_counts": {
+        "BENIGN": 870926,
+        "Bot": 1966,
+        "DDoS": 128027,
+        "Infiltration": 36,
+        "PortScan": 158930,
+        "Web Attack - Brute Force": 1507,
+        "Web Attack - Sql Injection": 21,
+        "Web Attack - XSS": 652
+      },
+      "excluded_label_counts": {
+        "Bot": 1966,
+        "Infiltration": 36,
+        "Web Attack - Brute Force": 1507,
+        "Web Attack - Sql Injection": 21,
+        "Web Attack - XSS": 652
+      },
+      "repairs": {
+        "flow_duration_nonfinite": 0,
+        "flow_duration_negative": 62,
+        "total_fwd_packets_nonfinite": 0,
+        "total_fwd_packets_negative": 0,
+        "total_backward_packets_nonfinite": 0,
+        "total_backward_packets_negative": 0,
+        "total_length_of_fwd_packets_nonfinite": 0,
+        "total_length_of_fwd_packets_negative": 0,
+        "total_length_of_bwd_packets_nonfinite": 0,
+        "total_length_of_bwd_packets_negative": 0,
+        "packet_length_mean_nonfinite": 0,
+        "packet_length_mean_negative": 0,
+        "packet_length_max_nonfinite": 0,
+        "packet_length_max_negative": 0,
+        "syn_flag_count_nonfinite": 0,
+        "syn_flag_count_negative": 0,
+        "fin_flag_count_nonfinite": 0,
+        "fin_flag_count_negative": 0,
+        "rst_flag_count_nonfinite": 0,
+        "rst_flag_count_negative": 0,
+        "total_packets_zero": 0,
+        "flow_packets_s_nonfinite": 869,
+        "flow_packets_s_negative": 62,
+        "flow_packets_s_repaired": 931,
+        "flow_packets_s_zero_duration_repair": 931,
+        "flow_bytes_s_nonfinite": 869,
+        "flow_bytes_s_negative": 60,
+        "flow_bytes_s_repaired": 929,
+        "flow_bytes_s_zero_duration_repair": 929,
+        "syn_ratio_above_one": 0,
+        "rst_ratio_above_one": 0,
+        "short_flow_flag_count": 477774
+      }
+    }
+  },
+  "training_label_audit": {
+    "per_file": {
+      "Monday-WorkingHours.pcap_ISCX.csv": {
+        "counts": {
+          "BENIGN": 529918
+        },
+        "sha256": "96f26aea87d513073769b48ce204c2921791149e1c6225f7db65a3fed7973820"
+      },
+      "Tuesday-WorkingHours.pcap_ISCX.csv": {
+        "counts": {
+          "BENIGN": 432074,
+          "FTP-Patator": 7938,
+          "SSH-Patator": 5897
+        },
+        "sha256": "ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815"
+      }
+    },
+    "aggregate": {
+      "BENIGN": 961992,
+      "FTP-Patator": 7938,
+      "SSH-Patator": 5897
+    }
+  },
+  "feasibility": {
+    "supervised_binary_heads": false,
+    "logistic_regression": false,
+    "random_forest": false,
+    "isolation_forest": true,
+    "full_p2b_comparison": false,
+    "reason": "The training partition contains zero volumetric/scanning positives. A supervised binary head has no positive class to fit. Only the unsupervised Isolation Forest is trainable, and it cannot satisfy the full rules-vs-supervised comparison."
+  },
+  "blocker": {
+    "code": "training_partition_has_no_target_positives",
+    "detail": "The frozen Monday-Tuesday training partition contains 0 volumetric/scanning positives across 961,954 primary rows. The only non-benign training labels are FTP-Patator and SSH-Patator, which the P2A label policy excludes. A supervised binary head cannot be fitted, so no LogReg or Random Forest comparison is possible under the preregistered split.",
+    "evidence": {
+      "train_primary_rows": 961954,
+      "train_positives": 0,
+      "train_negatives": 961954,
+      "train_excluded_rows": 13835,
+      "train_excluded_labels": {
+        "FTP-Patator": 7938,
+        "SSH-Patator": 5897
+      }
+    }
+  },
+  "amendments": [
+    {
+      "id": "A1",
+      "name": "Time-ordered holdout inside Wednesday",
+      "change": "Train on the earlier portion of Wednesday, select thresholds on the later portion, keep Thursday-Friday as the test partition.",
+      "pros": "Creates training positives while preserving a held-out test day range.",
+      "cons": "Wednesday is currently the validation partition; the amendment reduces validation size and changes the preregistered split.",
+      "requires": "Human approval; timestamp ordering must be verified.",
+      "recommended": "yes, if the supervised comparison is required"
+    },
+    {
+      "id": "A2",
+      "name": "Unsupervised-only P2B",
+      "change": "Train Isolation Forest on Monday-Tuesday benign traffic and freeze thresholds on Wednesday. Do not report LogReg/RF.",
+      "pros": "Uses the existing split unchanged and needs no new labels.",
+      "cons": "Cannot answer the pack's rules-vs-supervised question and leaves the main model comparison unexecuted.",
+      "requires": "Human approval of a partial P2B scope.",
+      "recommended": "no, unless the supervised comparison is out of scope"
+    },
+    {
+      "id": "A3",
+      "name": "Move volumetric days into training",
+      "change": "Train on Monday-Wednesday and test on Thursday-Friday.",
+      "pros": "Adds the DoS families to training.",
+      "cons": "Removes the independent validation partition and makes threshold selection and test reporting depend on the same days.",
+      "requires": "Human approval; not recommended.",
+      "recommended": "no"
+    },
+    {
+      "id": "A4",
+      "name": "External volumetric capture",
+      "change": "Acquire a labelled capture with volumetric/scanning traffic and use it as an additional training or validation source.",
+      "pros": "Adds independent positives and supports cross-dataset claims.",
+      "cons": "Requires data, licensing, and capture effort that do not exist yet.",
+      "requires": "External data and human approval.",
+      "recommended": "yes, as the longer-term fix"
+    }
+  ],
+  "execution": {
+    "models_trained": [],
+    "registry_rows_added": [],
+    "metrics_computed": false,
+    "reason": "No supervised model can be trained under the preregistered split. The audit does not substitute a different split or synthetic positives."
+  },
+  "artifact_identity": {
+    "serving_artifact": "models/model_bundle_rf_day_based_seed42.pkl",
+    "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "p2a_artifact": "docs/rule_baselines.json",
+    "p2a_sha256": "00a3af95718668098e3237566da2ab9e7ba2d8f597adcabb867f714a216615a4"
+  },
+  "notes": [
+    "No model is trained, no registry row is written, and the serving artifact is untouched.",
+    "The blocker is a property of the frozen split, not a bug in the model code.",
+    "Amendments are listed but not executed; P2B has a human approval gate for a new artifact.",
+    "The test partition is not used for threshold selection or model selection.",
+    "Rules remain the only evaluated Tier A baseline; see docs/RULE_BASELINES.md."
+  ]
+}

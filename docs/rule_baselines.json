@@ -1,0 +1,3430 @@
+{
+  "artifact_version": "rule-baselines-v1",
+  "method": "tier_a_rule_baselines",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope.",
+  "seed": 20261113,
+  "bootstrap_draws": 10000,
+  "inputs": {
+    "budgets": [
+      10,
+      100
+    ],
+    "prevalences": [
+      0.0001,
+      0.001,
+      0.01,
+      0.1
+    ],
+    "threshold_comparison": "score > threshold",
+    "threshold_rule": "K = ceil(B * N / 10000); if K >= N, min(score)-epsilon; otherwise score at descending rank K+1",
+    "source_files": {
+      "validation": {
+        "Wednesday": [
+          "Wednesday-workingHours.pcap_ISCX.csv"
+        ]
+      },
+      "test": {
+        "Thursday": [
+          "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+          "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+        ],
+        "Friday": [
+          "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+          "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+          "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+        ]
+      }
+    }
+  },
+  "label_policy": {
+    "positive_labels": [
+      "DDoS",
+      "DoS GoldenEye",
+      "DoS Hulk",
+      "DoS Slowhttptest",
+      "DoS slowloris",
+      "PortScan"
+    ],
+    "negative_labels": [
+      "BENIGN"
+    ],
+    "excluded_labels": {
+      "Bot": "excluded; botnet",
+      "FTP-Patator": "excluded; credential attack",
+      "Heartbleed": "excluded; validation-only diagnostic",
+      "Infiltration": "excluded; infiltration",
+      "SSH-Patator": "excluded; credential attack",
+      "Web Attack - Brute Force": "excluded; web attack",
+      "Web Attack - Sql Injection": "excluded; web attack",
+      "Web Attack - XSS": "excluded; web attack"
+    },
+    "unmapped_policy": "excluded and logged; never treated as negative",
+    "missing_policy": "removed by the frozen loader; never treated as negative",
+    "heartbleed": "excluded from primary; validation-only diagnostic",
+    "primary_metric": "binary any-volumetric/scan",
+    "secondary_metric": "per-family recall"
+  },
+  "label_audit": {
+    "raw_strings_observed": [
+      "BENIGN",
+      "DDoS",
+      "DoS Hulk",
+      "DoS GoldenEye",
+      "DoS slowloris",
+      "DoS Slowhttptest",
+      "PortScan",
+      "Heartbleed",
+      "Web Attack \u2013 Brute Force",
+      "Web Attack \u2013 Sql Injection",
+      "Web Attack \u2013 XSS",
+      "FTP-Patator",
+      "SSH-Patator",
+      "Bot",
+      "Infiltration"
+    ],
+    "validation": {
+      "per_file": {
+        "Wednesday-workingHours.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 440031,
+            "DoS slowloris": 5796,
+            "DoS Slowhttptest": 5499,
+            "DoS Hulk": 231073,
+            "DoS GoldenEye": 10293,
+            "Heartbleed": 11
+          },
+          "sha256": "ed538e85b84181e8897dedb3d37d365982f44b27eccd67c477581a8b65f3d170"
+        }
+      },
+      "aggregate": {
+        "BENIGN": 440031,
+        "DoS slowloris": 5796,
+        "DoS Slowhttptest": 5499,
+        "DoS Hulk": 231073,
+        "DoS GoldenEye": 10293,
+        "Heartbleed": 11
+      }
+    },
+    "test": {
+      "per_file": {
+        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 168186,
+            "Web Attack \u2013 Brute Force": 1507,
+            "Web Attack \u2013 XSS": 652,
+            "Web Attack \u2013 Sql Injection": 21,
+            "<missing>": 288602
+          },
+          "sha256": "e3deaff483d18b53b100a441dff9b8919416df8876b4edcc0f0d1e4bf48397d0"
+        },
+        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 288566,
+            "Infiltration": 36
+          },
+          "sha256": "d74238e054023c8bd4d8056650463cadb25c100fb0e26ebd4272c07b5c022c4b"
+        },
+        "Friday-WorkingHours-Morning.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 189067,
+            "Bot": 1966
+          },
+          "sha256": "c061cd98f39d8054aeaed6244a5129a20b3985983d0d022b860ae8aa07fe8d21"
+        },
+        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 127537,
+            "PortScan": 158930
+          },
+          "sha256": "7e2ddaa80a5849ba629463296b6128436c161b4a32e8034bb5beae06b0c45e08"
+        },
+        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv": {
+          "counts": {
+            "BENIGN": 97718,
+            "DDoS": 128027
+          },
+          "sha256": "1f779b4f0d78f9225554c4de53b5a2c07912b60dcd136ee4c5c1d0d2496b7cc4"
+        }
+      },
+      "aggregate": {
+        "BENIGN": 871074,
+        "Web Attack \u2013 Brute Force": 1507,
+        "Web Attack \u2013 XSS": 652,
+        "Web Attack \u2013 Sql Injection": 21,
+        "<missing>": 288602,
+        "Infiltration": 36,
+        "Bot": 1966,
+        "PortScan": 158930,
+        "DDoS": 128027
+      }
+    }
+  },
+  "data_inventory": {
+    "flow_csv_files": [
+      {
+        "path": "data/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+        "bytes": 96101069,
+        "sha256": "1f779b4f0d78f9225554c4de53b5a2c07912b60dcd136ee4c5c1d0d2496b7cc4"
+      },
+      {
+        "path": "data/Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "bytes": 101874777,
+        "sha256": "7e2ddaa80a5849ba629463296b6128436c161b4a32e8034bb5beae06b0c45e08"
+      },
+      {
+        "path": "data/Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "bytes": 75386737,
+        "sha256": "c061cd98f39d8054aeaed6244a5129a20b3985983d0d022b860ae8aa07fe8d21"
+      },
+      {
+        "path": "data/Monday-WorkingHours.pcap_ISCX.csv",
+        "bytes": 268649908,
+        "sha256": "96f26aea87d513073769b48ce204c2921791149e1c6225f7db65a3fed7973820"
+      },
+      {
+        "path": "data/Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "bytes": 108723183,
+        "sha256": "d74238e054023c8bd4d8056650463cadb25c100fb0e26ebd4272c07b5c022c4b"
+      },
+      {
+        "path": "data/Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "bytes": 92030223,
+        "sha256": "e3deaff483d18b53b100a441dff9b8919416df8876b4edcc0f0d1e4bf48397d0"
+      },
+      {
+        "path": "data/Tuesday-WorkingHours.pcap_ISCX.csv",
+        "bytes": 174696560,
+        "sha256": "ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815"
+      },
+      {
+        "path": "data/Wednesday-workingHours.pcap_ISCX.csv",
+        "bytes": 285642925,
+        "sha256": "ed538e85b84181e8897dedb3d37d365982f44b27eccd67c477581a8b65f3d170"
+      }
+    ],
+    "sample_csv_files": [
+      {
+        "path": "data/samples/network_test_dataset.csv",
+        "bytes": 15674868,
+        "sha256": "7e0538b1969d5087acfcab4e25fa2259bd031aaee401f829d2ec80f52736ca8b"
+      },
+      {
+        "path": "data/samples/test_dataset.csv",
+        "bytes": 3010009,
+        "sha256": "1aaa522a86da6873670d53fb9ec8d0e1910270d28effcfca79f895c7b6bbd0e0"
+      }
+    ],
+    "scratch_dirs": [
+      "cic-binary-attack",
+      "cic-temporal-balanced",
+      "cic-temporal-holdout",
+      "cic-temporal-logistic"
+    ],
+    "raw_packet_files": [],
+    "raw_packet_search": {
+      "roots": [
+        "data",
+        "data/samples",
+        "scratch"
+      ],
+      "extensions": [
+        ".pcap",
+        ".pcapng"
+      ],
+      "count": 0,
+      "note": "CIC-IDS-2017 CSV filenames contain 'pcap_ISCX' but their extension is .csv; they are per-flow exports, not packets."
+    }
+  },
+  "datasets": {
+    "CIC-IDS-2017": {
+      "evaluated": true,
+      "tier_a": true,
+      "tier_b": false,
+      "raw_packets": false
+    },
+    "CIC-IDS-2018": {
+      "evaluated": false,
+      "tier_a": false,
+      "tier_b": false,
+      "reason": "dataset not acquired"
+    },
+    "UNSW-NB15": {
+      "evaluated": false,
+      "tier_a": false,
+      "tier_b": false,
+      "reason": "dataset not acquired"
+    },
+    "ToN-IoT": {
+      "evaluated": false,
+      "tier_a": false,
+      "tier_b": false,
+      "reason": "dataset not acquired"
+    },
+    "CIC-IoT-2023": {
+      "evaluated": false,
+      "tier_a": false,
+      "tier_b": false,
+      "reason": "dataset not acquired"
+    }
+  },
+  "partitions": {
+    "validation": {
+      "days": [
+        "Wednesday"
+      ],
+      "source_files": [
+        "Wednesday-workingHours.pcap_ISCX.csv"
+      ],
+      "rows_after_dedup": 692686,
+      "primary_rows": 692675,
+      "positives": 252660,
+      "negatives": 440015,
+      "excluded_rows": 11,
+      "benchmark_prevalence": 0.36475980799076047,
+      "label_counts": {
+        "BENIGN": 440015,
+        "DoS GoldenEye": 10293,
+        "DoS Hulk": 231072,
+        "DoS Slowhttptest": 5499,
+        "DoS slowloris": 5796,
+        "Heartbleed": 11
+      },
+      "excluded_label_counts": {
+        "Heartbleed": 11
+      },
+      "repairs": {
+        "flow_duration_nonfinite": 0,
+        "flow_duration_negative": 21,
+        "total_fwd_packets_nonfinite": 0,
+        "total_fwd_packets_negative": 0,
+        "total_backward_packets_nonfinite": 0,
+        "total_backward_packets_negative": 0,
+        "total_length_of_fwd_packets_nonfinite": 0,
+        "total_length_of_fwd_packets_negative": 0,
+        "total_length_of_bwd_packets_nonfinite": 0,
+        "total_length_of_bwd_packets_negative": 0,
+        "packet_length_mean_nonfinite": 0,
+        "packet_length_mean_negative": 0,
+        "packet_length_max_nonfinite": 0,
+        "packet_length_max_negative": 0,
+        "syn_flag_count_nonfinite": 0,
+        "syn_flag_count_negative": 0,
+        "fin_flag_count_nonfinite": 0,
+        "fin_flag_count_negative": 0,
+        "rst_flag_count_nonfinite": 0,
+        "rst_flag_count_negative": 0,
+        "total_packets_zero": 0,
+        "flow_packets_s_nonfinite": 1296,
+        "flow_packets_s_negative": 21,
+        "flow_packets_s_repaired": 1317,
+        "flow_packets_s_zero_duration_repair": 1317,
+        "flow_bytes_s_nonfinite": 1296,
+        "flow_bytes_s_negative": 16,
+        "flow_bytes_s_repaired": 1312,
+        "flow_bytes_s_zero_duration_repair": 1312,
+        "syn_ratio_above_one": 0,
+        "rst_ratio_above_one": 0,
+        "short_flow_flag_count": 226258
+      }
+    },
+    "test": {
+      "days": [
+        "Thursday",
+        "Friday"
+      ],
+      "source_files": [
+        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      ],
+      "rows_after_dedup": 1162065,
+      "primary_rows": 1157883,
+      "positives": 286957,
+      "negatives": 870926,
+      "excluded_rows": 4182,
+      "benchmark_prevalence": 0.24782901208498614,
+      "label_counts": {
+        "BENIGN": 870926,
+        "Bot": 1966,
+        "DDoS": 128027,
+        "Infiltration": 36,
+        "PortScan": 158930,
+        "Web Attack - Brute Force": 1507,
+        "Web Attack - Sql Injection": 21,
+        "Web Attack - XSS": 652
+      },
+      "excluded_label_counts": {
+        "Bot": 1966,
+        "Infiltration": 36,
+        "Web Attack - Brute Force": 1507,
+        "Web Attack - Sql Injection": 21,
+        "Web Attack - XSS": 652
+      },
+      "repairs": {
+        "flow_duration_nonfinite": 0,
+        "flow_duration_negative": 62,
+        "total_fwd_packets_nonfinite": 0,
+        "total_fwd_packets_negative": 0,
+        "total_backward_packets_nonfinite": 0,
+        "total_backward_packets_negative": 0,
+        "total_length_of_fwd_packets_nonfinite": 0,
+        "total_length_of_fwd_packets_negative": 0,
+        "total_length_of_bwd_packets_nonfinite": 0,
+        "total_length_of_bwd_packets_negative": 0,
+        "packet_length_mean_nonfinite": 0,
+        "packet_length_mean_negative": 0,
+        "packet_length_max_nonfinite": 0,
+        "packet_length_max_negative": 0,
+        "syn_flag_count_nonfinite": 0,
+        "syn_flag_count_negative": 0,
+        "fin_flag_count_nonfinite": 0,
+        "fin_flag_count_negative": 0,
+        "rst_flag_count_nonfinite": 0,
+        "rst_flag_count_negative": 0,
+        "total_packets_zero": 0,
+        "flow_packets_s_nonfinite": 869,
+        "flow_packets_s_negative": 62,
+        "flow_packets_s_repaired": 931,
+        "flow_packets_s_zero_duration_repair": 931,
+        "flow_bytes_s_nonfinite": 869,
+        "flow_bytes_s_negative": 60,
+        "flow_bytes_s_repaired": 929,
+        "flow_bytes_s_zero_duration_repair": 929,
+        "syn_ratio_above_one": 0,
+        "rst_ratio_above_one": 0,
+        "short_flow_flag_count": 477774
+      }
+    }
+  },
+  "rules": {
+    "rate_bytes": {
+      "tier": "A",
+      "definition": "score = sanitized Flow Bytes/s",
+      "source_features": [
+        "flow_bytes_s"
+      ],
+      "normalization": null,
+      "thresholds": {
+        "10": {
+          "budget_per_10k": 10,
+          "n": 692675,
+          "k": 693,
+          "threshold": 483000000.0,
+          "comparison": ">",
+          "expected_alerts": 651,
+          "expected_alerts_per_10k": 9.398346988125745
+        },
+        "100": {
+          "budget_per_10k": 100,
+          "n": 692675,
+          "k": 6927,
+          "threshold": 12300000.0,
+          "comparison": ">",
+          "expected_alerts": 6334,
+          "expected_alerts_per_10k": 91.44259573393005
+        }
+      },
+      "validation": {
+        "10": {
+          "threshold": 483000000.0,
+          "comparison": ">",
+          "alerts": 651,
+          "alerts_per_10k": 9.398346988125745,
+          "counts": {
+            "true_positives": 130,
+            "false_positives": 521,
+            "false_negatives": 252530,
+            "true_negatives": 439494
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.000514525449220296,
+          "recall_ci95": [
+            0.000433370434774539,
+            0.0006108686510294942
+          ],
+          "fpr": 0.0011840505437314638,
+          "fpr_ci95": [
+            0.0010867011371624544,
+            0.0012901094906582855
+          ],
+          "precision_at_benchmark": 0.19969278033794163,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.2099857301006517,
+          "pr_auc": 0.2474192928455858,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 4.3457143581630574e-05,
+              "ppv_ci95": [
+                3.552933269082382e-05,
+                5.232165209487944e-05
+              ],
+              "alerts_per_10k": 11.839835912220126,
+              "alerts_per_10k_ci95": [
+                10.839973857498958,
+                12.862465729020574
+              ],
+              "break_even_per_flow": 23010.176473704134
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0004347927177443991,
+              "ppv_ci95": [
+                0.00035549962121783743,
+                0.0005234411546974802
+              ],
+              "alerts_per_10k": 11.833810186369526,
+              "alerts_per_10k_ci95": [
+                10.834882831435408,
+                12.855876680453777
+              ],
+              "break_even_per_flow": 2298.9465243754803
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.004370179947996921,
+              "ppv_ci95": [
+                0.0035757581715915357,
+                0.00525698146604674
+              ],
+              "alerts_per_10k": 11.773552927863522,
+              "alerts_per_10k_ci95": [
+                10.783972570799905,
+                12.789986194785847
+              ],
+              "break_even_per_flow": 227.8235294426152
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.04605911329454284,
+              "ppv_ci95": [
+                0.0379754303329824,
+                0.05493867990592015
+              ],
+              "alerts_per_10k": 11.17098034280347,
+              "alerts_per_10k_ci95": [
+                10.27628040310101,
+                12.107251672674435
+              ],
+              "break_even_per_flow": 20.711229949328654
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 130,
+              "recall": 0.02364066193853428,
+              "recall_ci95": [
+                0.019945341390110102,
+                0.02800106244418056
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 693,
+          "expected_alerts": 651,
+          "expected_alerts_per_10k": 9.398346988125745
+        },
+        "100": {
+          "threshold": 12300000.0,
+          "comparison": ">",
+          "alerts": 6334,
+          "alerts_per_10k": 91.44259573393005,
+          "counts": {
+            "true_positives": 254,
+            "false_positives": 6080,
+            "false_negatives": 252406,
+            "true_negatives": 433935
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.0010053035700150399,
+          "recall_ci95": [
+            0.0008890893177890846,
+            0.0011366910861873758
+          ],
+          "fpr": 0.01381771075986046,
+          "fpr_ci95": [
+            0.013477016486400232,
+            0.014166893984554113
+          ],
+          "precision_at_benchmark": 0.040101041995579415,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.2099857301006517,
+          "pr_auc": 0.2474192928455858,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 7.276145900228987e-06,
+              "ppv_ci95": [
+                6.395713388919687e-06,
+                8.210964238914523e-06
+              ],
+              "alerts_per_10k": 138.16429519141474,
+              "alerts_per_10k_ci95": [
+                134.77841292957783,
+                141.5956661753838
+              ],
+              "break_even_per_flow": 137434.39694119233
+            },
+            {
+              "p": 0.001,
+              "ppv": 7.28222363057501e-05,
+              "ppv_ci95": [
+                6.40110646726698e-05,
+                8.217753614975984e-05
+              ],
+              "alerts_per_10k": 138.04898352670614,
+              "alerts_per_10k_ci95": [
+                134.66639467309489,
+                141.47738263835328
+              ],
+              "break_even_per_flow": 13731.069361361251
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0007343564074867635,
+              "ppv_ci95": [
+                0.0006455541743332234,
+                0.0008286270054593195
+              ],
+              "alerts_per_10k": 136.89586687962006,
+              "alerts_per_10k_ci95": [
+                133.54621210826562,
+                140.29454726804806
+              ],
+              "break_even_per_flow": 1360.7366033781418
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.008019032205534626,
+              "ppv_ci95": [
+                0.007055548529603997,
+                0.009039989267676301
+              ],
+              "alerts_per_10k": 125.36470040875918,
+              "alerts_per_10k_ci95": [
+                122.31105553236866,
+                128.45533954841977
+              ],
+              "break_even_per_flow": 123.70332757983108
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 1,
+              "recall": 4.327655449383742e-06,
+              "recall_ci95": [
+                7.639378605903914e-07,
+                2.4515462979480178e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 253,
+              "recall": 0.04600836515730133,
+              "recall_ci95": [
+                0.04078087282356524,
+                0.05186970826912675
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 6927,
+          "expected_alerts": 6334,
+          "expected_alerts_per_10k": 91.44259573393005
+        }
+      },
+      "test": {
+        "10": {
+          "threshold": 483000000.0,
+          "comparison": ">",
+          "alerts": 745,
+          "alerts_per_10k": 6.434156128037116,
+          "counts": {
+            "true_positives": 1,
+            "false_positives": 744,
+            "false_negatives": 286956,
+            "true_negatives": 870182
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 3.4848426767773567e-06,
+          "recall_ci95": [
+            6.151605674034082e-07,
+            1.9741131918351595e-05
+          ],
+          "fpr": 0.000854263163575321,
+          "fpr_ci95": [
+            0.0007950679133012784,
+            0.0009178616337238148
+          ],
+          "precision_at_benchmark": 0.0013422818791946308,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.545451382080909,
+          "pr_auc": 0.25063781688662357,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 4.079761275712372e-07,
+              "ppv_ci95": [
+                0.0,
+                1.2825379160004736e-06
+              ],
+              "alerts_per_10k": 8.541780857432313,
+              "alerts_per_10k_ci95": [
+                7.933290543628277,
+                9.161745172237369
+              ],
+              "break_even_per_flow": 2451122.809506204
+            },
+            {
+              "p": 0.001,
+              "ppv": 4.083421727865413e-06,
+              "ppv_ci95": [
+                0.0,
+                1.2836785234349042e-05
+              ],
+              "alerts_per_10k": 8.534123852544225,
+              "alerts_per_10k_ci95": [
+                7.926149868071455,
+                9.153499561110845
+              ],
+              "break_even_per_flow": 244891.65783545328
+            },
+            {
+              "p": 0.01,
+              "ppv": 4.120390786361786e-05,
+              "ppv_ci95": [
+                0.0,
+                0.00012951971812111182
+              ],
+              "alerts_per_10k": 8.457553803663355,
+              "alerts_per_10k_ci95": [
+                7.854743112503243,
+                9.071043449845604
+              ],
+              "break_even_per_flow": 24268.542668378257
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.00045305630959542045,
+              "ppv_ci95": [
+                0.0,
+                0.001422873996942172
+              ],
+              "alerts_per_10k": 7.691853314854667,
+              "alerts_per_10k_ci95": [
+                7.14067555682113,
+                8.24660001914593
+              ],
+              "break_even_per_flow": 2206.2311516707505
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 1,
+              "recall": 7.81085239832223e-06,
+              "recall_ci95": [
+                1.3788085739089586e-06,
+                4.424659507207855e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        },
+        "100": {
+          "threshold": 12300000.0,
+          "comparison": ">",
+          "alerts": 9158,
+          "alerts_per_10k": 79.09261989337438,
+          "counts": {
+            "true_positives": 33,
+            "false_positives": 9125,
+            "false_negatives": 286924,
+            "true_negatives": 861801
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.00011499980833365278,
+          "recall_ci95": [
+            8.18912261618765e-05,
+            0.00016149201200275117
+          ],
+          "fpr": 0.010477353988743016,
+          "fpr_ci95": [
+            0.010265659182277174,
+            0.010693367124876606
+          ],
+          "precision_at_benchmark": 0.003603406857392444,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.545451382080909,
+          "pr_auc": 0.25063781688662357,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 1.0977121068817727e-06,
+              "ppv_ci95": [
+                7.462525652102894e-07,
+                1.4816462927982751e-06
+              ],
+              "alerts_per_10k": 104.76317753324976,
+              "alerts_per_10k_ci95": [
+                102.66217923851988,
+                106.88714107995293
+              ],
+              "break_even_per_flow": 910984.670769962
+            },
+            {
+              "p": 0.001,
+              "ppv": 1.0986901714329914e-05,
+              "ppv_ci95": [
+                7.46919843279372e-06,
+                1.4829613144662365e-05
+              ],
+              "alerts_per_10k": 104.66991634562608,
+              "alerts_per_10k_ci95": [
+                102.57083972102295,
+                106.7919689181294
+              ],
+              "break_even_per_flow": 91016.47025694491
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.00011085675391496884,
+              "ppv_ci95": [
+                7.536588488770813e-05,
+                0.0001496241065723221
+              ],
+              "alerts_per_10k": 103.73730446938923,
+              "alerts_per_10k_ci95": [
+                101.6574445460537,
+                105.84024729989405
+              ],
+              "break_even_per_flow": 9019.65020564319
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0012180739757948079,
+              "ppv_ci95": [
+                0.0008284004024667967,
+                0.001643406240388562
+              ],
+              "alerts_per_10k": 94.4111857070208,
+              "alerts_per_10k_ci95": [
+                92.52021577418992,
+                96.32643185663639
+              ],
+              "break_even_per_flow": 819.9682005130172
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 33,
+              "recall": 0.00025775812914463354,
+              "recall_ci95": [
+                0.00018355239404979412,
+                0.0003619525641688679
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        }
+      }
+    },
+    "rate_packets": {
+      "tier": "A",
+      "definition": "score = sanitized Flow Packets/s",
+      "source_features": [
+        "flow_packets_s"
+      ],
+      "normalization": null,
+      "thresholds": {
+        "10": {
+          "budget_per_10k": 10,
+          "n": 692675,
+          "k": 693,
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "expected_alerts": 98,
+          "expected_alerts_per_10k": 1.4148049229436603
+        },
+        "100": {
+          "budget_per_10k": 100,
+          "n": 692675,
+          "k": 6927,
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "expected_alerts": 98,
+          "expected_alerts_per_10k": 1.4148049229436603
+        }
+      },
+      "validation": {
+        "10": {
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "alerts": 98,
+          "alerts_per_10k": 1.4148049229436603,
+          "counts": {
+            "true_positives": 50,
+            "false_positives": 48,
+            "false_negatives": 252610,
+            "true_negatives": 439967
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.00019789440354626772,
+          "recall_ci95": [
+            0.00015012272859036782,
+            0.00026086389387661575
+          ],
+          "fpr": 0.00010908719020942468,
+          "fpr_ci95": [
+            8.228571469598425e-05,
+            0.00014461697540174833
+          ],
+          "precision_at_benchmark": 0.5102040816326531,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.29640336482901597,
+          "pr_auc": 0.34948314417684156,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.00018139462022593675,
+              "ppv_ci95": [
+                0.00012128255180900158,
+                0.00027180189524764783
+              ],
+              "alerts_per_10k": 1.0909607093075837,
+              "alerts_per_10k_ci95": [
+                0.7955695275994991,
+                1.4090920468256545
+              ],
+              "break_even_per_flow": 5511.842656273081
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0018126182331081662,
+              "ppv_ci95": [
+                0.0012125932311569344,
+                0.0027138223743731235
+              ],
+              "alerts_per_10k": 1.0917599742276152,
+              "alerts_per_10k_ci95": [
+                0.7968484185014961,
+                1.4095346064109255
+              ],
+              "break_even_per_flow": 550.6881501766985
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.017994447053868396,
+              "ppv_ci95": [
+                0.012102752462453261,
+                0.026725584955754812
+              ],
+              "alerts_per_10k": 1.0997526234279311,
+              "alerts_per_10k_ci95": [
+                0.8096373275214664,
+                1.413960202263637
+              ],
+              "break_even_per_flow": 54.572699567060205
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.16775273967103438,
+              "ppv_ci95": [
+                0.11875736693581665,
+                0.23198270074345614
+              ],
+              "alerts_per_10k": 1.17967911543109,
+              "alerts_per_10k_ci95": [
+                0.9151079049148979,
+                1.4726199502533994
+              ],
+              "break_even_per_flow": 4.961154506096383
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 50,
+              "recall": 0.0002163827724691871,
+              "recall_ci95": [
+                0.00016414832451515398,
+                0.00028523425985682333
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006980864067120304
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 693,
+          "expected_alerts": 98,
+          "expected_alerts_per_10k": 1.4148049229436603
+        },
+        "100": {
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "alerts": 98,
+          "alerts_per_10k": 1.4148049229436603,
+          "counts": {
+            "true_positives": 50,
+            "false_positives": 48,
+            "false_negatives": 252610,
+            "true_negatives": 439967
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.00019789440354626772,
+          "recall_ci95": [
+            0.00015012272859036782,
+            0.00026086389387661575
+          ],
+          "fpr": 0.00010908719020942468,
+          "fpr_ci95": [
+            8.228571469598425e-05,
+            0.00014461697540174833
+          ],
+          "precision_at_benchmark": 0.5102040816326531,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.29640336482901597,
+          "pr_auc": 0.34948314417684156,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.00018139462022593675,
+              "ppv_ci95": [
+                0.00012190443779324623,
+                0.0002714366357102656
+              ],
+              "alerts_per_10k": 1.0909607093075837,
+              "alerts_per_10k_ci95": [
+                0.7955417234358009,
+                1.4091038215426654
+              ],
+              "break_even_per_flow": 5511.842656273081
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0018126182331081662,
+              "ppv_ci95": [
+                0.0012188040789393995,
+                0.0027101843146622134
+              ],
+              "alerts_per_10k": 1.0917599742276152,
+              "alerts_per_10k_ci95": [
+                0.7965703768645136,
+                1.4096523535810357
+              ],
+              "break_even_per_flow": 550.6881501766985
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.017994447053868396,
+              "ppv_ci95": [
+                0.012164062892301104,
+                0.026690618991579124
+              ],
+              "alerts_per_10k": 1.0997526234279311,
+              "alerts_per_10k_ci95": [
+                0.8068569111516413,
+                1.4151376739647374
+              ],
+              "break_even_per_flow": 54.572699567060205
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.16775273967103438,
+              "ppv_ci95": [
+                0.11929372774574881,
+                0.23174313070408822
+              ],
+              "alerts_per_10k": 1.17967911543109,
+              "alerts_per_10k_ci95": [
+                0.9091567934150515,
+                1.4693430801873557
+              ],
+              "break_even_per_flow": 4.961154506096383
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 50,
+              "recall": 0.0002163827724691871,
+              "recall_ci95": [
+                0.00016414832451515398,
+                0.00028523425985682333
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006980864067120304
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 6927,
+          "expected_alerts": 98,
+          "expected_alerts_per_10k": 1.4148049229436603
+        }
+      },
+      "test": {
+        "10": {
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "alerts": 113,
+          "alerts_per_10k": 0.975918983178784,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 113,
+            "false_negatives": 286957,
+            "true_negatives": 870813
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.00012974695898388612,
+          "fpr_ci95": [
+            0.00010792950275503391,
+            0.00015597402641524482
+          ],
+          "precision_at_benchmark": 0.0,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5602986944471104,
+          "pr_auc": 0.29959881140951683,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2973398428798772,
+              "alerts_per_10k_ci95": [
+                1.0677221715737044,
+                1.5384383977513587
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2961721202490222,
+              "alerts_per_10k_ci95": [
+                1.066761125514682,
+                1.5370536647200794
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2844948939404726,
+              "alerts_per_10k_ci95": [
+                1.0571506649244597,
+                1.523206334407286
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.167722630854975,
+              "alerts_per_10k_ci95": [
+                0.9610460590222362,
+                1.3847330312793509
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        },
+        "100": {
+          "threshold": 2000000.0,
+          "comparison": ">",
+          "alerts": 113,
+          "alerts_per_10k": 0.975918983178784,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 113,
+            "false_negatives": 286957,
+            "true_negatives": 870813
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.00012974695898388612,
+          "fpr_ci95": [
+            0.00010792950275503391,
+            0.00015597402641524482
+          ],
+          "precision_at_benchmark": 0.0,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5602986944471104,
+          "pr_auc": 0.29959881140951683,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2973398428798772,
+              "alerts_per_10k_ci95": [
+                1.0677221715737044,
+                1.5384383977513587
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2961721202490222,
+              "alerts_per_10k_ci95": [
+                1.066761125514682,
+                1.5370536647200794
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.2844948939404726,
+              "alerts_per_10k_ci95": [
+                1.0571506649244597,
+                1.523206334407286
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 1.167722630854975,
+              "alerts_per_10k_ci95": [
+                0.9610460590222362,
+                1.3847330312793509
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        }
+      }
+    },
+    "syn": {
+      "tier": "A",
+      "definition": "score = syn_ratio * log1p(total_packets + 1)",
+      "source_features": [
+        "syn_ratio",
+        "total_packets"
+      ],
+      "normalization": null,
+      "thresholds": {
+        "10": {
+          "budget_per_10k": 10,
+          "n": 692675,
+          "k": 693,
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        },
+        "100": {
+          "budget_per_10k": 100,
+          "n": 692675,
+          "k": 6927,
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        }
+      },
+      "validation": {
+        "10": {
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 252660,
+            "true_negatives": 440015
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.5203832881327455e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            8.383495997271142e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.47534160660881947,
+          "pr_auc": 0.3619925137560792,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006980864067120304
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 693,
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        },
+        "100": {
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 252660,
+            "true_negatives": 440015
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.5203832881327455e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            8.383495997271142e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.47534160660881947,
+          "pr_auc": 0.3619925137560792,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006980864067120304
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 6927,
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        }
+      },
+      "test": {
+        "10": {
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 286957,
+            "true_negatives": 870926
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            4.2355741381554955e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.47644863053807096,
+          "pr_auc": 0.24782901208498614,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        },
+        "100": {
+          "threshold": 0.6931471805599453,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 286957,
+            "true_negatives": 870926
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            4.2355741381554955e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.47644863053807096,
+          "pr_auc": 0.24782901208498614,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        }
+      }
+    },
+    "composite_bytes_syn": {
+      "tier": "A",
+      "definition": "score = z(log1p(max(flow_bytes_s, 0))) + z(syn_score); median/IQR fitted on validation only",
+      "source_features": [
+        "flow_bytes_s",
+        "syn_ratio",
+        "total_packets"
+      ],
+      "normalization": {
+        "rate_bytes_log1p": {
+          "median": 6.226862760975451,
+          "iqr": 5.196291566705215
+        },
+        "rate_packets_log1p": {
+          "median": 4.16501194253627,
+          "iqr": 9.565954381863085
+        },
+        "syn_score": {
+          "median": 0.0,
+          "iqr": 0.110455161553182
+        }
+      },
+      "thresholds": {
+        "10": {
+          "budget_per_10k": 10,
+          "n": 692675,
+          "k": 693,
+          "threshold": 8.925081324631993,
+          "comparison": ">",
+          "expected_alerts": 648,
+          "expected_alerts_per_10k": 9.355036633341754
+        },
+        "100": {
+          "budget_per_10k": 100,
+          "n": 692675,
+          "k": 6927,
+          "threshold": 8.184577714700842,
+          "comparison": ">",
+          "expected_alerts": 5095,
+          "expected_alerts_per_10k": 73.55541920814235
+        }
+      },
+      "validation": {
+        "10": {
+          "threshold": 8.925081324631993,
+          "comparison": ">",
+          "alerts": 648,
+          "alerts_per_10k": 9.355036633341754,
+          "counts": {
+            "true_positives": 130,
+            "false_positives": 518,
+            "false_negatives": 252530,
+            "true_negatives": 439497
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.000514525449220296,
+          "recall_ci95": [
+            0.000433370434774539,
+            0.0006108686510294942
+          ],
+          "fpr": 0.0011772325943433747,
+          "fpr_ci95": [
+            0.0010801755979332158,
+            0.0012829992501556654
+          ],
+          "precision_at_benchmark": 0.2006172839506173,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.20486591669781085,
+          "pr_auc": 0.24660874345802336,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 4.3708814879630884e-05,
+              "ppv_ci95": [
+                3.579154102528198e-05,
+                5.2507275494182016e-05
+              ],
+              "alerts_per_10k": 11.771663236288623,
+              "alerts_per_10k_ci95": [
+                10.749116535137668,
+                12.771549038338215
+              ],
+              "break_even_per_flow": 22877.680256005264
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.00043730972109572494,
+              "ppv_ci95": [
+                0.0003581223813259908,
+                0.0005252973075998979
+              ],
+              "alerts_per_10k": 11.765698871982517,
+              "alerts_per_10k_ci95": [
+                10.744463534393159,
+                12.764863700200886
+              ],
+              "break_even_per_flow": 2285.7088284577717
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.004395378623783435,
+              "ppv_ci95": [
+                0.0036020533395656478,
+                0.005275534430936907
+              ],
+              "alerts_per_10k": 11.70605522892144,
+              "alerts_per_10k_ci95": [
+                10.697933526948058,
+                12.698010318827606
+              ],
+              "break_even_per_flow": 226.5116857030224
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.046313510711864826,
+              "ppv_ci95": [
+                0.038244982080958674,
+                0.055122853618255675
+              ],
+              "alerts_per_10k": 11.109618798310668,
+              "alerts_per_10k_ci95": [
+                10.192516955997178,
+                12.01553922903827
+              ],
+              "break_even_per_flow": 20.59197142754749
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 130,
+              "recall": 0.02364066193853428,
+              "recall_ci95": [
+                0.019945341390110102,
+                0.02800106244418056
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 693,
+          "expected_alerts": 648,
+          "expected_alerts_per_10k": 9.355036633341754
+        },
+        "100": {
+          "threshold": 8.184577714700842,
+          "comparison": ">",
+          "alerts": 5095,
+          "alerts_per_10k": 73.55541920814235,
+          "counts": {
+            "true_positives": 196,
+            "false_positives": 4899,
+            "false_negatives": 252464,
+            "true_negatives": 435116
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.0007757460619013695,
+          "recall_ci95": [
+            0.0006745116737141716,
+            0.0008921606943429278
+          ],
+          "fpr": 0.011133711350749406,
+          "fpr_ci95": [
+            0.010827921668763897,
+            0.01144803684774886
+          ],
+          "precision_at_benchmark": 0.03846908734052993,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.20486591669781085,
+          "pr_auc": 0.24660874345802336,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 6.968190693451723e-06,
+              "ppv_ci95": [
+                5.997324112714058e-06,
+                7.982047629750959e-06
+              ],
+              "alerts_per_10k": 111.32675554220522,
+              "alerts_per_10k_ci95": [
+                108.23628454835833,
+                114.34975594026454
+              ],
+              "break_even_per_flow": 143508.27579231412
+            },
+            {
+              "p": 0.001,
+              "ppv": 6.974030537547738e-05,
+              "ppv_ci95": [
+                6.0024027979053834e-05,
+                7.98866419610078e-05
+              ],
+              "alerts_per_10k": 111.23353385460558,
+              "alerts_per_10k_ci95": [
+                108.14605741954004,
+                114.25480631468265
+              ],
+              "break_even_per_flow": 14337.910542706453
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0007032971891458104,
+              "ppv_ci95": [
+                0.0006053666773669986,
+                0.0008055438216892502
+              ],
+              "alerts_per_10k": 110.30131697860925,
+              "alerts_per_10k_ci95": [
+                107.24378613135728,
+                113.30531005886374
+              ],
+              "break_even_per_flow": 1420.8740177456843
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0076822401019037935,
+              "ppv_ci95": [
+                0.006618964445894699,
+                0.008790173340286268
+              ],
+              "alerts_per_10k": 100.97914821864602,
+              "alerts_per_10k_ci95": [
+                98.20591076665899,
+                103.70616342579709
+              ],
+              "break_even_per_flow": 129.17036524960767
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 196,
+              "recall": 0.03564284415348245,
+              "recall_ci95": [
+                0.031057829669486434,
+                0.040876181474190296
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 6927,
+          "expected_alerts": 5095,
+          "expected_alerts_per_10k": 73.55541920814235
+        }
+      },
+      "test": {
+        "10": {
+          "threshold": 8.925081324631993,
+          "comparison": ">",
+          "alerts": 738,
+          "alerts_per_10k": 6.3737009697871025,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 738,
+            "false_negatives": 286957,
+            "true_negatives": 870188
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.0008473739445142296,
+          "fpr_ci95": [
+            0.0007884262625035862,
+            0.0009107249071726498
+          ],
+          "precision_at_benchmark": 0.0,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5263094314441898,
+          "pr_auc": 0.24162067169510698,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 8.472892071197782,
+              "alerts_per_10k_ci95": [
+                7.875886125801733,
+                9.09285978372445
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 8.465265705697155,
+              "alerts_per_10k_ci95": [
+                7.86879711938787,
+                9.084675391479873
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 8.389002050690873,
+              "alerts_per_10k_ci95": [
+                7.79790705524924,
+                9.002831469034108
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 7.626365500628068,
+              "alerts_per_10k_ci95": [
+                7.089006413862946,
+                8.184392244576463
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        },
+        "100": {
+          "threshold": 8.184577714700842,
+          "comparison": ">",
+          "alerts": 6783,
+          "alerts_per_10k": 58.58104834426276,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 6783,
+            "false_negatives": 286957,
+            "true_negatives": 864143
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.007788262148563712,
+          "fpr_ci95": [
+            0.007605800316455428,
+            0.007975066032194427
+          ],
+          "precision_at_benchmark": 0.0,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5263094314441898,
+          "pr_auc": 0.24162067169510698,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 77.87483322348857,
+              "alerts_per_10k_ci95": [
+                76.04937273660448,
+                79.7235424995924
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 77.80473886415149,
+              "alerts_per_10k_ci95": [
+                75.98092145601349,
+                79.65178413550635
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 77.10379527078075,
+              "alerts_per_10k_ci95": [
+                75.29640865010346,
+                78.93420049464592
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 70.09435933707341,
+              "alerts_per_10k_ci95": [
+                68.45128059100314,
+                71.75836408604175
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        }
+      }
+    },
+    "composite_packets_syn": {
+      "tier": "A",
+      "definition": "score = z(log1p(max(flow_packets_s, 0))) + z(syn_score); median/IQR fitted on validation only",
+      "source_features": [
+        "flow_packets_s",
+        "syn_ratio",
+        "total_packets"
+      ],
+      "normalization": {
+        "rate_bytes_log1p": {
+          "median": 6.226862760975451,
+          "iqr": 5.196291566705215
+        },
+        "rate_packets_log1p": {
+          "median": 4.16501194253627,
+          "iqr": 9.565954381863085
+        },
+        "syn_score": {
+          "median": 0.0,
+          "iqr": 0.110455161553182
+        }
+      },
+      "thresholds": {
+        "10": {
+          "budget_per_10k": 10,
+          "n": 692675,
+          "k": 693,
+          "threshold": 7.356669460639839,
+          "comparison": ">",
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        },
+        "100": {
+          "budget_per_10k": 100,
+          "n": 692675,
+          "k": 6927,
+          "threshold": 7.211750009241434,
+          "comparison": ">",
+          "expected_alerts": 6417,
+          "expected_alerts_per_10k": 92.64084888295376
+        }
+      },
+      "validation": {
+        "10": {
+          "threshold": 7.356669460639839,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 252660,
+            "true_negatives": 440015
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.5203832881327455e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            8.383495997271142e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.28956763363831806,
+          "pr_auc": 0.30716713915447236,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006980864067120304
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.0006623385911440457
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 693,
+          "expected_alerts": 0,
+          "expected_alerts_per_10k": 0.0
+        },
+        "100": {
+          "threshold": 7.211750009241434,
+          "comparison": ">",
+          "alerts": 6417,
+          "alerts_per_10k": 92.64084888295376,
+          "counts": {
+            "true_positives": 49,
+            "false_positives": 6368,
+            "false_negatives": 252611,
+            "true_negatives": 433647
+          },
+          "positives": 252660,
+          "negatives": 440015,
+          "recall": 0.00019393651547534236,
+          "recall_ci95": [
+            0.000146710754916681,
+            0.00025636021175858947
+          ],
+          "fpr": 0.014472233901117007,
+          "fpr_ci95": [
+            0.01412357725722517,
+            0.01482936806798758
+          ],
+          "precision_at_benchmark": 0.007635966962755181,
+          "benchmark_prevalence": 0.36475980799076047,
+          "roc_auc": 0.28956763363831806,
+          "pr_auc": 0.30716713915447236,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 1.3401915174506143e-06,
+              "ppv_ci95": [
+                9.742387287912802e-07,
+                1.7329060867548438e-06
+              ],
+              "alerts_per_10k": 144.70806071378442,
+              "alerts_per_10k_ci95": [
+                141.23064873360278,
+                148.29848851073794
+              ],
+              "break_even_per_flow": 746161.012651934
+            },
+            {
+              "p": 0.001,
+              "ppv": 1.341382701613017e-05,
+              "ppv_ci95": [
+                9.75107862890494e-06,
+                1.7344401857342913e-05
+              ],
+              "alerts_per_10k": 144.57955603731364,
+              "alerts_per_10k_ci95": [
+                141.10493738886692,
+                148.16675390730686
+              ],
+              "break_even_per_flow": 74548.94005793401
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.00013534120494902862,
+              "ppv_ci95": [
+                9.838852621643003e-05,
+                0.00017499319008579674
+              ],
+              "alerts_per_10k": 143.2945092726059,
+              "alerts_per_10k_ci95": [
+                139.8478239415082,
+                146.84940787299587
+              ],
+              "break_even_per_flow": 7387.732798534002
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0014867410811456201,
+              "ppv_ci95": [
+                0.0010812100017704711,
+                0.0019215624874454507
+              ],
+              "alerts_per_10k": 130.4440416255284,
+              "alerts_per_10k_ci95": [
+                127.31320831396496,
+                133.67318628984228
+              ],
+              "break_even_per_flow": 671.6120725940001
+            }
+          ],
+          "per_family_recall": {
+            "DoS GoldenEye": {
+              "support": 10293,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                0.00037307157112760776
+              ]
+            },
+            "DoS Hulk": {
+              "support": 231072,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                1.662423382921533e-05
+              ]
+            },
+            "DoS Slowhttptest": {
+              "support": 5499,
+              "alerts": 48,
+              "recall": 0.00872885979268958,
+              "recall_ci95": [
+                0.006590293111549005,
+                0.011553325883807442
+              ]
+            },
+            "DoS slowloris": {
+              "support": 5796,
+              "alerts": 1,
+              "recall": 0.0001725327812284334,
+              "recall_ci95": [
+                3.045692168303875e-05,
+                0.0009767186816793836
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Heartbleed": {
+              "support": 11,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          },
+          "k": 6927,
+          "expected_alerts": 6417,
+          "expected_alerts_per_10k": 92.64084888295376
+        }
+      },
+      "test": {
+        "10": {
+          "threshold": 7.356669460639839,
+          "comparison": ">",
+          "alerts": 0,
+          "alerts_per_10k": 0.0,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 0,
+            "false_negatives": 286957,
+            "true_negatives": 870926
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.0,
+          "fpr_ci95": [
+            0.0,
+            4.2355741381554955e-06
+          ],
+          "precision_at_benchmark": null,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5381676919839051,
+          "pr_auc": 0.2777089303000018,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": null,
+              "ppv_ci95": [
+                null,
+                null
+              ],
+              "alerts_per_10k": 0.0,
+              "alerts_per_10k_ci95": [
+                0.0,
+                0.0
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        },
+        "100": {
+          "threshold": 7.211750009241434,
+          "comparison": ">",
+          "alerts": 8186,
+          "alerts_per_10k": 70.69798934780111,
+          "counts": {
+            "true_positives": 0,
+            "false_positives": 8186,
+            "false_negatives": 286957,
+            "true_negatives": 862740
+          },
+          "positives": 286957,
+          "negatives": 870926,
+          "recall": 0.0,
+          "recall_ci95": [
+            0.0,
+            1.3386700433290234e-05
+          ],
+          "fpr": 0.009399191205682228,
+          "fpr_ci95": [
+            0.009198691483385217,
+            0.009604018768672411
+          ],
+          "precision_at_benchmark": 0.0,
+          "benchmark_prevalence": 0.24782901208498614,
+          "roc_auc": 0.5381676919839051,
+          "pr_auc": 0.2777089303000018,
+          "prevalence": [
+            {
+              "p": 0.0001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 93.9825128656166,
+              "alerts_per_10k_ci95": [
+                91.93891559099166,
+                96.00343539520004
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.001,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 93.89792014476546,
+              "alerts_per_10k_ci95": [
+                91.85616229162983,
+                95.91702366217106
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.01,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 93.05199293625405,
+              "alerts_per_10k_ci95": [
+                91.02862929801152,
+                95.05290633188123
+              ],
+              "break_even_per_flow": null
+            },
+            {
+              "p": 0.1,
+              "ppv": 0.0,
+              "ppv_ci95": [
+                0.0,
+                0.0
+              ],
+              "alerts_per_10k": 84.59272085114004,
+              "alerts_per_10k_ci95": [
+                82.75329936182867,
+                86.41173302898294
+              ],
+              "break_even_per_flow": null
+            }
+          ],
+          "per_family_recall": {
+            "DDoS": {
+              "support": 128027,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                1.6940658945086007e-21,
+                3.0004167565591427e-05
+              ]
+            },
+            "PortScan": {
+              "support": 158930,
+              "alerts": 0,
+              "recall": 0.0,
+              "recall_ci95": [
+                0.0,
+                2.4170175372558625e-05
+              ]
+            }
+          },
+          "excluded_diagnostics": {
+            "Bot": {
+              "support": 1966,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Infiltration": {
+              "support": 36,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Brute Force": {
+              "support": 1507,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - Sql Injection": {
+              "support": 21,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            },
+            "Web Attack - XSS": {
+              "support": 652,
+              "alerts": 0,
+              "alert_rate": 0.0,
+              "note": "excluded from primary metrics and threshold selection"
+            }
+          }
+        }
+      }
+    }
+  },
+  "fanout": {
+    "tier": "B",
+    "available": false,
+    "required_features": [
+      "unique_dst_ports_60s",
+      "unique_dst_hosts_60s",
+      "connection_attempts_60s",
+      "fanout_ratio_60s"
+    ],
+    "raw_packets_present": false,
+    "reason": "Tier B requires raw packets or a stateful aggregator. The repository contains per-flow CSV exports and no .pcap/.pcapng files, so 60-second destination fan-out cannot be derived. It is not approximated from per-flow columns.",
+    "evaluated": false
+  },
+  "syn_tie_diagnostic": {
+    "max_score": 0.6931471805599453,
+    "tied_rows": 11699,
+    "tied_label_counts": {
+      "BENIGN": 10573,
+      "DoS Slowhttptest": 604,
+      "DoS slowloris": 522
+    },
+    "budget_k": {
+      "10": 693,
+      "100": 6927
+    },
+    "exceeds_smallest_budget": true,
+    "partition": "validation",
+    "explanation": "The top SYN score is tied across more rows than either budget allows. The specified tie rule raises the threshold above the maximum and selects zero alerts. This is a property of the rule, not a bug."
+  },
+  "score_tie_diagnostics": {
+    "rate_bytes": {
+      "max_score": 2070000000.0,
+      "tied_rows": 31,
+      "tied_label_counts": {
+        "BENIGN": 31
+      },
+      "budget_k": {
+        "10": 693,
+        "100": 6927
+      },
+      "exceeds_smallest_budget": false
+    },
+    "rate_packets": {
+      "max_score": 3000000.0,
+      "tied_rows": 97,
+      "tied_label_counts": {
+        "BENIGN": 47,
+        "DoS Hulk": 50
+      },
+      "budget_k": {
+        "10": 693,
+        "100": 6927
+      },
+      "exceeds_smallest_budget": false
+    },
+    "syn": {
+      "max_score": 0.6931471805599453,
+      "tied_rows": 11699,
+      "tied_label_counts": {
+        "BENIGN": 10573,
+        "DoS Slowhttptest": 604,
+        "DoS slowloris": 522
+      },
+      "budget_k": {
+        "10": 693,
+        "100": 6927
+      },
+      "exceeds_smallest_budget": true
+    },
+    "composite_bytes_syn": {
+      "max_score": 9.20514398322955,
+      "tied_rows": 31,
+      "tied_label_counts": {
+        "BENIGN": 31
+      },
+      "budget_k": {
+        "10": 693,
+        "100": 6927
+      },
+      "exceeds_smallest_budget": false
+    },
+    "composite_packets_syn": {
+      "max_score": 7.356669460639839,
+      "tied_rows": 1487,
+      "tied_label_counts": {
+        "BENIGN": 1476,
+        "DoS Slowhttptest": 11
+      },
+      "budget_k": {
+        "10": 693,
+        "100": 6927
+      },
+      "exceeds_smallest_budget": true
+    }
+  },
+  "notes": [
+    "Thresholds are selected on validation only; the test partition is loaded after they are frozen.",
+    "The decision is score > threshold, so a threshold at descending rank K+1 yields K alerts without ties.",
+    "Ties at the boundary reduce the alert count. A top score tied more than K times yields zero alerts.",
+    "Rate repairs replace non-finite or negative values with total/duration, or total*1e6 when duration is zero.",
+    "Excluded labels are removed from primary metrics and logged as diagnostics.",
+    "Tier B fan-out is unavailable because no raw packets exist; it is not approximated from per-flow columns.",
+    "Bootstrap intervals resample the thresholded indicator within each class; this is the non-parametric bootstrap distribution of TP/FP at a frozen threshold.",
+    "The test partition is CIC-IDS-2017 Thursday + Friday, already inspected. It is not a blind confirmatory test.",
+    "These are rule baselines, not a deployable detector. Detection remains 4/10."
+  ]
+}

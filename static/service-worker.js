@@ -6,25 +6,24 @@
  * - NEVER caches /predict (file upload) or /socket.io/* (live WebSocket traffic)
  */
 
-const VERSION = 'v2.8.0';
+const VERSION = 'v3.3.0';
 const STATIC_CACHE = `netshield-static-${VERSION}`;
 const RUNTIME_CACHE = `netshield-runtime-${VERSION}`;
 
 // Bump VERSION above whenever you deploy changed assets so old caches are dropped.
+// Do not precache HTML pages here. Navigations are network-first and cached in the
+// runtime cache, so a stale app shell can never shadow a newer server-rendered page.
 const APP_SHELL = [
-  '/',
-  '/dashboard',
   '/offline.html',
   '/static/manifest.json',
-  '/static/css/style.css',
-  '/static/css/responsive.css',
-  '/static/css/design.css',
-  '/static/js/main.js',
-  '/static/js/dashboard.js',
+  '/static/css/console.css?v=5',
+  '/static/css/workbench.css?v=2',
+  '/static/js/console.js?v=9',
+  '/static/js/theme.js?v=4',
+  '/static/js/workbench.js?v=3',
   '/static/js/pwa-register.js',
   '/static/icons/icon-192.png',
   '/static/icons/icon-512.png',
-  '/static/icons/maskable-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -60,7 +59,8 @@ self.addEventListener('activate', (event) => {
 
 function isNeverCache(url) {
   return (
-    url.pathname.startsWith('/socket.io') || // live dashboard websocket/polling
+    url.pathname.startsWith('/socket.io') || // live console websocket/polling
+    url.pathname.startsWith('/api/') || // live state must not be served stale
     url.pathname === '/predict' // CSV upload + inference, must always hit the server
   );
 }
