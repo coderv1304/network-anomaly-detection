@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:4B6CB7,100:8E54E9&height=210&section=header&text=NetShield&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Network%20Anomaly%20Detection%20%7C%20ML%20for%20Volumetric%20%26%20Scanning%20Traffic&descAlignY=56&descSize=17" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:4B6CB7,100:8E54E9&height=210&section=header&text=NetShield&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Network%20Anomaly%20Detection%20%7C%20ML%20for%20Volumetric%20and%20Scanning%20Traffic&descAlignY=56&descSize=17" width="100%"/>
 
 <a href="https://github.com/coderv1304/network-anomaly-detection">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=21&pause=1000&color=8E54E9&center=true&vCenter=true&width=820&lines=Flow-based+anomaly+detection+on+CIC-IDS-2017;Random+Forest+%2B+frozen+Tier+A+schema;Flask+console+%2B+research+workbench;Honest+benchmarks%2C+including+negative+results;Research+prototype%2C+not+a+production+NIDS" alt="Typing SVG"/>
