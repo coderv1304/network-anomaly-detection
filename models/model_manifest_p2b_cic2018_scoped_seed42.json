@@ -1,0 +1,68 @@
+{
+  "artifact_version": "p2b-scoped-cic2018-v1",
+  "model_type": "rf",
+  "task": "binary_attack",
+  "seed": 42,
+  "split_mode": "group_hash",
+  "scope": "CIC-IDS-2018 DoS/DDoS only; PortScan absent",
+  "model_file": "model_bundle_p2b_cic2018_scoped_seed42.pkl",
+  "model_sha256": "fd1cc443f638ffcee2c3cfdcca09ff3685ff8e2365d51dc924386c1a530423ef",
+  "schema": {
+    "features": [
+      "flow_duration",
+      "total_fwd_packets",
+      "total_backward_packets",
+      "total_length_of_fwd_packets",
+      "total_length_of_bwd_packets",
+      "flow_packets_s",
+      "flow_bytes_s",
+      "packet_length_mean",
+      "packet_length_max",
+      "syn_flag_count",
+      "fin_flag_count",
+      "rst_flag_count"
+    ],
+    "count": 12,
+    "sha256": "159b0298563f36b697628428a0586b0c617c6ff1f1ec3326e33753b07f019cc9",
+    "version": "cic-ids-2017-12f-159b0298563f"
+  },
+  "feature_count": 12,
+  "features": [
+    "flow_duration",
+    "total_fwd_packets",
+    "total_backward_packets",
+    "total_length_of_fwd_packets",
+    "total_length_of_bwd_packets",
+    "flow_packets_s",
+    "flow_bytes_s",
+    "packet_length_mean",
+    "packet_length_max",
+    "syn_flag_count",
+    "fin_flag_count",
+    "rst_flag_count"
+  ],
+  "thresholds": {
+    "10_per_10k": {
+      "budget_per_10k": 10,
+      "n": 1756302,
+      "k": 1757,
+      "threshold": 0.9999996753131907,
+      "comparison": ">",
+      "expected_alerts": 20,
+      "expected_alerts_per_10k": 0.11387563186741233
+    },
+    "100_per_10k": {
+      "budget_per_10k": 100,
+      "n": 1756302,
+      "k": 17564,
+      "threshold": 0.9999996753131907,
+      "comparison": ">",
+      "expected_alerts": 20,
+      "expected_alerts_per_10k": 0.11387563186741233
+    }
+  },
+  "threshold_comparison": ">",
+  "serving_registry_unchanged": true,
+  "python_version": "3.12.10",
+  "scikit_learn_version": "1.5.2"
+}
