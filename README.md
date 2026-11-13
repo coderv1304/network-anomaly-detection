@@ -54,6 +54,8 @@ It is built to explore the gap between strong benchmark numbers and useful monit
 | 📍 Status | Research prototype • not production-ready |
 
 > **Frozen scope (P0):** NetShield is a flow-based detector for volumetric and scanning behavior. It is **not** a general NIDS. Live accuracy is unvalidated. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope. Every public claim maps to an artifact in the [claim–evidence matrix](docs/CLAIM_EVIDENCE_MATRIX.md).
+>
+> **IDS/IPS:** the [roadmap](docs/IDS_IPS_ROADMAP.md) is a planning document, not current capability. The repository does not implement inline enforcement or traffic blocking.
 
 ---
 
@@ -252,6 +254,7 @@ Model artifacts are local or registry-managed. The serving bundle and registry a
 | Security | [SECURITY_AND_COMPLIANCE.md](docs/SECURITY_AND_COMPLIANCE.md) • [PRODUCT_BOUNDARY_AND_THREAT_MODEL.md](docs/PRODUCT_BOUNDARY_AND_THREAT_MODEL.md) |
 | Tenancy and access | [TENANCY_AND_ACCESS_CONTROL.md](docs/TENANCY_AND_ACCESS_CONTROL.md) |
 | Phase status | [PHASE_STATUS.md](docs/PHASE_STATUS.md) |
+| IDS/IPS roadmap | [IDS_IPS_ROADMAP.md](docs/IDS_IPS_ROADMAP.md) — **planned, not implemented** |
 
 ---
 

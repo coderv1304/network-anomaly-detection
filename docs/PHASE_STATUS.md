@@ -111,6 +111,10 @@ This sequence is separate from Track P below. It is the re-scope execution pack,
 
 Do not reorder these to chase a score. The score is a consequence of the evidence, not a target to negotiate.
 
+## IDS/IPS roadmap
+
+The staged IDS-then-IPS plan is in [`IDS_IPS_ROADMAP.md`](IDS_IPS_ROADMAP.md). It is a planning document, not implemented capability. It adds no detection or SaaS evidence, and no phase in it raises the current scores by itself.
+
 ## Honest bottom line
 
 - The requested phases are **implemented as far as the repository and the assistant can take them**.
