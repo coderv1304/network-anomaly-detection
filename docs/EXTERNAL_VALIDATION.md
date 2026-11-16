@@ -1,5 +1,12 @@
 # D7 — External Validation and Real-Capture Report
 
+> [!NOTE]
+> **Superseded for dataset availability by P3 (2026-11-13).** CIC-IDS-2018 and
+> UNSW-NB15 are now present and were used for the documented negative-transfer
+> run in [`CROSS_DATASET.md`](CROSS_DATASET.md). D7 remains blocked on a *clean
+> independent replication* and on labelled real capture, not on the absence of
+> any external CSV. The statements below describe the repository on 2026-11-10.
+
 **Status:** **incomplete.** The second-dataset gate is **blocked**, and the only real capture is an **unlabelled-traffic ingest test with operator-declared benign traffic**. Neither result is external detection evidence.
 **Date:** 2026-11-10.
 **Related:** [`EVALUATION_PROTOCOL_V2.md`](EVALUATION_PROTOCOL_V2.md), [`MODEL_CARD.md`](MODEL_CARD.md), [`LIVE_CAPTURE_OPERATIONS.md`](LIVE_CAPTURE_OPERATIONS.md), [`D6_EXPERIMENT_PROTOCOL.md`](D6_EXPERIMENT_PROTOCOL.md).

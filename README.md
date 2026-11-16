@@ -89,14 +89,17 @@ It is built to explore the gap between strong benchmark numbers and useful monit
 flowchart LR
     A[PCAP / CSV upload] --> B[Flow parser]
     L[Go live collector] --> B
+    Z[Optional Zeek conn.log] --> B
     B --> C[Feature mapper]
     C --> D[Random Forest bundle]
     D --> E[Score + frozen threshold]
     E --> F[(SQLite)]
-    F --> G[Flask operator console]
-    F --> H[Research workbench]
-    G --> I[Review, audit, retention]
-    H --> J[Evaluation reports]
+    E --> G[Host/window evidence accumulator]
+    G --> H["/api/incidents"]
+    F --> I[Flask operator console]
+    F --> J[Research workbench]
+    I --> K[Review, audit, retention]
+    J --> M[Evaluation reports]
 ```
 
 **Two runnable surfaces:**
@@ -110,7 +113,7 @@ flowchart LR
 
 ## 📊 Evidence Snapshot
 
-All numbers below are from the frozen evaluation protocol. They are development evidence, not a blind confirmatory test, and they are reported with their limitations.
+All numbers below are from the frozen evaluation protocol or from explicitly labelled research/sensitivity runs. They are development evidence, not a blind confirmatory test, and they are reported with their limitations.
 
 | Evaluation | Result | Reading |
 | --- | --- | --- |
@@ -122,7 +125,10 @@ All numbers below are from the frozen evaluation protocol. They are development 
 | Prevalence 0.1% (seed 42) | PPV **7.40%**, **78.27** alerts per 10k flows | Precision collapses outside the benchmark base rate |
 | CIC-IDS-2018 transfer | ROC-AUC **0.7241**, AP **0.2048** | Frozen threshold emits **0 alerts** |
 | UNSW-NB15 transfer | ROC-AUC **0.3793**, AP **0.1028** | Frozen threshold emits **0 alerts** |
-| Cross-dataset conclusion | **Negative / partial transfer** | Reported, not tuned away |
+| P3B portable-ratio (CIC-IDS-2018) | ROC-AUC **0.7785**, AP **0.2271** | Both improve, but the validation threshold saturates at **1.000000** |
+| P3B portable-ratio (UNSW-NB15) | ROC-AUC **0.4956**, AP **0.1088** | AP is **0.0001** above the 10.86% prevalence; near chance |
+| P3C corrected-label sensitivity | ROC-AUC **0.9988**, AP **0.9916** | Higher than P3B's **0.9859 / 0.9297**, but the release is also a re-extraction and thresholds still saturate |
+| Cross-dataset conclusion | **Negative baseline / mixed candidate** | Reported, not tuned away |
 
 > **What this does not mean:** a matching artifact hash is provenance, not detection evidence. High benchmark precision is not a production claim. See [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md), [CROSS_DATASET.md](docs/CROSS_DATASET.md), and [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md).
 
@@ -190,8 +196,12 @@ The included Dockerfile and Compose file are for a **loopback-bound local demo**
 | `NETSHIELD_CAPTURE_INTERFACE` | Selects the capture interface |
 | `NETSHIELD_DEMO_STREAM` | Emits synthetic fixtures for demos only |
 | `AUTH_REQUIRED` | Enables authentication and the production artifact gate |
+| `ENABLE_MULTI_SIGNAL_EVIDENCE` | Enables host/window incident accumulation during ingest (default `true`) |
+| `NETSHIELD_EVIDENCE_WINDOW_SECONDS` | Evidence window length (default `300`) |
+| `NETSHIELD_INCIDENT_RISK_THRESHOLD` | Points needed to open an incident (default `70`) |
+| `NETSHIELD_THREAT_INTEL_ON_INGEST` | Allows AbuseIPDB lookups during ingest (default `false`) |
 
-Full configuration and operational notes: [LIVE_CAPTURE_OPERATIONS.md](docs/LIVE_CAPTURE_OPERATIONS.md) and [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md).
+Full configuration and operational notes: [LIVE_CAPTURE_OPERATIONS.md](docs/LIVE_CAPTURE_OPERATIONS.md), [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), and [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md).
 
 ---
 
@@ -220,8 +230,10 @@ The CI workflow in `.github/workflows/security.yml` runs the Python suite, a sec
 ```text
 network-anomaly-detection/
 ├── app.py                     # Flask app: console, research workbench, API
+├── evidence_accumulator.py    # Host/window multi-signal incident logic
 ├── live_capture.py            # Optional Python capture adapter
 ├── pcap_parser.py             # PCAP/CSV flow parsing
+├── zeek_parser.py             # Optional Zeek conn.log parser/converter
 ├── feature_mapper.py          # Schema mapping to the model feature order
 ├── models/                    # Serving bundle, registry, metrics, manifests
 ├── training/                  # Training, audit, benchmark, SHAP pipelines
@@ -249,7 +261,10 @@ Model artifacts are local or registry-managed. The serving bundle and registry a
 | Benchmarks | [BENCHMARK_RESULTS.md](docs/BENCHMARK_RESULTS.md) • [BASELINE_RESULTS_V2.md](docs/BASELINE_RESULTS_V2.md) |
 | Prevalence and cost | [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md) • [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md) |
 | Cross-dataset transfer | [CROSS_DATASET.md](docs/CROSS_DATASET.md) • [CROSS_DATASET_MAPPING.md](docs/CROSS_DATASET_MAPPING.md) |
+| Research candidates | [PORTABLE_TRANSFER.md](docs/PORTABLE_TRANSFER.md) • [CORRECTED_LABEL_SENSITIVITY.md](docs/CORRECTED_LABEL_SENSITIVITY.md) • [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md) |
+| Optional collection | [ZEEK_COLLECTOR.md](docs/ZEEK_COLLECTOR.md) |
 | Features and labels | [PORTABLE_FEATURES.md](docs/PORTABLE_FEATURES.md) • [LABEL_POLICY.md](docs/LABEL_POLICY.md) |
+| Dataset audits | [DISTRINET_CICIDS2017_AUDIT.md](docs/DISTRINET_CICIDS2017_AUDIT.md) • [EXTERNAL_DATASET_AUDIT.md](docs/EXTERNAL_DATASET_AUDIT.md) |
 | Operations | [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md) • [INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) |
 | Security | [SECURITY_AND_COMPLIANCE.md](docs/SECURITY_AND_COMPLIANCE.md) • [PRODUCT_BOUNDARY_AND_THREAT_MODEL.md](docs/PRODUCT_BOUNDARY_AND_THREAT_MODEL.md) |
 | Tenancy and access | [TENANCY_AND_ACCESS_CONTROL.md](docs/TENANCY_AND_ACCESS_CONTROL.md) |
@@ -263,8 +278,10 @@ Model artifacts are local or registry-managed. The serving bundle and registry a
 - **Not a general NIDS.** The frozen scope is volumetric and scanning behavior. Botnet, web attacks, infiltration, zero-day, and arbitrary novel attacks are out of scope.
 - **Live accuracy is unvalidated.** Offline benchmark results do not transfer automatically to live capture, and the live BPF path drops ICMP and IPv6 while the upload path keeps them.
 - **Benchmark prevalence is unrealistic.** At 25.05% positives the model looks strong; at 0.1% prevalence precision falls sharply.
-- **Cross-dataset transfer is negative.** CIC-IDS-2018 and UNSW-NB15 do not reproduce the CIC-IDS-2017 operating point. The frozen threshold emits zero alerts on both.
+- **Cross-dataset transfer is negative.** CIC-IDS-2018 and UNSW-NB15 do not reproduce the CIC-IDS-2017 operating point. The frozen threshold emits zero alerts on both. The P3B ratio-only candidate improves ranking on both datasets, but UNSW-NB15 AP stays essentially at chance and its threshold saturates, so this is not a deployable cross-dataset detector.
 - **The serving model is uncalibrated.** The console deliberately shows no confidence percentage.
+- **Host/window incidents are experimental.** Risk points are a triage heuristic, not a probability, and the in-memory store resets on restart. No labelled host/window evaluation exists.
+- **The optional Zeek parser is not validated detection.** It maps `conn.log` fields honestly but leaves per-packet maxima and exact flag counts unavailable.
 - **Console labels are model predictions, not ground truth.**
 - **No containment.** NetShield does not block hosts, change firewalls, or execute response actions.
 - **Do not use as a production intrusion-prevention system.** Use it for education, experimentation, and controlled lab work.

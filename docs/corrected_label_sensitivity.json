@@ -1,0 +1,479 @@
+{
+  "artifact_version": "corrected-label-sensitivity-v1",
+  "status": "COMPLETE",
+  "method": "strict_frozen_policy_corrected_release_in_distribution",
+  "scope": "In-distribution sensitivity only. Not an external-transfer result and not a deployability claim.",
+  "source": {
+    "directory": "data/CICIDS2017_improved",
+    "files": {
+      "friday.csv": 547557,
+      "monday.csv": 371624,
+      "thursday.csv": 362076,
+      "tuesday.csv": 322078,
+      "wednesday.csv": 496641
+    },
+    "provenance": "docs/DISTRINET_CICIDS2017_AUDIT.json"
+  },
+  "policy": {
+    "description": "Strict frozen policy; case/spelling variants only.",
+    "aliases": {
+      "Portscan": "PortScan",
+      "Botnet": "Bot",
+      "DoS Slowloris": "DoS slowloris",
+      "Web Attack - SQL Injection": "Web Attack - Sql Injection"
+    },
+    "excluded_aliases": {
+      "Infiltration - Portscan": "corrected-release portscan category; not in frozen policy"
+    },
+    "attempted": "excluded",
+    "positive_labels": [
+      "DDoS",
+      "DoS GoldenEye",
+      "DoS Hulk",
+      "DoS Slowhttptest",
+      "DoS slowloris",
+      "PortScan"
+    ],
+    "negative_labels": [
+      "BENIGN"
+    ],
+    "excluded_labels": {
+      "Bot": "excluded; botnet",
+      "FTP-Patator": "excluded; credential attack",
+      "Heartbleed": "excluded; validation-only diagnostic",
+      "Infiltration": "excluded; infiltration",
+      "SSH-Patator": "excluded; credential attack",
+      "Web Attack - Brute Force": "excluded; web attack",
+      "Web Attack - Sql Injection": "excluded; web attack",
+      "Web Attack - XSS": "excluded; web attack"
+    }
+  },
+  "data": {
+    "rows_read": 2099976,
+    "rows_kept": 2008410,
+    "prevalence": 0.21203041211704782,
+    "raw_label_counts": {
+      "BENIGN": 1582566,
+      "Botnet": 736,
+      "Botnet - Attempted": 4067,
+      "DDoS": 95144,
+      "DoS GoldenEye": 7567,
+      "DoS GoldenEye - Attempted": 80,
+      "DoS Hulk": 158468,
+      "DoS Hulk - Attempted": 581,
+      "DoS Slowhttptest": 1740,
+      "DoS Slowhttptest - Attempted": 3368,
+      "DoS Slowloris": 3859,
+      "DoS Slowloris - Attempted": 1847,
+      "FTP-Patator": 3972,
+      "FTP-Patator - Attempted": 12,
+      "Heartbleed": 11,
+      "Infiltration": 36,
+      "Infiltration - Attempted": 45,
+      "Infiltration - Portscan": 71767,
+      "Portscan": 159066,
+      "SSH-Patator": 2961,
+      "SSH-Patator - Attempted": 27,
+      "Web Attack - Brute Force": 73,
+      "Web Attack - Brute Force - Attempted": 1292,
+      "Web Attack - SQL Injection": 13,
+      "Web Attack - SQL Injection - Attempted": 5,
+      "Web Attack - XSS": 18,
+      "Web Attack - XSS - Attempted": 655
+    },
+    "kept_label_counts": {
+      "BENIGN": 1582566,
+      "DDoS": 95144,
+      "DoS GoldenEye": 7567,
+      "DoS Hulk": 158468,
+      "DoS Slowhttptest": 1740,
+      "DoS slowloris": 3859,
+      "PortScan": 159066
+    },
+    "role_counts": {
+      "excluded": 91566,
+      "negative": 1582566,
+      "positive": 425844
+    },
+    "excluded_reasons": {
+      "attempted variant; strict frozen policy excludes": 11979,
+      "corrected-release portscan category; not in frozen policy": 71767,
+      "excluded; botnet": 736,
+      "excluded; credential attack": 6933,
+      "excluded; infiltration": 36,
+      "excluded; validation-only diagnostic": 11,
+      "excluded; web attack": 104
+    },
+    "invalid_input_rows": 0,
+    "portable_schema": {
+      "version": "portable-ratio-v1",
+      "features": [
+        "log_bytes_per_packet",
+        "log_fwd_bytes_per_packet",
+        "log_bwd_bytes_per_packet",
+        "fwd_packet_ratio",
+        "packet_count_balance",
+        "fwd_byte_ratio",
+        "log_down_up_ratio",
+        "packet_size_asymmetry"
+      ],
+      "count": 8,
+      "inputs": [
+        "total_fwd_packets",
+        "total_backward_packets",
+        "total_length_of_fwd_packets",
+        "total_length_of_bwd_packets"
+      ],
+      "sha256": "50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39"
+    }
+  },
+  "training": {
+    "seed": 42,
+    "split_mode": "stratified_group",
+    "fractions": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "partitions": {
+      "train": {
+        "BENIGN": 1110034,
+        "DDoS": 66727,
+        "DoS GoldenEye": 5299,
+        "DoS Hulk": 110950,
+        "DoS Slowhttptest": 1213,
+        "DoS slowloris": 2635,
+        "PortScan": 111329
+      },
+      "validation": {
+        "BENIGN": 236866,
+        "DDoS": 14320,
+        "DoS GoldenEye": 1133,
+        "DoS Hulk": 23763,
+        "DoS Slowhttptest": 261,
+        "DoS slowloris": 613,
+        "PortScan": 23851
+      },
+      "test": {
+        "BENIGN": 235666,
+        "DDoS": 14097,
+        "DoS GoldenEye": 1135,
+        "DoS Hulk": 23755,
+        "DoS Slowhttptest": 266,
+        "DoS slowloris": 611,
+        "PortScan": 23886
+      }
+    },
+    "coverage_gate": {
+      "families": {
+        "BENIGN": {
+          "train": 1110034,
+          "validation": 236866,
+          "test": 235666,
+          "required": false,
+          "observed": true,
+          "pass": true
+        },
+        "DDoS": {
+          "train": 66727,
+          "validation": 14320,
+          "test": 14097,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS GoldenEye": {
+          "train": 5299,
+          "validation": 1133,
+          "test": 1135,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Hulk": {
+          "train": 110950,
+          "validation": 23763,
+          "test": 23755,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Slowhttptest": {
+          "train": 1213,
+          "validation": 261,
+          "test": 266,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS slowloris": {
+          "train": 2635,
+          "validation": 613,
+          "test": 611,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "PortScan": {
+          "train": 111329,
+          "validation": 23851,
+          "test": 23886,
+          "required": true,
+          "observed": true,
+          "pass": true
+        }
+      },
+      "missing_required": [],
+      "train_validation_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "validation_test_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "overall_pass": true,
+      "reason": "Every required positive family is present in train, validation, and test, and validation/test families overlap."
+    },
+    "split": {
+      "mixed_groups_dropped": 0,
+      "mixed_rows_dropped": 0,
+      "per_family": {
+        "BENIGN": {
+          "groups": 804550,
+          "train": 563185,
+          "validation": 120682,
+          "test": 120683
+        },
+        "DDoS": {
+          "groups": 45160,
+          "train": 31612,
+          "validation": 6774,
+          "test": 6774
+        },
+        "DoS GoldenEye": {
+          "groups": 7494,
+          "train": 5246,
+          "validation": 1124,
+          "test": 1124
+        },
+        "DoS Hulk": {
+          "groups": 14108,
+          "train": 9876,
+          "validation": 2116,
+          "test": 2116
+        },
+        "DoS Slowhttptest": {
+          "groups": 1406,
+          "train": 984,
+          "validation": 211,
+          "test": 211
+        },
+        "DoS slowloris": {
+          "groups": 2093,
+          "train": 1465,
+          "validation": 314,
+          "test": 314
+        },
+        "PortScan": {
+          "groups": 158611,
+          "train": 111028,
+          "validation": 23792,
+          "test": 23791
+        }
+      },
+      "fractions": {
+        "train": 0.7,
+        "validation": 0.15,
+        "test": 0.15
+      }
+    },
+    "model": "RandomForestClassifier(n_estimators=200, seed=42)",
+    "test_prevalence": 0.21291447350842974
+  },
+  "thresholds": {
+    "10_per_10k": {
+      "budget_per_10k": 10,
+      "n": 300807,
+      "k": 301,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    },
+    "100_per_10k": {
+      "budget_per_10k": 100,
+      "n": 300807,
+      "k": 3009,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    }
+  },
+  "in_distribution": [
+    {
+      "partition": "train",
+      "rows": 1408187,
+      "positives": 298153,
+      "roc_auc": 0.9988741350648837,
+      "average_precision": 0.991864139378096
+    },
+    {
+      "partition": "validation",
+      "rows": 300807,
+      "positives": 63941,
+      "roc_auc": 0.9987496448855671,
+      "average_precision": 0.991184675767455
+    },
+    {
+      "partition": "test",
+      "rows": 299416,
+      "positives": 63750,
+      "roc_auc": 0.9988225149151765,
+      "average_precision": 0.9915776204904635
+    }
+  ],
+  "results": {
+    "10_per_10k": {
+      "threshold": 1.0,
+      "comparison": ">",
+      "rows": 299416,
+      "prevalence": 0.21291447350842974,
+      "tp": 0,
+      "fp": 0,
+      "tn": 235666,
+      "fn": 63750,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "ppv": null,
+      "ppv_at_1_percent_prevalence": null,
+      "alert_rate": 0.0,
+      "per_family": {
+        "DDoS": {
+          "rows": 14097,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS GoldenEye": {
+          "rows": 1135,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS Hulk": {
+          "rows": 23755,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS Slowhttptest": {
+          "rows": 266,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS slowloris": {
+          "rows": 611,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "PortScan": {
+          "rows": 23886,
+          "detected": 0,
+          "recall": 0.0
+        }
+      }
+    },
+    "100_per_10k": {
+      "threshold": 1.0,
+      "comparison": ">",
+      "rows": 299416,
+      "prevalence": 0.21291447350842974,
+      "tp": 0,
+      "fp": 0,
+      "tn": 235666,
+      "fn": 63750,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "ppv": null,
+      "ppv_at_1_percent_prevalence": null,
+      "alert_rate": 0.0,
+      "per_family": {
+        "DDoS": {
+          "rows": 14097,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS GoldenEye": {
+          "rows": 1135,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS Hulk": {
+          "rows": 23755,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS Slowhttptest": {
+          "rows": 266,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DoS slowloris": {
+          "rows": 611,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "PortScan": {
+          "rows": 23886,
+          "detected": 0,
+          "recall": 0.0
+        }
+      }
+    }
+  },
+  "baseline_original_kaggle": {
+    "source": "docs/portable_transfer_results.json",
+    "model_sha256": "cc7b67733a4c5d9db12414ebc3a1c30496972c12493ba03086330341c5d3a618",
+    "test": {
+      "partition": "test",
+      "rows": 423276,
+      "roc_auc": 0.985945149898553,
+      "average_precision": 0.9297336552610503
+    },
+    "test_prevalence": 0.19094160783980194,
+    "thresholds": {
+      "10_per_10k": {
+        "budget_per_10k": 10,
+        "n": 423480,
+        "k": 424,
+        "threshold": 1.0,
+        "comparison": ">",
+        "expected_alerts": 0,
+        "expected_alerts_per_10k": 0.0
+      },
+      "100_per_10k": {
+        "budget_per_10k": 100,
+        "n": 423480,
+        "k": 4235,
+        "threshold": 1.0,
+        "comparison": ">",
+        "expected_alerts": 0,
+        "expected_alerts_per_10k": 0.0
+      }
+    }
+  },
+  "interpretation": "The corrected release kept 2,008,410 of 2,099,976 rows under the strict policy (21.2030% positive). On the grouped test partition the portable model reached ROC-AUC 0.9988 and average precision 0.9916. The original-Kaggle P3B arm reached ROC-AUC 0.9859 and average precision 0.9297 under the same split algorithm; the corrected-arm deltas are +0.0129 and +0.0618. Test prevalence was 19.0942% in the original arm and 21.2914% in the corrected arm; average precision is prevalence-sensitive, so the AP comparison needs that context. The validation-selected threshold saturated at 1.000000 for 10_per_10k, 100_per_10k; strict test alerts are therefore zero by construction, not a measured false-positive rate. Because the corrected release is also a CICFlowMeter re-extraction, a difference cannot be attributed to labels alone. This is a sensitivity check, not a replacement for the original result and not external evidence.",
+  "limits": [
+    "The corrected release is both a relabelling and a re-extraction with a fixed CICFlowMeter. A difference from the original Kaggle arm cannot be attributed to labels alone.",
+    "The strict policy excludes every `- Attempted` row. That is a policy choice, not evidence that attempted attacks are harmless.",
+    "This is an in-distribution sensitivity under the P3B stratified-group protocol. It does not report external transfer and does not establish deployability.",
+    "The serving artifact, the frozen Tier A schema, and every existing claim are unchanged."
+  ]
+}

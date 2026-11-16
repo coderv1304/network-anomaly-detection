@@ -8,6 +8,12 @@ This report evaluates the frozen Tier A-only artifact. It does not
 evaluate the 80-feature serving model, does not change its threshold, and
 does not unblock P2B.
 
+> **Follow-up:** [PORTABLE_TRANSFER.md](PORTABLE_TRANSFER.md) reports P3B, a
+> separate 8-feature ratio-only candidate trained on the same CIC-IDS-2017
+> export and scored on the same external streams. It improves ranking on both
+> datasets but remains weak in absolute terms; it is not a replacement for this
+> result or a deployable detector.
+
 ## 1. Freeze
 
 | Item | Value |

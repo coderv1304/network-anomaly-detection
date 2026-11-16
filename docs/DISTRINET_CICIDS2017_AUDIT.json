@@ -1,0 +1,270 @@
+{
+  "artifact_version": "distrinet-cicids2017-audit-v1",
+  "source": {
+    "url": "https://intrusion-detection.distrinet-research.be/CNS2022/Datasets/CICIDS2017_improved.zip",
+    "citation": "Liu, Engelen, Lynar, Essam, Joosen (2022), Error Prevalence in NIDS Datasets: A Case Study on CIC-IDS-2017 and CSE-CIC-IDS-2018, IEEE CNS 2022.",
+    "licence_note": "The DistriNet page requires citation. The Kaggle mirror (dhoogla/distrinetcicids2017) lists CC BY-NC-SA 4.0. Verify the current licence before redistributing the CSVs; this repository does not version them.",
+    "zip_path": "data/CICIDS2017_improved.zip",
+    "zip_sha256": "97fdb91d339e2d8cf5627f981b831e5e7e400b981c58181c451a38fd03c48883"
+  },
+  "directory": "data/CICIDS2017_improved",
+  "files": {
+    "friday.csv": {
+      "bytes": 285188226,
+      "sha256": "ebd499e6f23bd59f9cb81bec28178491b02b925fa5640a24215c9437d79482d0",
+      "rows": 547557
+    },
+    "monday.csv": {
+      "bytes": 207875155,
+      "sha256": "51fe5dc962626efb4ae70dce0303072fb780da0932822b651202ee9c2fbc1aff",
+      "rows": 371624
+    },
+    "thursday.csv": {
+      "bytes": 189519159,
+      "sha256": "78a4d11eaf473d099e30e71ddb01e0f38218e844c0a9cdd36602145d674af482",
+      "rows": 362076
+    },
+    "tuesday.csv": {
+      "bytes": 178397720,
+      "sha256": "e2a0a5b631dfc6b455cc9f9a88b944110637d70a7f74171473925f76f38b6b0c",
+      "rows": 322078
+    },
+    "wednesday.csv": {
+      "bytes": 291290505,
+      "sha256": "bf46c5f3c792e8817381f724511229569606918eaf07ac986d7a2592b6341bc2",
+      "rows": 496641
+    }
+  },
+  "rows": 2099976,
+  "sample_limit_per_file": null,
+  "columns": [
+    "id",
+    "Flow ID",
+    "Src IP",
+    "Src Port",
+    "Dst IP",
+    "Dst Port",
+    "Protocol",
+    "Timestamp",
+    "Flow Duration",
+    "Total Fwd Packet",
+    "Total Bwd packets",
+    "Total Length of Fwd Packet",
+    "Total Length of Bwd Packet",
+    "Fwd Packet Length Max",
+    "Fwd Packet Length Min",
+    "Fwd Packet Length Mean",
+    "Fwd Packet Length Std",
+    "Bwd Packet Length Max",
+    "Bwd Packet Length Min",
+    "Bwd Packet Length Mean",
+    "Bwd Packet Length Std",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "Flow IAT Mean",
+    "Flow IAT Std",
+    "Flow IAT Max",
+    "Flow IAT Min",
+    "Fwd IAT Total",
+    "Fwd IAT Mean",
+    "Fwd IAT Std",
+    "Fwd IAT Max",
+    "Fwd IAT Min",
+    "Bwd IAT Total",
+    "Bwd IAT Mean",
+    "Bwd IAT Std",
+    "Bwd IAT Max",
+    "Bwd IAT Min",
+    "Fwd PSH Flags",
+    "Bwd PSH Flags",
+    "Fwd URG Flags",
+    "Bwd URG Flags",
+    "Fwd RST Flags",
+    "Bwd RST Flags",
+    "Fwd Header Length",
+    "Bwd Header Length",
+    "Fwd Packets/s",
+    "Bwd Packets/s",
+    "Packet Length Min",
+    "Packet Length Max",
+    "Packet Length Mean",
+    "Packet Length Std",
+    "Packet Length Variance",
+    "FIN Flag Count",
+    "SYN Flag Count",
+    "RST Flag Count",
+    "PSH Flag Count",
+    "ACK Flag Count",
+    "URG Flag Count",
+    "CWR Flag Count",
+    "ECE Flag Count",
+    "Down/Up Ratio",
+    "Average Packet Size",
+    "Fwd Segment Size Avg",
+    "Bwd Segment Size Avg",
+    "Fwd Bytes/Bulk Avg",
+    "Fwd Packet/Bulk Avg",
+    "Fwd Bulk Rate Avg",
+    "Bwd Bytes/Bulk Avg",
+    "Bwd Packet/Bulk Avg",
+    "Bwd Bulk Rate Avg",
+    "Subflow Fwd Packets",
+    "Subflow Fwd Bytes",
+    "Subflow Bwd Packets",
+    "Subflow Bwd Bytes",
+    "FWD Init Win Bytes",
+    "Bwd Init Win Bytes",
+    "Fwd Act Data Pkts",
+    "Fwd Seg Size Min",
+    "Active Mean",
+    "Active Std",
+    "Active Max",
+    "Active Min",
+    "Idle Mean",
+    "Idle Std",
+    "Idle Max",
+    "Idle Min",
+    "ICMP Code",
+    "ICMP Type",
+    "Total TCP Flow Time",
+    "Label",
+    "Attempted Category"
+  ],
+  "column_count": 91,
+  "label_counts": {
+    "BENIGN": 1582566,
+    "Botnet": 736,
+    "Botnet - Attempted": 4067,
+    "DDoS": 95144,
+    "DoS GoldenEye": 7567,
+    "DoS GoldenEye - Attempted": 80,
+    "DoS Hulk": 158468,
+    "DoS Hulk - Attempted": 581,
+    "DoS Slowhttptest": 1740,
+    "DoS Slowhttptest - Attempted": 3368,
+    "DoS Slowloris": 3859,
+    "DoS Slowloris - Attempted": 1847,
+    "FTP-Patator": 3972,
+    "FTP-Patator - Attempted": 12,
+    "Heartbleed": 11,
+    "Infiltration": 36,
+    "Infiltration - Attempted": 45,
+    "Infiltration - Portscan": 71767,
+    "Portscan": 159066,
+    "SSH-Patator": 2961,
+    "SSH-Patator - Attempted": 27,
+    "Web Attack - Brute Force": 73,
+    "Web Attack - Brute Force - Attempted": 1292,
+    "Web Attack - SQL Injection": 13,
+    "Web Attack - SQL Injection - Attempted": 5,
+    "Web Attack - XSS": 18,
+    "Web Attack - XSS - Attempted": 655
+  },
+  "attempted_category_counts": {
+    "-1": 2087997,
+    "0": 4845,
+    "1": 4067,
+    "2": 23,
+    "3": 27,
+    "4": 75,
+    "5": 138,
+    "6": 2804
+  },
+  "missing_values": {
+    "Flow Duration": 0,
+    "Total Fwd Packet": 0,
+    "Total Bwd packets": 0,
+    "Total Length of Fwd Packet": 0,
+    "Total Length of Bwd Packet": 0,
+    "Flow Packets/s": 0,
+    "Flow Bytes/s": 0,
+    "Packet Length Mean": 0,
+    "Packet Length Max": 0,
+    "SYN Flag Count": 0,
+    "FIN Flag Count": 0,
+    "RST Flag Count": 0
+  },
+  "tier_a": {
+    "available": 12,
+    "total": 12,
+    "mapping": {
+      "flow_duration": {
+        "source_column": "Flow Duration",
+        "present": true,
+        "note": ""
+      },
+      "total_fwd_packets": {
+        "source_column": "Total Fwd Packet",
+        "present": true,
+        "note": ""
+      },
+      "total_backward_packets": {
+        "source_column": "Total Bwd packets",
+        "present": true,
+        "note": ""
+      },
+      "total_length_of_fwd_packets": {
+        "source_column": "Total Length of Fwd Packet",
+        "present": true,
+        "note": ""
+      },
+      "total_length_of_bwd_packets": {
+        "source_column": "Total Length of Bwd Packet",
+        "present": true,
+        "note": ""
+      },
+      "flow_packets_s": {
+        "source_column": "Flow Packets/s",
+        "present": true,
+        "note": ""
+      },
+      "flow_bytes_s": {
+        "source_column": "Flow Bytes/s",
+        "present": true,
+        "note": ""
+      },
+      "packet_length_mean": {
+        "source_column": "Packet Length Mean",
+        "present": true,
+        "note": ""
+      },
+      "packet_length_max": {
+        "source_column": "Packet Length Max",
+        "present": true,
+        "note": ""
+      },
+      "syn_flag_count": {
+        "source_column": "SYN Flag Count",
+        "present": true,
+        "note": ""
+      },
+      "fin_flag_count": {
+        "source_column": "FIN Flag Count",
+        "present": true,
+        "note": ""
+      },
+      "rst_flag_count": {
+        "source_column": "RST Flag Count",
+        "present": true,
+        "note": ""
+      }
+    }
+  },
+  "portable_inputs": {
+    "available": 4,
+    "total": 4,
+    "mapping": {
+      "total_fwd_packets": "Total Fwd Packet",
+      "total_backward_packets": "Total Bwd packets",
+      "total_length_of_fwd_packets": "Total Length of Fwd Packet",
+      "total_length_of_bwd_packets": "Total Length of Bwd Packet"
+    }
+  },
+  "notes": [
+    "The corrected release uses singular 'Total Fwd Packet'/'Total Bwd packets' names, not the original Kaggle names.",
+    "Label strings differ in case and spelling from the frozen POSITIVE_LABELS set; they require an explicit mapping before any supervised use.",
+    "Attempted Category is a corrected-release column and is not part of the original label policy.",
+    "This audit does not train, score, or tune a model.",
+    "The release is consumed by scripts/corrected_label_sensitivity.py under the strict frozen policy; that is an in-distribution sensitivity (see docs/CORRECTED_LABEL_SENSITIVITY.md), not external validation."
+  ]
+}

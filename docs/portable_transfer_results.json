@@ -1,0 +1,757 @@
+{
+  "artifact_version": "portable-ratio-transfer-v1",
+  "status": "COMPLETE",
+  "method": "portable_ratio_cic2017_to_external_transfer",
+  "scope": "Flow-based detector for volumetric and scanning behavior. Not a general NIDS.",
+  "schema": {
+    "version": "portable-ratio-v1",
+    "features": [
+      "log_bytes_per_packet",
+      "log_fwd_bytes_per_packet",
+      "log_bwd_bytes_per_packet",
+      "fwd_packet_ratio",
+      "packet_count_balance",
+      "fwd_byte_ratio",
+      "log_down_up_ratio",
+      "packet_size_asymmetry"
+    ],
+    "count": 8,
+    "inputs": [
+      "total_fwd_packets",
+      "total_backward_packets",
+      "total_length_of_fwd_packets",
+      "total_length_of_bwd_packets"
+    ],
+    "sha256": "50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39"
+  },
+  "model_sha256": "cc7b67733a4c5d9db12414ebc3a1c30496972c12493ba03086330341c5d3a618",
+  "model_path": "models/model_bundle_rf_portable_ratio_seed42.pkl",
+  "serving_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+  "serving_untouched": true,
+  "training": {
+    "split_mode": "stratified_group",
+    "seed": 42,
+    "coverage_gate": {
+      "families": {
+        "BENIGN": {
+          "train": 1587832,
+          "validation": 342608,
+          "test": 342455,
+          "required": false,
+          "observed": true,
+          "pass": true
+        },
+        "DDoS": {
+          "train": 89633,
+          "validation": 19246,
+          "test": 19148,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS GoldenEye": {
+          "train": 7201,
+          "validation": 1553,
+          "test": 1539,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Hulk": {
+          "train": 161855,
+          "validation": 34579,
+          "test": 34638,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Slowhttptest": {
+          "train": 3851,
+          "validation": 820,
+          "test": 828,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS slowloris": {
+          "train": 4131,
+          "validation": 838,
+          "test": 827,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "PortScan": {
+          "train": 111253,
+          "validation": 23836,
+          "test": 23841,
+          "required": true,
+          "observed": true,
+          "pass": true
+        }
+      },
+      "missing_required": [],
+      "train_validation_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "validation_test_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "overall_pass": true,
+      "reason": "Every required positive family is present in train, validation, and test, and validation/test families overlap."
+    },
+    "partitions": {
+      "train": {
+        "BENIGN": 1587832,
+        "DDoS": 89633,
+        "DoS GoldenEye": 7201,
+        "DoS Hulk": 161855,
+        "DoS Slowhttptest": 3851,
+        "DoS slowloris": 4131,
+        "PortScan": 111253
+      },
+      "validation": {
+        "BENIGN": 342608,
+        "DDoS": 19246,
+        "DoS GoldenEye": 1553,
+        "DoS Hulk": 34579,
+        "DoS Slowhttptest": 820,
+        "DoS slowloris": 838,
+        "PortScan": 23836
+      },
+      "test": {
+        "BENIGN": 342455,
+        "DDoS": 19148,
+        "DoS GoldenEye": 1539,
+        "DoS Hulk": 34638,
+        "DoS Slowhttptest": 828,
+        "DoS slowloris": 827,
+        "PortScan": 23841
+      }
+    },
+    "not_p2b": true
+  },
+  "thresholds": {
+    "10_per_10k": {
+      "budget_per_10k": 10,
+      "n": 423480,
+      "k": 424,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    },
+    "100_per_10k": {
+      "budget_per_10k": 100,
+      "n": 423480,
+      "k": 4235,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    }
+  },
+  "in_distribution": [
+    {
+      "partition": "train",
+      "rows": 1965756,
+      "roc_auc": 0.9858606064687512,
+      "average_precision": 0.929876305335544
+    },
+    {
+      "partition": "validation",
+      "rows": 423480,
+      "roc_auc": 0.9859139965302812,
+      "average_precision": 0.9295927928490563
+    },
+    {
+      "partition": "test",
+      "rows": 423276,
+      "roc_auc": 0.985945149898553,
+      "average_precision": 0.9297336552610503
+    }
+  ],
+  "datasets": [
+    {
+      "name": "cic_ids_2018",
+      "files": [
+        "02-14-2018.csv",
+        "02-15-2018.csv",
+        "02-16-2018.csv",
+        "02-20-2018.csv",
+        "02-21-2018.csv",
+        "02-22-2018.csv",
+        "02-23-2018.csv",
+        "02-28-2018.csv",
+        "03-01-2018.csv",
+        "03-02-2018.csv"
+      ],
+      "raw_rows": 16233002,
+      "header_rows": 59,
+      "unique_rows": 11717527,
+      "duplicate_rows": 3685414,
+      "prevalence": 0.08597829559086999,
+      "results": {
+        "10_per_10k": {
+          "threshold": 1.0,
+          "comparison": ">",
+          "rows": 11717527,
+          "prevalence": 0.08597829559086999,
+          "tp": 0,
+          "fp": 0,
+          "tn": 10710074,
+          "fn": 1007453,
+          "recall": 0.0,
+          "fpr": 0.0,
+          "ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "alert_rate": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "detected": 0,
+              "recall": 0.0
+            },
+            "DDoS": {
+              "rows": 775955,
+              "detected": 0,
+              "recall": 0.0
+            }
+          }
+        },
+        "100_per_10k": {
+          "threshold": 1.0,
+          "comparison": ">",
+          "rows": 11717527,
+          "prevalence": 0.08597829559086999,
+          "tp": 0,
+          "fp": 0,
+          "tn": 10710074,
+          "fn": 1007453,
+          "recall": 0.0,
+          "fpr": 0.0,
+          "ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "alert_rate": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "detected": 0,
+              "recall": 0.0
+            },
+            "DDoS": {
+              "rows": 775955,
+              "detected": 0,
+              "recall": 0.0
+            }
+          }
+        }
+      },
+      "tie_aware": {
+        "10_per_10k": {
+          "budget_per_10k": 10,
+          "threshold": 1.0,
+          "k": 11718,
+          "strict_alerts": 0,
+          "tie_count": 2854,
+          "tie_positive_rate": 0.9036440084092502,
+          "selected_from_ties": 2854,
+          "expected_alerts": 2854.0,
+          "expected_tp": 2579.0,
+          "expected_fp": 274.99999999999994,
+          "expected_recall": 0.0025599209094617813,
+          "expected_fpr": 2.5676760029856e-05,
+          "expected_ppv": 0.9036440084092502,
+          "ppv_at_1_percent_prevalence": 0.5017563648558421,
+          "max_score": 1.0,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "expected_detected": 2579.0,
+              "expected_recall": 0.01114048501498933
+            },
+            "DDoS": {
+              "rows": 775955,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            }
+          }
+        },
+        "100_per_10k": {
+          "budget_per_10k": 100,
+          "threshold": 1.0,
+          "k": 117176,
+          "strict_alerts": 0,
+          "tie_count": 2854,
+          "tie_positive_rate": 0.9036440084092502,
+          "selected_from_ties": 2854,
+          "expected_alerts": 2854.0,
+          "expected_tp": 2579.0,
+          "expected_fp": 274.99999999999994,
+          "expected_recall": 0.0025599209094617813,
+          "expected_fpr": 2.5676760029856e-05,
+          "expected_ppv": 0.9036440084092502,
+          "ppv_at_1_percent_prevalence": 0.5017563648558421,
+          "max_score": 1.0,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "expected_detected": 2579.0,
+              "expected_recall": 0.01114048501498933
+            },
+            "DDoS": {
+              "rows": 775955,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            }
+          }
+        }
+      },
+      "rank_budget": {
+        "10_per_10k": {
+          "budget_per_10k": 10,
+          "threshold": 0.45061178153788906,
+          "k": 11718,
+          "strict_alerts": 8623,
+          "tie_count": 2000162,
+          "tie_positive_rate": 0.24542362068672438,
+          "selected_from_ties": 3095,
+          "expected_alerts": 11718.0,
+          "expected_tp": 4856.586106025412,
+          "expected_fp": 6861.413893974588,
+          "expected_recall": 0.00482065774386042,
+          "expected_fpr": 0.0006406504655312921,
+          "expected_ppv": 0.41445520618069737,
+          "ppv_at_1_percent_prevalence": 0.07063746708685696,
+          "max_score": 1.0,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "expected_detected": 4360.824285232896,
+              "expected_recall": 0.018837416674152244
+            },
+            "DDoS": {
+              "rows": 775955,
+              "expected_detected": 495.76182079251583,
+              "expected_recall": 0.0006389053756886879
+            }
+          }
+        },
+        "100_per_10k": {
+          "budget_per_10k": 100,
+          "threshold": 0.45061178153788906,
+          "k": 117176,
+          "strict_alerts": 8623,
+          "tie_count": 2000162,
+          "tie_positive_rate": 0.24542362068672438,
+          "selected_from_ties": 108553,
+          "expected_alerts": 117176.0,
+          "expected_tp": 30738.47029640599,
+          "expected_fp": 86437.529703594,
+          "expected_recall": 0.0305110712821402,
+          "expected_fpr": 0.008070675300991759,
+          "expected_ppv": 0.2623273562538915,
+          "ppv_at_1_percent_prevalence": 0.0367821335069265,
+          "max_score": 1.0,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 231498,
+              "expected_detected": 13350.285180900348,
+              "expected_recall": 0.05766911671332084
+            },
+            "DDoS": {
+              "rows": 775955,
+              "expected_detected": 17388.185115505643,
+              "expected_recall": 0.02240875452249891
+            }
+          }
+        }
+      },
+      "ranking": {
+        "roc_auc": 0.778519939771153,
+        "average_precision": 0.22708816073707183
+      },
+      "per_family": {
+        "DoS": {
+          "rows": 231498,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "DDoS": {
+          "rows": 775955,
+          "detected": 0,
+          "recall": 0.0
+        }
+      },
+      "rank_budget_per_family": {
+        "DoS": {
+          "rows": 231498,
+          "expected_detected": 13350.285180900348,
+          "expected_recall": 0.05766911671332084
+        },
+        "DDoS": {
+          "rows": 775955,
+          "expected_detected": 17388.185115505643,
+          "expected_recall": 0.02240875452249891
+        }
+      },
+      "tie_diagnostics": {
+        "threshold": 1.0,
+        "tie_count": 2854,
+        "tie_positive_rate": 0.9036440084092502,
+        "max_score": 1.0,
+        "strict_alerts_at_100_per_10k": 0
+      },
+      "comparability": "Full 8/8 portable inputs; no imputation.",
+      "shift": {
+        "log_bytes_per_packet": {
+          "psi": 0.8518324910877036,
+          "ks": 0.13177999999999998,
+          "status": "available"
+        },
+        "log_fwd_bytes_per_packet": {
+          "psi": 0.664100853032041,
+          "ks": 0.1892999999999999,
+          "status": "available"
+        },
+        "log_bwd_bytes_per_packet": {
+          "psi": 0.8085013762800721,
+          "ks": 0.11714000000000002,
+          "status": "available"
+        },
+        "fwd_packet_ratio": {
+          "psi": 0.07158348303977913,
+          "ks": 0.19996000000000003,
+          "status": "available"
+        },
+        "packet_count_balance": {
+          "psi": 0.14474993852080495,
+          "ks": 0.23189500000000002,
+          "status": "available"
+        },
+        "fwd_byte_ratio": {
+          "psi": 0.19552289920102364,
+          "ks": 0.09590500000000002,
+          "status": "available"
+        },
+        "log_down_up_ratio": {
+          "psi": 0.15486874645862655,
+          "ks": 0.18231999999999998,
+          "status": "available"
+        },
+        "packet_size_asymmetry": {
+          "psi": 0.32517047904293833,
+          "ks": 0.25956999999999997,
+          "status": "available"
+        }
+      }
+    },
+    {
+      "name": "unsw_nb15",
+      "files": [
+        "unsw_test_official.csv"
+      ],
+      "raw_rows": 82332,
+      "header_rows": 0,
+      "unique_rows": 38375,
+      "duplicate_rows": 6210,
+      "prevalence": 0.1086384364820847,
+      "results": {
+        "10_per_10k": {
+          "threshold": 1.0,
+          "comparison": ">",
+          "rows": 38375,
+          "prevalence": 0.1086384364820847,
+          "tp": 0,
+          "fp": 0,
+          "tn": 34206,
+          "fn": 4169,
+          "recall": 0.0,
+          "fpr": 0.0,
+          "ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "alert_rate": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "detected": 0,
+              "recall": 0.0
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "detected": 0,
+              "recall": 0.0
+            }
+          }
+        },
+        "100_per_10k": {
+          "threshold": 1.0,
+          "comparison": ">",
+          "rows": 38375,
+          "prevalence": 0.1086384364820847,
+          "tp": 0,
+          "fp": 0,
+          "tn": 34206,
+          "fn": 4169,
+          "recall": 0.0,
+          "fpr": 0.0,
+          "ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "alert_rate": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "detected": 0,
+              "recall": 0.0
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "detected": 0,
+              "recall": 0.0
+            }
+          }
+        }
+      },
+      "tie_aware": {
+        "10_per_10k": {
+          "budget_per_10k": 10,
+          "threshold": 1.0,
+          "k": 39,
+          "strict_alerts": 0,
+          "tie_count": 0,
+          "tie_positive_rate": 0.0,
+          "selected_from_ties": 0,
+          "expected_alerts": 0.0,
+          "expected_tp": 0.0,
+          "expected_fp": 0.0,
+          "expected_recall": 0.0,
+          "expected_fpr": 0.0,
+          "expected_ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "max_score": 0.995,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            }
+          }
+        },
+        "100_per_10k": {
+          "budget_per_10k": 100,
+          "threshold": 1.0,
+          "k": 384,
+          "strict_alerts": 0,
+          "tie_count": 0,
+          "tie_positive_rate": 0.0,
+          "selected_from_ties": 0,
+          "expected_alerts": 0.0,
+          "expected_tp": 0.0,
+          "expected_fp": 0.0,
+          "expected_recall": 0.0,
+          "expected_fpr": 0.0,
+          "expected_ppv": null,
+          "ppv_at_1_percent_prevalence": null,
+          "max_score": 0.995,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            }
+          }
+        }
+      },
+      "rank_budget": {
+        "10_per_10k": {
+          "budget_per_10k": 10,
+          "threshold": 0.11499999999999999,
+          "k": 39,
+          "strict_alerts": 36,
+          "tie_count": 9,
+          "tie_positive_rate": 0.0,
+          "selected_from_ties": 3,
+          "expected_alerts": 39.0,
+          "expected_tp": 9.0,
+          "expected_fp": 30.0,
+          "expected_recall": 0.0021587910769968817,
+          "expected_fpr": 0.0008770391159445711,
+          "expected_ppv": 0.23076923076923078,
+          "ppv_at_1_percent_prevalence": 0.02425998740404092,
+          "max_score": 0.995,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "expected_detected": 9.0,
+              "expected_recall": 0.005411906193625977
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "expected_detected": 0.0,
+              "expected_recall": 0.0
+            }
+          }
+        },
+        "100_per_10k": {
+          "budget_per_10k": 100,
+          "threshold": 0.05500000000000005,
+          "k": 384,
+          "strict_alerts": 365,
+          "tie_count": 321,
+          "tie_positive_rate": 0.01557632398753894,
+          "selected_from_ties": 19,
+          "expected_alerts": 384.0,
+          "expected_tp": 40.29595015576324,
+          "expected_fp": 343.70404984423675,
+          "expected_recall": 0.009665615292819198,
+          "expected_fpr": 0.010048063200731941,
+          "expected_ppv": 0.1049373701973001,
+          "ppv_at_1_percent_prevalence": 0.00962304417554573,
+          "max_score": 0.995,
+          "min_score": 0.0,
+          "per_family": {
+            "DoS": {
+              "rows": 1663,
+              "expected_detected": 39.29595015576324,
+              "expected_recall": 0.023629555114710304
+            },
+            "Reconnaissance": {
+              "rows": 2506,
+              "expected_detected": 1.0,
+              "expected_recall": 0.0003990422984836393
+            }
+          }
+        }
+      },
+      "ranking": {
+        "roc_auc": 0.4955731122793653,
+        "average_precision": 0.10875903360315264
+      },
+      "per_family": {
+        "DoS": {
+          "rows": 1663,
+          "detected": 0,
+          "recall": 0.0
+        },
+        "Reconnaissance": {
+          "rows": 2506,
+          "detected": 0,
+          "recall": 0.0
+        }
+      },
+      "rank_budget_per_family": {
+        "DoS": {
+          "rows": 1663,
+          "expected_detected": 39.29595015576324,
+          "expected_recall": 0.023629555114710304
+        },
+        "Reconnaissance": {
+          "rows": 2506,
+          "expected_detected": 1.0,
+          "expected_recall": 0.0003990422984836393
+        }
+      },
+      "tie_diagnostics": {
+        "threshold": 1.0,
+        "tie_count": 0,
+        "tie_positive_rate": 0.0,
+        "max_score": 0.995,
+        "strict_alerts_at_100_per_10k": 0
+      },
+      "comparability": "Full portable schema; UNSW-NB15 lacks max-packet and flag columns, but the ratio-only schema does not use them.",
+      "shift": {
+        "log_bytes_per_packet": {
+          "psi": 3.522839562415771,
+          "ks": 0.3919018729641694,
+          "status": "available"
+        },
+        "log_fwd_bytes_per_packet": {
+          "psi": 6.352985745172511,
+          "ks": 0.7031588273615635,
+          "status": "available"
+        },
+        "log_bwd_bytes_per_packet": {
+          "psi": 1.6837692712691699,
+          "ks": 0.2554162377850163,
+          "status": "available"
+        },
+        "fwd_packet_ratio": {
+          "psi": 0.513408742049697,
+          "ks": 0.22724587947882735,
+          "status": "available"
+        },
+        "packet_count_balance": {
+          "psi": 0.2643516248206331,
+          "ks": 0.34456125407166127,
+          "status": "available"
+        },
+        "fwd_byte_ratio": {
+          "psi": 1.8631872691198055,
+          "ks": 0.5020754885993486,
+          "status": "available"
+        },
+        "log_down_up_ratio": {
+          "psi": 1.4282873236452234,
+          "ks": 0.3765354885993486,
+          "status": "available"
+        },
+        "packet_size_asymmetry": {
+          "psi": 0.36188445106209555,
+          "ks": 0.17781017915309447,
+          "status": "available"
+        }
+      }
+    }
+  ],
+  "baseline": {
+    "cic_ids_2018": {
+      "roc_auc": 0.7241421481335659,
+      "average_precision": 0.20480697331358655,
+      "recall_at_100_per_10k": 0.02336602707996211,
+      "ppv_at_100_per_10k": 0.20089586672858833
+    },
+    "unsw_nb15": {
+      "roc_auc": 0.37925028603873084,
+      "average_precision": 0.10282253476148373,
+      "recall_at_100_per_10k": 0.0072605494769083165,
+      "ppv_at_100_per_10k": 0.07882612179487179
+    }
+  },
+  "sample_limit_per_file": null,
+  "interpretation": "cic_ids_2018: average precision moved from 0.2048 to 0.2271 (+0.0223); chance-level AP on this stream is its prevalence (8.5978%). ROC-AUC moved from 0.7241 to 0.7785 (+0.0544). unsw_nb15: average precision moved from 0.1028 to 0.1088 (+0.0059); chance-level AP on this stream is its prevalence (10.8638%). ROC-AUC moved from 0.3793 to 0.4956 (+0.1163). The ratio-only schema improved both average precision and ROC-AUC on every external dataset in this run. That is evidence that raw-scale features contributed to the P3 negative transfer, not proof that the detector is production-ready. The weakest absolute result is unsw_nb15: average precision 0.1088 versus prevalence 10.8638% (+0.0001). A small gap above chance is not a deployable operating point. The validation-selected threshold saturated at 1.000000, so the strict-threshold external alert count is zero by construction and is not a measured false-positive rate.",
+  "limits": [
+    "This run trains on the original CIC-IDS-2017 Kaggle export. The DistriNet-corrected CIC-IDS-2017 CSVs are used by a separate strict-policy in-distribution sensitivity (docs/CORRECTED_LABEL_SENSITIVITY.md), not by this external-transfer artifact.",
+    "The portable transform removes raw magnitudes, not every dataset artifact. Flow timeout, packet capture point, and label policy still differ.",
+    "Average precision is prevalence-sensitive. The P3 baseline and this candidate are comparable only when both are evaluated on the same external stream in a full run.",
+    "The external rank-budget table is transductive and is a diagnostic, not a deployable threshold.",
+    "CIC-IDS-2018 covers DoS/DDoS only; PortScan is absent. UNSW-NB15 covers DoS/Reconnaissance only.",
+    "The serving artifact, the frozen Tier A report, and all product claims are unchanged."
+  ]
+}

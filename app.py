@@ -12,6 +12,7 @@ POST /api/flows              -> ingest a flow record (collector endpoint)
 GET  /api/flows              -> paginated stored flow history
 GET  /api/flows/<id>         -> one stored flow record
 GET  /api/stats              -> counts by predicted label
+GET  /api/incidents          -> host/window multi-signal incidents
 GET  /api/unmapped-features  -> feature-mapping diagnostic
 """
 
@@ -48,6 +49,12 @@ from feature_mapper import (
     UNMAPPED_LOG,
     _auto_normalize,
     normalize_flow_features,
+)
+from evidence_accumulator import (
+    EvidenceAccumulator,
+    Observation,
+    isolation_confidence,
+    load_calibrator,
 )
 from pcap_parser import pcap_to_flows as _pcap_to_flows
 import mfa as mfa_module
@@ -1795,6 +1802,103 @@ _serving_artifact["threshold_applied"] = _serving_threshold is not None
 _serving_artifact["threshold_policy"] = _serving_policy
 
 
+# ---------------------------------------------------------------------
+# Multi-signal evidence accumulation (Slips-style host/window incidents)
+# ---------------------------------------------------------------------
+# This layer is deliberately additive. It does not change the per-flow
+# prediction, the serving threshold, or the stored Flow row. It groups scored
+# flows by (tenant, source IP, time window) so three independent signals can
+# corroborate before an operator sees an incident.
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.environ.get(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+MULTI_SIGNAL_ENABLED = (
+    os.environ.get("ENABLE_MULTI_SIGNAL_EVIDENCE", "true").lower() == "true"
+)
+THREAT_INTEL_ON_INGEST = (
+    os.environ.get("NETSHIELD_THREAT_INTEL_ON_INGEST", "false").lower() == "true"
+)
+_EVIDENCE_ACCUMULATOR = EvidenceAccumulator(
+    window_seconds=_env_int("NETSHIELD_EVIDENCE_WINDOW_SECONDS", 300),
+    incident_threshold=_env_float("NETSHIELD_INCIDENT_RISK_THRESHOLD", 70.0),
+)
+_CALIBRATOR = None
+_CALIBRATION_METADATA = {}
+_CALIBRATION_STATUS = "uncalibrated"
+_CALIBRATION_PATH = os.environ.get(
+    "NETSHIELD_CALIBRATION_PATH", "models/calibration_rf_day_based_seed42.json"
+)
+_calibration_artifact_hash = None
+try:
+    if os.path.isfile(_CALIBRATION_PATH):
+        _calibrator_candidate, _calibration_metadata = load_calibrator(_CALIBRATION_PATH)
+        _calibration_artifact_hash = _calibration_metadata.get("artifact_sha256")
+        if (
+            _calibration_artifact_hash
+            and _serving_artifact.get("hash")
+            and _calibration_artifact_hash == _serving_artifact.get("hash")
+        ):
+            _CALIBRATOR = _calibrator_candidate
+            _CALIBRATION_METADATA = _calibration_metadata
+            _CALIBRATION_STATUS = _calibration_metadata.get(
+                "calibration_version", "calibrated"
+            )
+        else:
+            _CALIBRATION_STATUS = "calibration_hash_mismatch"
+    else:
+        _CALIBRATION_STATUS = "calibration_artifact_missing"
+except Exception as exc:  # noqa: BLE001 - calibration must never break serving
+    _CALIBRATION_STATUS = f"calibration_load_failed: {exc}"
+    app.logger.warning("Could not load calibration artifact: %s", exc)
+
+_ISOLATION_BUNDLE = None
+_ISOLATION_LOAD_ATTEMPTED = False
+
+
+def _load_isolation_bundle():
+    """Load the seeded Isolation Forest bundle once, if it is present."""
+    global _ISOLATION_BUNDLE, _ISOLATION_LOAD_ATTEMPTED
+    if _ISOLATION_LOAD_ATTEMPTED:
+        return _ISOLATION_BUNDLE
+    _ISOLATION_LOAD_ATTEMPTED = True
+    path = os.environ.get(
+        "NETSHIELD_ISOLATION_BUNDLE",
+        "models/model_bundle_if_day_based_seed42.pkl",
+    )
+    try:
+        if os.path.isfile(path):
+            bundle = joblib.load(path)
+            if isinstance(bundle, dict) and "pipeline" in bundle:
+                _ISOLATION_BUNDLE = bundle
+    except Exception as exc:  # noqa: BLE001 - optional signal
+        app.logger.warning("Could not load isolation-forest bundle: %s", exc)
+    return _ISOLATION_BUNDLE
+
+
+def _calibrated_probability(raw_score):
+    """Calibrate the RF attack score only when the artifact hash matches."""
+    if raw_score is None:
+        return None
+    if _CALIBRATOR is None:
+        return float(raw_score)
+    try:
+        return float(_CALIBRATOR(float(raw_score)))
+    except Exception:  # noqa: BLE001
+        return float(raw_score)
+
+
+
 def _classifier_probabilities(estimator, row):
     """Return (attack_score, argmax_label) from a fitted estimator."""
     classifier = getattr(estimator, "named_steps", {}).get("classifier", estimator)
@@ -1829,6 +1933,35 @@ def _classifier_probabilities_batch(estimator, rows):
     predictions = estimator.predict(rows)
     labels = label_encoder.inverse_transform(predictions)
     return [None] * len(labels), [str(value) for value in labels]
+
+
+def _isolation_confidences(flow_dicts: list[dict]) -> list[float | None]:
+    """Score a batch with the optional Isolation Forest and normalise it.
+
+    The raw ``-decision_function`` value is unbounded. ``isolation_confidence``
+    maps the validation threshold to 0.5 and keeps ordering, so the accumulator
+    consumes a bounded corroborating signal rather than a second hard label.
+    """
+    bundle = _load_isolation_bundle()
+    if not bundle or not MULTI_SIGNAL_ENABLED:
+        return [None] * len(flow_dicts)
+    if_names = list(bundle.get("feature_names") or [])
+    threshold = bundle.get("threshold")
+    if not if_names or threshold is None:
+        return [None] * len(flow_dicts)
+    try:
+        rows = [normalize_flow_features(flow, if_names) for flow in flow_dicts]
+        frame = pd.DataFrame(rows).apply(pd.to_numeric, errors="coerce")
+        frame = frame.reindex(columns=if_names, fill_value=np.nan)
+        raw_scores = -np.asarray(bundle["pipeline"].decision_function(frame), dtype=float)
+        return [
+            isolation_confidence(float(value), float(threshold))
+            for value in raw_scores
+        ]
+    except Exception:  # noqa: BLE001 - the optional signal must not break scoring
+        app.logger.exception("Isolation-forest scoring failed")
+        return [None] * len(flow_dicts)
+
 
 
 def classify_flows_with_evidence(flow_dicts: list[dict]) -> list[dict]:
@@ -1872,9 +2005,13 @@ def classify_flows_with_evidence(flow_dicts: list[dict]) -> list[dict]:
         PREDICTION_LATENCY.labels("live").observe(time.perf_counter() - started)
 
     evidence_rows = []
-    for attack_score, argmax_label in zip(attack_scores, argmax_labels):
+    isolation_confidences = _isolation_confidences(flow_dicts)
+    for attack_score, argmax_label, isolation_conf in zip(
+        attack_scores, argmax_labels, isolation_confidences
+    ):
         if argmax_label is None:
             raise RuntimeError("Model produced no label")
+        calibrated_score = _calibrated_probability(attack_score)
         if _serving_threshold is not None and attack_score is not None:
             is_attack = bool(attack_score >= float(_serving_threshold))
             decision_basis = "attack_probability_threshold"
@@ -1890,6 +2027,9 @@ def classify_flows_with_evidence(flow_dicts: list[dict]) -> list[dict]:
                 "predicted_label": predicted_label,
                 "argmax_label": argmax_label,
                 "attack_score": attack_score,
+                "calibrated_attack_probability": calibrated_score,
+                "calibration_status": _CALIBRATION_STATUS,
+                "isolation_confidence": isolation_conf,
                 "is_attack": is_attack,
                 "decision_basis": decision_basis,
                 "threshold": _serving_threshold,
@@ -1930,6 +2070,72 @@ def _safe_int(value):
     try:
         return int(value)
     except (TypeError, ValueError):
+        return None
+
+
+def _flow_event_time(flow_dict):
+    """Return an epoch timestamp for evidence windows.
+
+    Collectors may send epoch seconds, epoch milliseconds, or an ISO string.
+    An unparseable or absent timestamp uses receipt time; the incident record
+    remains useful even when the collector omits time.
+    """
+    raw = _extract_flow_field(
+        flow_dict, "timestamp", "Timestamp", "event_time", "first_seen"
+    )
+    if raw is None:
+        return time.time()
+    try:
+        value = float(raw)
+        if value > 1e12:  # milliseconds
+            value /= 1000.0
+        if math.isfinite(value):
+            return value
+    except (TypeError, ValueError):
+        pass
+    try:
+        text = str(raw).strip().replace("Z", "+00:00")
+        return datetime.fromisoformat(text).timestamp()
+    except (TypeError, ValueError):
+        return time.time()
+
+
+def _accumulate_flow_evidence(tenant_id, flow_dict, evidence, src_ip, dst_ip, dst_port):
+    """Feed one scored flow into the host/window accumulator.
+
+    Returns the affected window summary or ``None`` when the flow has no usable
+    source address. This function is best-effort: a failure is logged and never
+    turns a successful ingest into a 500.
+    """
+    if not MULTI_SIGNAL_ENABLED:
+        return None
+    source = str(src_ip or "").strip()
+    if not source or source in {"—", "Not present in upload"}:
+        return None
+    reputation_score = None
+    if THREAT_INTEL_ON_INGEST and evidence.get("is_attack"):
+        try:
+            reputation_score = lookup_abuseipdb(source).get("abuse_score")
+        except Exception:  # noqa: BLE001 - optional enrichment
+            app.logger.warning("Threat-intel lookup failed for ingest enrichment")
+    try:
+        return _EVIDENCE_ACCUMULATOR.observe(
+            Observation(
+                source_ip=source,
+                timestamp=_flow_event_time(flow_dict),
+                supervised_probability=evidence.get("calibrated_attack_probability"),
+                unsupervised_confidence=evidence.get("isolation_confidence"),
+                reputation_score=reputation_score,
+                supervised_calibration=evidence.get("calibration_status")
+                or "uncalibrated",
+                destination_ip=str(dst_ip or ""),
+                destination_port=dst_port,
+                tenant_id=tenant_id,
+                flow_id=evidence.get("flow_id"),
+            )
+        )
+    except Exception:  # noqa: BLE001 - evidence is additive
+        app.logger.exception("Evidence accumulation failed for one flow")
         return None
 
 
@@ -2727,6 +2933,9 @@ def ingest_flow():
                 decision_basis=evidence.get("decision_basis"),
                 threshold_value=evidence.get("threshold"),
             ))
+            _accumulate_flow_evidence(
+                tenant_id, flow_dict, evidence, src_ip, dst_ip, dst_port
+            )
     except Exception:  # noqa: BLE001
         INGEST_REQUESTS.labels(outcome="failed").inc()
         INGEST_FLOWS.labels(outcome="failed").inc(len(flow_dicts))
@@ -3159,6 +3368,33 @@ def sensor_summary():
         detail={"sensor_count": payload["sensor_count"], "unattributed_flows": payload["unattributed_flows"]},
         commit=True,
     )
+    return jsonify(payload)
+
+
+@app.route("/api/incidents", methods=["GET"])
+@limiter.limit(os.environ.get("READ_RATE_LIMIT", "120 per minute"))
+@require_permission("console:read")
+def list_incidents():
+    """Host/window incidents accumulated from independent signals.
+
+    The accumulator is in-memory and resets on restart. It is an alert-triage
+    view, not a persistence layer and not a ground-truth label source.
+    """
+    try:
+        limit = int(request.args.get("limit", 50))
+    except (TypeError, ValueError):
+        return jsonify({"error": "limit must be an integer"}), 400
+    if not 1 <= limit <= 500:
+        return jsonify({"error": "limit must be 1-500"}), 400
+    open_only = request.args.get("open_only", "true").lower() == "true"
+    payload = _EVIDENCE_ACCUMULATOR.snapshot(
+        tenant_id=requested_tenant_id(), open_only=open_only, limit=limit
+    )
+    payload["enabled"] = MULTI_SIGNAL_ENABLED
+    payload["in_memory"] = True
+    payload["calibration_status"] = _CALIBRATION_STATUS
+    payload["isolation_forest_loaded"] = _load_isolation_bundle() is not None
+    payload["threat_intel_on_ingest"] = THREAT_INTEL_ON_INGEST
     return jsonify(payload)
 
 

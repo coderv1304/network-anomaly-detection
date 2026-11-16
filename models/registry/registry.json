@@ -312,6 +312,73 @@
         }
       }
     },
+    "netshield-flow-portable": {
+      "history": [
+        {
+          "action": "register",
+          "actor": "p3b-portable-transfer",
+          "artifact_sha256": "cc7b67733a4c5d9db12414ebc3a1c30496972c12493ba03086330341c5d3a618",
+          "at": "2026-11-16T16:29:51.132636+00:00",
+          "version": "portable-ratio-v1-group-seed42"
+        }
+      ],
+      "versions": {
+        "portable-ratio-v1-group-seed42": {
+          "approved_at": null,
+          "approved_by": null,
+          "artifact_path": "C:/Users/varun/OneDrive/Desktop/network-anomaly-detection/models/model_bundle_rf_portable_ratio_seed42.pkl",
+          "artifact_sha256": "cc7b67733a4c5d9db12414ebc3a1c30496972c12493ba03086330341c5d3a618",
+          "artifact_size": 35393782,
+          "calibration_artifact": null,
+          "calibration_artifact_sha256": null,
+          "calibration_method": "none",
+          "calibration_version": "uncalibrated",
+          "classes": [],
+          "created_at": "2026-11-16T16:29:51.132636+00:00",
+          "created_by": "p3b-portable-transfer",
+          "dataset_sha256": {},
+          "feature_count": 8,
+          "feature_schema_label": "CIC-IDS-2017 CICFlowMeter 80-feature schema",
+          "feature_schema_sha256": "509040112df328594ccbe7744f7d94942a69cb6fb4d8cf27f581911fbdcdf6c3",
+          "feature_schema_version": "cic-ids-2017-8f-509040112df3",
+          "features": [
+            "log_bytes_per_packet",
+            "log_fwd_bytes_per_packet",
+            "log_bwd_bytes_per_packet",
+            "fwd_packet_ratio",
+            "packet_count_balance",
+            "fwd_byte_ratio",
+            "log_down_up_ratio",
+            "packet_size_asymmetry"
+          ],
+          "model_id": "netshield-flow-portable",
+          "notes": "P3B ratio-only research candidate. It is not the serving model and does not change the serving artifact or the frozen Tier A schema. The registry-wide feature_schema_label field is a constant ('80-feature schema'); the authoritative schema for this entry is feature_count=8 and feature_schema_sha256=50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39.",
+          "python_version": "3.12.10",
+          "role": "research",
+          "signature": null,
+          "status": "candidate",
+          "task": "binary_attack",
+          "threshold_policy": {
+            "decision": "attack_score > threshold",
+            "max_fpr": null,
+            "name": "portable_transfer_attack_threshold",
+            "score": "1 - P(BENIGN)",
+            "selected_on": "cic_ids_2017_validation_at_100_alerts_per_10k",
+            "threshold": 1.0
+          },
+          "training_config": {
+            "feature_set": "portable_ratio",
+            "n_estimators": 200,
+            "not_p2b": true,
+            "schema_sha256": "50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39",
+            "seed": 42,
+            "split_mode": "stratified_group"
+          },
+          "verification": "sha256",
+          "version": "portable-ratio-v1-group-seed42"
+        }
+      }
+    },
     "netshield-flow-tierA": {
       "history": [
         {
@@ -1129,5 +1196,5 @@
     }
   },
   "schema_version": "1.0",
-  "updated_at": "2026-11-13T16:08:37.965737+00:00"
+  "updated_at": "2026-11-16T16:29:51.132636+00:00"
 }

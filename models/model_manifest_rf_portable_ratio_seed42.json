@@ -1,0 +1,263 @@
+{
+  "artifact_version": "portable-ratio-transfer-v1",
+  "model_type": "rf",
+  "task": "binary_attack",
+  "seed": 42,
+  "split_mode": "stratified_group",
+  "model_file": "model_bundle_rf_portable_ratio_seed42.pkl",
+  "model_sha256": "cc7b67733a4c5d9db12414ebc3a1c30496972c12493ba03086330341c5d3a618",
+  "schema": {
+    "version": "portable-ratio-v1",
+    "features": [
+      "log_bytes_per_packet",
+      "log_fwd_bytes_per_packet",
+      "log_bwd_bytes_per_packet",
+      "fwd_packet_ratio",
+      "packet_count_balance",
+      "fwd_byte_ratio",
+      "log_down_up_ratio",
+      "packet_size_asymmetry"
+    ],
+    "count": 8,
+    "inputs": [
+      "total_fwd_packets",
+      "total_backward_packets",
+      "total_length_of_fwd_packets",
+      "total_length_of_bwd_packets"
+    ],
+    "sha256": "50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39"
+  },
+  "feature_count": 8,
+  "features": [
+    "log_bytes_per_packet",
+    "log_fwd_bytes_per_packet",
+    "log_bwd_bytes_per_packet",
+    "fwd_packet_ratio",
+    "packet_count_balance",
+    "fwd_byte_ratio",
+    "log_down_up_ratio",
+    "packet_size_asymmetry"
+  ],
+  "thresholds": {
+    "10_per_10k": {
+      "budget_per_10k": 10,
+      "n": 423480,
+      "k": 424,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    },
+    "100_per_10k": {
+      "budget_per_10k": 100,
+      "n": 423480,
+      "k": 4235,
+      "threshold": 1.0,
+      "comparison": ">",
+      "expected_alerts": 0,
+      "expected_alerts_per_10k": 0.0
+    }
+  },
+  "threshold_comparison": ">",
+  "training": {
+    "rows": 2812512,
+    "partitions": {
+      "train": {
+        "BENIGN": 1587832,
+        "DDoS": 89633,
+        "DoS GoldenEye": 7201,
+        "DoS Hulk": 161855,
+        "DoS Slowhttptest": 3851,
+        "DoS slowloris": 4131,
+        "PortScan": 111253
+      },
+      "validation": {
+        "BENIGN": 342608,
+        "DDoS": 19246,
+        "DoS GoldenEye": 1553,
+        "DoS Hulk": 34579,
+        "DoS Slowhttptest": 820,
+        "DoS slowloris": 838,
+        "PortScan": 23836
+      },
+      "test": {
+        "BENIGN": 342455,
+        "DDoS": 19148,
+        "DoS GoldenEye": 1539,
+        "DoS Hulk": 34638,
+        "DoS Slowhttptest": 828,
+        "DoS slowloris": 827,
+        "PortScan": 23841
+      }
+    },
+    "coverage_gate": {
+      "families": {
+        "BENIGN": {
+          "train": 1587832,
+          "validation": 342608,
+          "test": 342455,
+          "required": false,
+          "observed": true,
+          "pass": true
+        },
+        "DDoS": {
+          "train": 89633,
+          "validation": 19246,
+          "test": 19148,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS GoldenEye": {
+          "train": 7201,
+          "validation": 1553,
+          "test": 1539,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Hulk": {
+          "train": 161855,
+          "validation": 34579,
+          "test": 34638,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS Slowhttptest": {
+          "train": 3851,
+          "validation": 820,
+          "test": 828,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "DoS slowloris": {
+          "train": 4131,
+          "validation": 838,
+          "test": 827,
+          "required": true,
+          "observed": true,
+          "pass": true
+        },
+        "PortScan": {
+          "train": 111253,
+          "validation": 23836,
+          "test": 23841,
+          "required": true,
+          "observed": true,
+          "pass": true
+        }
+      },
+      "missing_required": [],
+      "train_validation_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "validation_test_overlap": [
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "PortScan"
+      ],
+      "overall_pass": true,
+      "reason": "Every required positive family is present in train, validation, and test, and validation/test families overlap."
+    },
+    "split": {
+      "mixed_groups_dropped": 0,
+      "mixed_rows_dropped": 0,
+      "per_family": {
+        "BENIGN": {
+          "groups": 1241767,
+          "train": 869237,
+          "validation": 186265,
+          "test": 186265
+        },
+        "DDoS": {
+          "groups": 45395,
+          "train": 31776,
+          "validation": 6809,
+          "test": 6810
+        },
+        "DoS GoldenEye": {
+          "groups": 7458,
+          "train": 5221,
+          "validation": 1119,
+          "test": 1118
+        },
+        "DoS Hulk": {
+          "groups": 14108,
+          "train": 9876,
+          "validation": 2116,
+          "test": 2116
+        },
+        "DoS Slowhttptest": {
+          "groups": 4216,
+          "train": 2951,
+          "validation": 632,
+          "test": 633
+        },
+        "DoS slowloris": {
+          "groups": 3873,
+          "train": 2711,
+          "validation": 581,
+          "test": 581
+        },
+        "PortScan": {
+          "groups": 158676,
+          "train": 111073,
+          "validation": 23801,
+          "test": 23802
+        }
+      },
+      "fractions": {
+        "train": 0.7,
+        "validation": 0.15,
+        "test": 0.15
+      }
+    },
+    "repairs": {
+      "flow_duration_nonfinite": 0,
+      "flow_duration_negative": 115,
+      "total_fwd_packets_nonfinite": 0,
+      "total_fwd_packets_negative": 0,
+      "total_backward_packets_nonfinite": 0,
+      "total_backward_packets_negative": 0,
+      "total_length_of_fwd_packets_nonfinite": 0,
+      "total_length_of_fwd_packets_negative": 0,
+      "total_length_of_bwd_packets_nonfinite": 0,
+      "total_length_of_bwd_packets_negative": 0,
+      "packet_length_mean_nonfinite": 0,
+      "packet_length_mean_negative": 0,
+      "packet_length_max_nonfinite": 0,
+      "packet_length_max_negative": 0,
+      "syn_flag_count_nonfinite": 0,
+      "syn_flag_count_negative": 0,
+      "fin_flag_count_nonfinite": 0,
+      "fin_flag_count_negative": 0,
+      "rst_flag_count_nonfinite": 0,
+      "rst_flag_count_negative": 0,
+      "total_packets_zero": 0,
+      "flow_packets_s_nonfinite": 2850,
+      "flow_packets_s_negative": 115,
+      "flow_packets_s_repaired": 2965,
+      "flow_packets_s_zero_duration_repair": 2965,
+      "flow_bytes_s_nonfinite": 2850,
+      "flow_bytes_s_negative": 85,
+      "flow_bytes_s_repaired": 2935,
+      "flow_bytes_s_zero_duration_repair": 2935,
+      "syn_ratio_above_one": 0,
+      "rst_ratio_above_one": 0,
+      "short_flow_flag_count": 1070427
+    },
+    "not_p2b": true
+  },
+  "python_version": "3.12.10",
+  "scikit_learn_version": "1.5.2"
+}
