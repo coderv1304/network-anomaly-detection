@@ -25,6 +25,8 @@ instance/
 *.sqlite
 *.sqlite3
 *.log
+# Small deterministic Zeek fixtures required by tests/test_zeek_parser.py
+!tests/fixtures/*.log
 backups/
 docs/backup_restore_artifacts/*.enc
 
