@@ -51,6 +51,26 @@ def test_abuseipdb_returns_live_score_and_reuses_one_hour_cache(monkeypatch):
     assert cache.ttl == 3600
 
 
+def test_reputation_stats_count_real_requests_only(monkeypatch):
+    calls = []
+    monkeypatch.setenv("ABUSEIPDB_API_KEY", "test-key")
+    monkeypatch.setattr(threat_intel, "_redis_cache", None)
+    monkeypatch.setattr(
+        threat_intel.requests,
+        "get",
+        lambda *args, **kwargs: calls.append(args) or FakeResponse(),
+    )
+    monkeypatch.setattr(threat_intel, "_abuse_stats", {"queries": 0, "live": 0, "errors": 0})
+    threat_intel._abuse_cache.clear()
+
+    threat_intel.lookup_abuseipdb("8.8.8.8")
+    threat_intel.lookup_abuseipdb("8.8.8.8")  # served from the in-memory cache
+    stats = threat_intel.reputation_stats()
+
+    assert len(calls) == 1
+    assert stats == {"queries": 1, "live": 1, "errors": 0}
+
+
 def test_abuseipdb_never_queries_private_or_invalid_addresses(monkeypatch):
     calls = []
     monkeypatch.setenv("ABUSEIPDB_API_KEY", "test-key")

@@ -20,6 +20,8 @@ upload path follows the training CSV semantics):
 import numpy as np
 import pandas as pd
 
+from capture_metadata import describe_pcap_link_type
+
 # Reference state-machine constants, mirrored from pyflowmeter.constants so the
 # upload path and the live path agree by construction.
 CLUMP_TIMEOUT = 1.0  # seconds between packets that split subflows/bulks
@@ -28,7 +30,26 @@ BULK_BOUND = 4  # packets that must pile up before a bulk is recognised
 
 
 def pcap_to_flows(file_stream, max_packets=250_000):
-    """Dissect a capture stream into bidirectional model feature rows."""
+    """Dissect a capture into model rows, preserving the legacy return shape.
+
+    Returns ``(flows, packet_headers, packet_count)``. New callers that need
+    capture provenance should use :func:`dissect_pcap`, which returns the same
+    first two values plus a metadata dictionary.
+    """
+    flows, details, metadata = dissect_pcap(file_stream, max_packets=max_packets)
+    return flows, details, metadata["frame_count"]
+
+
+def dissect_pcap(file_stream, max_packets=250_000):
+    """Dissect a capture stream into rows, headers, and capture metadata.
+
+    ``metadata`` describes only what the capture actually records: container
+    format, link type, snaplen, frame/byte counts, truncation, timestamps and
+    protocol mix. It deliberately does not name a capture interface, because a
+    PCAP file does not reliably carry one. It also does not claim wire bytes
+    when the capture was truncated; ``wire_bytes`` and ``captured_bytes`` are
+    reported separately.
+    """
     try:
         from scapy.error import Scapy_Exception
         from scapy.layers.inet import ICMP, IP, TCP, UDP
@@ -43,13 +64,59 @@ def pcap_to_flows(file_stream, max_packets=250_000):
         reader = PcapReader(file_stream)
     except (Scapy_Exception, EOFError, OSError) as exc:
         raise ValueError("Invalid or unsupported PCAP/PCAPNG capture.") from exc
+
+    reader_class = type(reader).__name__
+    container_format = "pcapng" if "ng" in reader_class.lower() else "pcap"
+    link_type = getattr(reader, "linktype", None)
+    if isinstance(link_type, (set, list, tuple)):
+        link_type = sorted(link_type)[0] if link_type else None
+    snaplen = getattr(reader, "snaplen", None)
+    if isinstance(snaplen, (set, list, tuple)):
+        snaplen = min(snaplen) if snaplen else None
+    metadata = {
+        **describe_pcap_link_type(container_format, link_type),
+        "reader": reader_class,
+        "snaplen": snaplen,
+        "frame_count": 0,
+        "captured_bytes": 0,
+        "wire_bytes": 0,
+        "truncated_frames": 0,
+        "non_ip_frames": 0,
+        "first_packet_at": None,
+        "last_packet_at": None,
+        "duration_seconds": None,
+        "protocol_counts": {},
+        "capture_interface": None,
+        "capture_interface_note": (
+            "A PCAP/PCAPNG file does not reliably carry the capture adapter name. "
+            "The interface is reported as unknown rather than guessed."
+        ),
+    }
+
+    def _bump(name):
+        metadata["protocol_counts"][name] = metadata["protocol_counts"].get(name, 0) + 1
+
     try:
         for packet in reader:
             packet_count += 1
             if packet_count > max_packets:
                 raise ValueError(f"Capture exceeds the {max_packets:,}-packet processing limit.")
 
+            captured_length = len(packet)
+            wire_length = int(getattr(packet, "wirelen", captured_length) or captured_length)
+            timestamp = float(packet.time)
+            metadata["frame_count"] += 1
+            metadata["captured_bytes"] += captured_length
+            metadata["wire_bytes"] += wire_length
+            if wire_length > captured_length:
+                metadata["truncated_frames"] += 1
+            if metadata["first_packet_at"] is None or timestamp < metadata["first_packet_at"]:
+                metadata["first_packet_at"] = timestamp
+            if metadata["last_packet_at"] is None or timestamp > metadata["last_packet_at"]:
+                metadata["last_packet_at"] = timestamp
+
             if IP in packet:
+                _bump("IPv4")
                 network = packet[IP]
                 ip_version = 4
                 source_ip, destination_ip = network.src, network.dst
@@ -60,6 +127,7 @@ def pcap_to_flows(file_stream, max_packets=250_000):
                 ip_protocol = int(network.proto)
                 ip_total_length = int(network.len or len(network))
             elif IPv6 in packet:
+                _bump("IPv6")
                 network = packet[IPv6]
                 ip_version = 6
                 source_ip, destination_ip = network.src, network.dst
@@ -70,10 +138,12 @@ def pcap_to_flows(file_stream, max_packets=250_000):
                 ip_protocol = int(network.nh)
                 ip_total_length = 40 + int(network.plen or max(0, len(network) - 40))
             else:
+                metadata["non_ip_frames"] += 1
                 continue
 
             source_port = destination_port = 0
             transport_name = {6: "TCP", 17: "UDP", 1: "ICMP", 58: "ICMPv6"}.get(ip_protocol, str(ip_protocol))
+            _bump(transport_name)
             tcp_flags = 0
             tcp_window = None
             udp_length = None
@@ -327,7 +397,14 @@ def pcap_to_flows(file_stream, max_packets=250_000):
         records.append(row)
         details.append(flow["header"])
 
-    return pd.DataFrame(records), details, packet_count
+    if metadata["first_packet_at"] is not None and metadata["last_packet_at"] is not None:
+        metadata["duration_seconds"] = round(
+            max(0.0, metadata["last_packet_at"] - metadata["first_packet_at"]), 6
+        )
+    metadata["flow_count"] = len(records)
+    metadata["interface_vector"] = metadata["link_type"]["vector"]
+    metadata["interface_vector_basis"] = "link_type"
+    return pd.DataFrame(records), details, metadata
 
 
 def _new_bulk_state():

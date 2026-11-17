@@ -4,7 +4,7 @@
 
 **Repository commit at package creation:** `4e6fbe3140be30271c6af9d8437abe6e02e5a3db`  
 **Package date:** 2026-11-08 (evidence package); serving-artifact identity, ingest-SLO, alert-budget, encrypted-backup, MFA/OIDC, staging/migration, and preflight updates on 2026-11-12; fail-closed staging tests and expanded secret-scan scope on 2026-11-13.  
-**Evidence update:** D2 pipeline audit, D3 controlled baselines, D4 threshold-policy transfer, D5 calibration, D6 rare/unseen-family experiment, D7 external validation, D8/S7 pilot preparation, D9 cost-sensitive release gate, S2 reliability measurements, S3 registry/deployment gate, S4 security scans, S5 operations with Alembic and a staging preflight, S6 onboarding/commercial status, S8 release-gate preparation, P1 live-capture parity, P2 multi-interface capture, and P3 sensor identity added. TOTP MFA, an OIDC authorization-code client, a `staging` profile, an Alembic baseline with a startup revision guard, and `scripts/preflight.py` are implemented and tested. They are code-level controls, not operated evidence. The registry-active serving artifact is the evaluated Random Forest seed 42 bundle, and the 20 flows/s ingest SLO passes after batching and WAL tuning. The working tree is uncommitted; artifact hashes below identify the exact files used.  
+**Evidence update:** D2 pipeline audit, D3 controlled baselines, D4 threshold-policy transfer, D5 calibration, D6 rare/unseen-family experiment, D7 external validation, D8/S7 pilot preparation, D9 cost-sensitive release gate, S2 reliability measurements, S3 registry/deployment gate, S4 security scans, S5 operations with Alembic and a staging preflight, S6 onboarding/commercial status, S8 release-gate preparation, P1 live-capture parity, P2 multi-interface capture, and P3 sensor identity added. TOTP MFA, an OIDC authorization-code client, a `staging` profile, an Alembic baseline with a startup revision guard, and `scripts/preflight.py` are implemented and tested. They are code-level controls, not operated evidence. On 2026-11-17 the SOC surface added capture-vector metadata, optional MaxMind/AbuseIPDB enrichment with explicit disabled/unknown states, collector heartbeats and a fleet view, persisted incident triage, and dry-run containment/STIX/opt-in webhook actions. Reputation lookups were exercised live against AbuseIPDB for public addresses; only the code and the documented counters are committed, never the operator key. The registry-active serving artifact is the evaluated Random Forest seed 42 bundle, and the 20 flows/s ingest SLO passes after batching and WAL tuning. The working tree is uncommitted; artifact hashes below identify the exact files used.  
 **Artifact root:** repository root
 
 ---
@@ -189,13 +189,20 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `tests/test_release_gate.py` | `a771f892e13beccab18ff62f0fab047dc59d56d65d8c915a5a4feec323aaccb3` |
 | `requirements.txt` | `a002047f9a22c6d36c6e94f0636dfa6f4b71ca599c94d0a68e2a1ba0bb8a8702` |
 | `requirements-runtime.txt` | `f4005921fa01ba83ec5a7ae0731a79f3ba1f6904ce49c03f61d3c0fba3615c66` |
-| `app.py` | `a05b111e025675f0e12f8a8d0831a49b5b96c11a0b8f0b479341fbf69e9069a8` |
+| `app.py` | `e9d30577cb39438e2cf86be4af815b246885e61dabd7c2831d0078939b2e4b32` |
+| `capture_metadata.py` | `8f73a1104d051e4181079d1634e1b156d6640b2c97bbedea4b13b20efa3cad77` |
+| `pcap_parser.py` | `b2c805b899da6bb62e5830e68db1c25bf755ad925607ed703baea4f5c31273b4` |
+| `threat_intel.py` | `e5e0ad8f20a3a028920cfeef3d5a2a8bf44aa2f8a29404e4098296a3f5460789` |
+| `sensor_fleet.py` | `615db61bb688f00986dd1ef7280969cf7a2864d0a4db79d1981ffea8e64b2f10` |
+| `incident_triage.py` | `bb3df76c34ffb456ce33295cfaea20079d0d573f7424d9d520a570c2bcc8aaba` |
+| `soar.py` | `611b102263fd578354da8f54f0dca5cdde9a1c4d1526c9856be2f3942937106b` |
 | `mfa.py` | `c26900276ad0a7ed02714945e6becc1bd990a1a9468f10c4a327a76c25d9ecaa` |
 | `oidc.py` | `f6d5ab4d3bc4e21c7aa5ca4e0922cc504d23763dcbd3b8dd0dd1d307bc73f06d` |
 | `migrations_runtime.py` | `4054b780467fb958e39855c8986f28015396d760b10bb6e9fcac344307a2e9df` |
 | `alembic.ini` | `fe45d42f852b5cdf90d7e62a85d6372209248a1f2e0d79b4b70c17be750f8032` |
 | `migrations/env.py` | `1120de400d92d37650febb50aa5685ed68982f5578694812ba88af370448f3e2` |
 | `migrations/versions/f68710d807f3_baseline_schema.py` | `8caedfeaee13c0d181d06c04ece321888ae39164d42477f6e8d8162a666d0463` |
+| `migrations/versions/a1c4e9f2b7d0_sensor_reports_and_incident_triage.py` | `fea9da1cb9f923fe92bf22e45cbb62027ae05d4f3892dba47054bca39afd85c1` |
 | `scripts/preflight.py` | `fb20dde4a24e3cf64c7b29cc96c59e4452f20790cad69bd2085e397109a2c472` |
 | `scripts/mfa_admin.py` | `bb33dffb6745c22a0b9ee13c9e5fed10862c1222556faf9773c92eb3f8a5047c` |
 | `docs/STAGING_AND_MIGRATIONS.md` | `194ec3c40fca19adf11d26c07ae3dd12336dcdcf4b878ec9b4532a92ca1321e7` |
@@ -206,6 +213,18 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `tests/test_preflight.py` | `e77f80abaee49ea03e21922b2819d075328d348135ca5760cd3bee01eda1a1e1` |
 | `templates/account.html` | `62e64155b245794ce218cc2ad802ea16c79df2c3e91ee125f48714fb13f0a5d6` |
 | `static/js/account.js` | `6345e73ad5e86dd980811ca40c5c6cc02a52f85d175bc0ca4871166aa66b2c23` |
+| `templates/console.html` | `8c19d715c78ea4f6fcd3465667e310bf4e7084ba8275e813e173cbb193e9a3e4` |
+| `static/js/console.js` | `2453d51d743c22dcbe90cf4ef8926efa01dfaa4ba719496ba57fecd2594e4956` |
+| `static/css/console.css` | `00623cf71cfd27ffd71b3fd711dfc0214fd076229408c0846b327dcd5721a0d4` |
+| `docs/SOC_CONTEXT.md` | `41f7777d4bafa8eab89fb13c3280427d07014cb9a550503d8db11afba25ce966` |
+| `docs/ENTERPRISE_READINESS_REVIEW.md` | `d0678d1f6c3dfc3a1fc89ef50a129203612a9c537922e9b4202c168eaa8be1ac` |
+| `tests/test_capture_metadata.py` | `e826deeb19010b054e2e975fe71bc7d262d016e58773be1b4832f2954052b21d` |
+| `tests/test_pcap_metadata.py` | `62df2d4a03d03e09d1d67a9253640023e3867a52931871818aeef2e676e0ca2f` |
+| `tests/test_sensor_fleet.py` | `79f78c7421e72776d742d629848b850c0a5c9b176ccb158fbfbc6cdfe865e513` |
+| `tests/test_incident_triage.py` | `21416cdfa4d9e191881545d96e5e39693bc8f43f4c1f1730c2412188a90ff75b` |
+| `tests/test_soar.py` | `10c2bd55753c9fbda5bbd5b366f523ee29d2f510ea5ad6c1263ef24eb3a29bd4` |
+| `tests/test_soc_api.py` | `05476dc8ac5ab13eb1349616620f1e3c17f324b5ff75051e8a9890f137d1f737` |
+| `tests/test_threat_intel.py` | `ebbdba5d15e7979551c993beaf12e4cbe2010cbc8aa20d66fa6f9e480a79ce5b` |
 
 Verify a hash on Windows:
 

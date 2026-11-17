@@ -104,10 +104,12 @@ flowchart LR
 
 **Two runnable surfaces:**
 
-- **Operator console** (`/`) — live flow queue, filters, sensor identity, review workflow, alert-budget status, provenance, and audit trail.
+- **Operator console** (`/`) — live flow queue, filters, sensor identity, ingestion topology, collector fleet health, host/window incident triage, threat context, review workflow, alert-budget status, provenance, and audit trail.
 - **Research workbench** (`/research`) — evaluation reports, threshold policy, prevalence analysis, calibration, cost model, and cross-dataset results.
 
 **Optional capture path:** the Go collector can stream live flow records when a capture driver and interface are configured. Live accuracy is **not validated**; the console is the primary runnable surface.
+
+**Capture vectors, not consumer network modes:** adapters and PCAP link types are classified as `ethernet`, `wlan`, `wwan`, `vpn`, `virtual`, `loopback`, or `unknown`. The vector is a name/link-type heuristic and does not change the model input. Wi-Fi, cellular, Ethernet, and VPN are never claimed as extra detection capability. See [SOC_CONTEXT.md](docs/SOC_CONTEXT.md).
 
 ---
 
@@ -189,6 +191,8 @@ The included Dockerfile and Compose file are for a **loopback-bound local demo**
 
 ### Optional integrations
 
+Settings can be exported in the shell or placed in a gitignored `.env` (copied from `.env.example`); the app loads it at startup with `override=False`, so real environment variables win. Never commit a key.
+
 | Setting | Purpose |
 | --- | --- |
 | `ABUSEIPDB_API_KEY` | Optional reputation lookups for eligible public IPs |
@@ -200,8 +204,14 @@ The included Dockerfile and Compose file are for a **loopback-bound local demo**
 | `NETSHIELD_EVIDENCE_WINDOW_SECONDS` | Evidence window length (default `300`) |
 | `NETSHIELD_INCIDENT_RISK_THRESHOLD` | Points needed to open an incident (default `70`) |
 | `NETSHIELD_THREAT_INTEL_ON_INGEST` | Allows AbuseIPDB lookups during ingest (default `false`) |
+| `NETSHIELD_THREAT_INTEL_ENABLED` | Master switch for reputation lookups; also requires `ABUSEIPDB_API_KEY` (default `false`) |
+| `NETSHIELD_GEOIP_CITY_DB` / `NETSHIELD_GEOIP_ASN_DB` | Optional operator-supplied MaxMind GeoLite2 databases (no database is bundled) |
+| `SENSOR_OFFLINE_SECONDS` | Heartbeat age after which a probe is `stale` (default `90`) |
+| `NETSHIELD_SOAR_ENABLED` | Enables the opt-in incident webhook (default `false`) |
+| `NETSHIELD_SOAR_WEBHOOK_URL` | Webhook destination; requires an allowlist match |
+| `NETSHIELD_SOAR_WEBHOOK_ALLOWLIST` | Comma-separated exact hosts permitted to receive webhook payloads |
 
-Full configuration and operational notes: [LIVE_CAPTURE_OPERATIONS.md](docs/LIVE_CAPTURE_OPERATIONS.md), [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), and [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md).
+Full configuration and operational notes: [SOC_CONTEXT.md](docs/SOC_CONTEXT.md), [ENTERPRISE_READINESS_REVIEW.md](docs/ENTERPRISE_READINESS_REVIEW.md), [LIVE_CAPTURE_OPERATIONS.md](docs/LIVE_CAPTURE_OPERATIONS.md), [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), and [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md).
 
 ---
 

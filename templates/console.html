@@ -7,7 +7,7 @@
   <meta name="description" content="NetShield flow console: live flow ingestion, predicted-label queue, analyst review, and capture status. Operational prototype, not a validated production IDS.">
   <title>NetShield | Live capture console</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}?v=6">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}?v=7">
   <script src="{{ url_for('static', filename='js/theme.js') }}?v=4"></script>
 </head>
 <body>
@@ -84,6 +84,14 @@
     </div>
     <button class="btn" id="btnCapture" type="button" disabled>Start capture</button>
     <span class="sensor-hint" id="sensorHint">Sensor offline. Stored flows remain available.</span>
+  </section>
+
+  <section class="vector-bar" aria-label="Ingestion topology">
+    <span class="vector-bar-label">Ingestion topology</span>
+    <div class="vector-chips" id="vectorChips">
+      <span class="vector-chip" data-state="unknown">No adapter metadata</span>
+    </div>
+    <span class="vector-bar-note">Capture vector is inferred from adapter and link-layer metadata. The detector still consumes Layer-3/4 flow statistics, not the radio or cable.</span>
   </section>
 
   <section class="status-strip" aria-label="Sensor status">
@@ -177,6 +185,32 @@
           </ul>
         </aside>
       </div>
+
+      <section class="panel fleet-panel" aria-labelledby="fleetTitle">
+        <header class="panel-head">
+          <div>
+            <h2 id="fleetTitle">Sensor fleet</h2>
+            <p class="panel-sub">Collector-reported heartbeats &middot; missing metrics stay missing</p>
+          </div>
+          <span class="fleet-count mono" id="fleetCount">&mdash;</span>
+        </header>
+        <div class="fleet-grid" id="fleetGrid">
+          <p class="note">No collector heartbeats have been received. Fleet metrics appear only when a collector posts to <code>/api/sensors/heartbeat</code>.</p>
+        </div>
+      </section>
+
+      <section class="panel incident-panel" aria-labelledby="incidentTitle">
+        <header class="panel-head">
+          <div>
+            <h2 id="incidentTitle">Host/window incidents</h2>
+            <p class="panel-sub">Independent signals accumulated per source &middot; internal severity, not CVSS</p>
+          </div>
+          <span class="fleet-count mono" id="incidentCount">0</span>
+        </header>
+        <div class="incident-list" id="incidentList">
+          <p class="note">No open host/window incident. Multi-signal accumulation must reach the configured risk threshold.</p>
+        </div>
+      </section>
 
       <section class="panel queue-panel" aria-labelledby="queueTitle">
         <header class="panel-head queue-head">
@@ -308,6 +342,6 @@
   <span class="mono" id="footBuild">console v2</span>
 </footer>
 
-<script src="{{ url_for('static', filename='js/console.js') }}?v=11" defer></script>
+<script src="{{ url_for('static', filename='js/console.js') }}?v=12" defer></script>
 </body>
 </html>

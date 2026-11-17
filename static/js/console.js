@@ -29,6 +29,14 @@ const state = {
   stats: { total: 0, benign: 0, attack: 0, attack_types: {} },
   alertBudget: null,
   sensors: [],
+  sensorFleet: null,
+  captureInterface: null,
+  incidents: [],
+  incidentBusy: null,
+  incidentDrafts: {},
+  incidentFlash: {},
+  incidentPlans: {},
+  intelCache: {},
   selectedId: null,
   filter: 'all',
   search: '',
@@ -504,7 +512,295 @@ function renderSensorList() {
   }).join('');
 }
 
-/* ---------- rendering: queue ---------- */
+/* ---------- rendering: ingestion vectors, fleet, incidents ---------- */
+
+const VECTOR_LABEL = {
+  ethernet: 'Wired Ethernet',
+  wlan: '802.11 wireless',
+  wwan: 'Cellular / WWAN',
+  vpn: 'VPN / tunnel',
+  virtual: 'Virtual / container',
+  loopback: 'Loopback',
+  unknown: 'Unclassified',
+};
+
+function metricText(value, unit, digits) {
+  if (value === null || value === undefined || value === '') return 'Not reported';
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 'Not reported';
+  return `${number.toLocaleString(undefined, { maximumFractionDigits: digits ?? 0 })}${unit || ''}`;
+}
+
+function renderVectors() {
+  const host = $('vectorChips');
+  if (!host) return;
+  const sensors = Array.isArray(state.sensorFleet?.sensors) ? state.sensorFleet.sensors : [];
+  const counts = {};
+  for (const row of sensors) counts[row.vector || 'unknown'] = (counts[row.vector || 'unknown'] || 0) + 1;
+  const local = state.captureInterface?.vector;
+  const order = ['ethernet', 'wlan', 'wwan', 'vpn', 'virtual', 'loopback'];
+  const chips = order.map((id) => {
+    const active = counts[id] > 0 || local === id;
+    const parts = [VECTOR_LABEL[id] || id];
+    if (counts[id]) parts.push(`${counts[id]} probe${counts[id] === 1 ? '' : 's'}`);
+    if (local === id) parts.push('local capture');
+    return `<span class="vector-chip" data-state="${active ? 'active' : 'idle'}"><i aria-hidden="true"></i>${escapeHtml(parts.join(' · '))}</span>`;
+  });
+  if (!sensors.length && !local) chips.push('<span class="vector-chip" data-state="unknown">No adapter metadata</span>');
+  host.innerHTML = chips.join('');
+}
+
+function renderFleet() {
+  const grid = $('fleetGrid');
+  const count = $('fleetCount');
+  if (!grid) return;
+  const fleet = state.sensorFleet;
+  const sensors = Array.isArray(fleet?.sensors) ? fleet.sensors : [];
+  if (count) {
+    count.textContent = sensors.length
+      ? `${fmtInt(fleet.online_count)}/${fmtInt(sensors.length)} online`
+      : 'No probes';
+  }
+  if (!sensors.length) {
+    grid.innerHTML = '<p class="note">No collector heartbeats have been received. Fleet metrics appear only when a collector posts to <code>/api/sensors/heartbeat</code>.</p>';
+    return;
+  }
+  grid.innerHTML = sensors.map((row) => {
+    const status = row.status || 'never_reported';
+    const driver = row.capture_driver || 'Driver not reported';
+    const speed = row.link_speed_mbps === null || row.link_speed_mbps === undefined
+      ? 'Link speed not reported'
+      : `${metricText(row.link_speed_mbps, ' Mbps', 1)} link`;
+    const drops = row.rx_drop_rate === null || row.rx_drop_rate === undefined
+      ? 'Drop rate not reported'
+      : `${(Number(row.rx_drop_rate) * 100).toFixed(3)}% rx drops`;
+    return `<article class="fleet-card" data-status="${escapeHtml(status)}">
+      <header>
+        <span class="fleet-status"><i aria-hidden="true"></i>${escapeHtml(status.replace('_', ' '))}</span>
+        <span class="fleet-age">${row.age_seconds === null || row.age_seconds === undefined ? 'No heartbeat' : `${fmtInt(row.age_seconds)}s ago`}</span>
+      </header>
+      <h3 title="${escapeHtml(row.sensor_id || '')}">${escapeHtml(row.sensor_id || 'Unidentified sensor')}</h3>
+      <p class="fleet-interface mono">${escapeHtml(row.interface || 'interface not reported')}</p>
+      <p class="fleet-vector">${escapeHtml(row.vector_label || VECTOR_LABEL[row.vector] || 'Unclassified')}</p>
+      <dl class="fleet-metrics">
+        <div><dt>Capture driver</dt><dd>${escapeHtml(driver)}</dd></div>
+        <div><dt>Link</dt><dd>${escapeHtml(speed)}</dd></div>
+        <div><dt>Drops</dt><dd>${escapeHtml(drops)}</dd></div>
+        <div><dt>Flows</dt><dd>${metricText(row.flows_total, '', 0)}</dd></div>
+      </dl>
+    </article>`;
+  }).join('');
+}
+
+function slaText(sla) {
+  if (!sla || sla.remaining_seconds === null || sla.remaining_seconds === undefined) return 'No deadline';
+  const seconds = Number(sla.remaining_seconds);
+  const abs = Math.abs(seconds);
+  const hours = Math.floor(abs / 3600);
+  const minutes = Math.floor((abs % 3600) / 60);
+  const label = hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+  return seconds < 0 ? `${label} overdue` : `${label} left`;
+}
+
+function incidentDraft(incident) {
+  const key = incident.incident_id;
+  if (!state.incidentDrafts[key]) {
+    state.incidentDrafts[key] = {
+      status: incident.triage?.status || 'new',
+      assignee: incident.triage?.assignee || '',
+      note: incident.triage?.note || '',
+    };
+  }
+  return state.incidentDrafts[key];
+}
+
+function renderIncidents() {
+  const list = $('incidentList');
+  const count = $('incidentCount');
+  if (!list) return;
+  const incidents = Array.isArray(state.incidents) ? state.incidents : [];
+  if (count) count.textContent = fmtInt(incidents.length);
+  if (!incidents.length) {
+    list.innerHTML = '<p class="note">No open host/window incident. Multi-signal accumulation must reach the configured risk threshold.</p>';
+    return;
+  }
+  const active = document.activeElement;
+  const focusKey = active?.dataset?.field
+    ? `${active.dataset.incident}|${active.dataset.field}`
+    : null;
+
+  list.innerHTML = incidents.map((incident) => {
+    const severity = incident.severity || {};
+    const triage = incident.triage || {};
+    const draft = incidentDraft(incident);
+    const options = (triage.allowed_statuses || ['new', 'investigating', 'suppressed', 'remediated'])
+      .map((status) => `<option value="${escapeHtml(status)}"${status === draft.status ? ' selected' : ''}>${escapeHtml(status)}</option>`)
+      .join('');
+    const evidence = (incident.evidence || []).slice(-4).map((line) => `<li>${escapeHtml(line)}</li>`).join('');
+    const flash = state.incidentFlash[incident.incident_id];
+    const plan = state.incidentPlans[incident.incident_id];
+    const planHtml = plan ? `<div class="incident-plan">
+        <p class="section-title">Dry-run containment &middot; not executed</p>
+        <ul>${(plan.commands || []).map((item) => `<li><code>${escapeHtml(item.command)}</code></li>`).join('')}</ul>
+        <p class="note">${escapeHtml(plan.warning || '')}</p>
+      </div>` : '';
+    return `<article class="incident-card" data-incident="${escapeHtml(incident.incident_id)}" data-severity="${escapeHtml(severity.id || 'P4')}">
+      <header>
+        <div>
+          <span class="severity-pill" data-severity="${escapeHtml(severity.id || 'P4')}">${escapeHtml(severity.id || 'P4')}</span>
+          <strong class="mono">${escapeHtml(incident.source_ip)}</strong>
+        </div>
+        <span class="sla-pill" data-state="${escapeHtml(triage.sla?.state || 'unknown')}">${escapeHtml(slaText(triage.sla))}</span>
+      </header>
+      <p class="incident-meta">${escapeHtml(severity.label || 'Internal risk priority')} &middot; ${fmtInt(incident.max_risk_points)} risk points &middot; ${fmtInt(incident.active_signals)} signals &middot; ${fmtInt(incident.flow_count)} flows &middot; window ${fmtInt(incident.window_seconds)}s</p>
+      <p class="incident-id mono">${escapeHtml(incident.incident_id)}</p>
+      <div class="incident-controls">
+        <label><span>Status</span>
+          <select data-incident="${escapeHtml(incident.incident_id)}" data-field="status">${options}</select>
+        </label>
+        <label><span>Assignee</span>
+          <input type="text" maxlength="120" placeholder="Unassigned" value="${escapeHtml(draft.assignee)}" data-incident="${escapeHtml(incident.incident_id)}" data-field="assignee">
+        </label>
+        <label class="wide"><span>Analyst note</span>
+          <input type="text" maxlength="2000" placeholder="Triage note" value="${escapeHtml(draft.note)}" data-incident="${escapeHtml(incident.incident_id)}" data-field="note">
+        </label>
+        <button class="btn compact" type="button" data-incident-action="save" data-incident="${escapeHtml(incident.incident_id)}"${state.incidentBusy === incident.incident_id ? ' disabled' : ''}>Save triage</button>
+        <button class="btn compact" type="button" data-incident-action="plan" data-incident="${escapeHtml(incident.incident_id)}">Containment plan</button>
+        <button class="btn compact" type="button" data-incident-action="stix" data-incident="${escapeHtml(incident.incident_id)}">Export STIX</button>
+      </div>
+      ${evidence ? `<ul class="incident-evidence">${evidence}</ul>` : ''}
+      ${planHtml}
+      <p class="incident-flash ${flash ? flash.cls : ''}" data-incident="${escapeHtml(incident.incident_id)}" role="status" aria-live="polite">${flash ? escapeHtml(flash.text) : ''}</p>
+    </article>`;
+  }).join('');
+
+  if (focusKey) {
+    const [incidentId, field] = focusKey.split('|');
+    const target = list.querySelector(`[data-incident="${CSS.escape(incidentId)}"][data-field="${CSS.escape(field)}"]`);
+    if (target) target.focus();
+  }
+}
+
+function flashIncident(incidentId, text, cls) {
+  state.incidentFlash[incidentId] = { text, cls: cls || '' };
+  window.setTimeout(() => {
+    if (state.incidentFlash[incidentId]?.text === text) {
+      delete state.incidentFlash[incidentId];
+      renderIncidents();
+    }
+  }, 5000);
+}
+
+async function saveIncidentTriage(incidentId) {
+  const incident = state.incidents.find((row) => row.incident_id === incidentId);
+  const draft = state.incidentDrafts[incidentId] || {};
+  state.incidentBusy = incidentId;
+  renderIncidents();
+  try {
+    const response = await apiFetch(`/api/incidents/${encodeURIComponent(incidentId)}/triage`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(draft),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    if (incident) {
+      incident.triage = data.triage || incident.triage;
+      incident.severity = data.severity || incident.severity;
+    }
+    flashIncident(incidentId, 'Triage saved', 'is-ok');
+  } catch (error) {
+    flashIncident(incidentId, error.message || 'Triage could not be saved', 'is-error');
+  } finally {
+    state.incidentBusy = null;
+    renderIncidents();
+  }
+}
+
+async function loadContainmentPlan(incidentId) {
+  try {
+    const response = await apiFetch(`/api/incidents/${encodeURIComponent(incidentId)}/playbook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'containment_plan' }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Plan failed (${response.status})`);
+    state.incidentPlans[incidentId] = data;
+    flashIncident(incidentId, 'Dry-run plan generated; nothing was executed', 'is-ok');
+  } catch (error) {
+    flashIncident(incidentId, error.message || 'Plan failed', 'is-error');
+  }
+  renderIncidents();
+}
+
+async function downloadIncidentStix(incidentId) {
+  try {
+    const response = await apiFetch(`/api/incidents/${encodeURIComponent(incidentId)}/stix`, { cache: 'no-store' });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || `STIX export failed (${response.status})`);
+    }
+    const text = await response.text();
+    const blob = new Blob([text], { type: 'application/stix+json;version=2.1' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `netshield-incident-${incidentId.replace(/[^a-zA-Z0-9._-]+/g, '_')}.stix.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    flashIncident(incidentId, 'STIX 2.1 bundle exported', 'is-ok');
+  } catch (error) {
+    flashIncident(incidentId, error.message || 'STIX export failed', 'is-error');
+  }
+  renderIncidents();
+}
+
+function intelHtml(flow) {
+  if (flow.simulation) return '<p class="note">Synthetic fixture. No external lookup is made.</p>';
+  const cached = state.intelCache[flow.src_ip];
+  if (cached === null || cached === undefined || cached.loading) {
+    return `<p class="note">Attribution is fetched when a public address is selected. <button class="btn compact" type="button" data-intel-action="refresh">Query attribution</button></p>
+      <p class="note">Missing MaxMind or AbuseIPDB configuration renders as unknown, never as clean.</p>`;
+  }
+  if (cached.error) return `<p class="note is-error">${escapeHtml(cached.error)}</p>`;
+  const geo = cached.geo || {};
+  const asn = cached.asn || {};
+  const reputation = cached.reputation || {};
+  const asnText = asn.number ? `AS${asn.number} ${asn.organization || ''}`.trim() : 'Unknown';
+  const geoText = geo.country_code ? `${geo.country_code}${geo.city ? ` · ${geo.city}` : ''}` : 'Unknown';
+  const repText = reputation.status === 'live'
+    ? `${reputation.abuse_score ?? 0}/100 (${reputation.total_reports ?? 0} reports)`
+    : `Not available (${reputation.status || 'not queried'})`;
+  return `<dl>
+      <div class="kv"><dt>ASN</dt><dd>${escapeHtml(asnText)}</dd></div>
+      <div class="kv"><dt>GeoIP</dt><dd>${escapeHtml(geoText)}</dd></div>
+      <div class="kv"><dt>Scope</dt><dd>${escapeHtml(cached.scope || 'unknown')}</dd></div>
+      <div class="kv"><dt>Reputation</dt><dd>${escapeHtml(repText)}</dd></div>
+    </dl>
+    <p class="note">${escapeHtml(cached.note || 'Attribution requires operator-supplied databases or keys.')}</p>`;
+}
+
+function ensureIntel(flow) {
+  if (!flow || flow.simulation || !flow.src_ip) return;
+  if (state.intelCache[flow.src_ip] !== undefined) return;
+  state.intelCache[flow.src_ip] = { loading: true };
+  apiFetch(`/api/intel/${encodeURIComponent(flow.src_ip)}?reputation=true`, { cache: 'no-store' })
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      state.intelCache[flow.src_ip] = response.ok ? data : { error: data.error || `Lookup failed (${response.status})` };
+    })
+    .catch((error) => {
+      state.intelCache[flow.src_ip] = { error: error.message || 'Lookup failed' };
+    })
+    .finally(() => {
+      if (String(state.selectedId) === String(flow.id)) renderInspector();
+    });
+}
+
+
 
 function filteredFlows() {
   const query = state.search.trim().toLowerCase();
@@ -695,6 +991,11 @@ function renderInspector() {
     </div>` : ''}
 
     <div class="inspector-section">
+      <p class="section-title">Threat context</p>
+      <div id="intelBody">${intelHtml(flow)}</div>
+    </div>
+
+    <div class="inspector-section">
       <p class="section-title">Record</p>
       <dl>
         <div class="kv"><dt>Record ID</dt><dd>${escapeHtml(flow.id)}</dd></div>
@@ -784,6 +1085,14 @@ function renderInspector() {
       button.disabled = false;
     }
   });
+
+  $('intelBody')?.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-intel-action="refresh"]')) return;
+    delete state.intelCache[flow.src_ip];
+    renderInspector();
+  });
+
+  ensureIntel(flow);
 }
 
 /* ---------- main render ---------- */
@@ -794,6 +1103,9 @@ function renderAll() {
   renderMix();
   renderSensorList();
   renderSensorOptions();
+  renderVectors();
+  renderFleet();
+  renderIncidents();
   renderQueue();
   renderInspector();
   drawChart();
@@ -816,6 +1128,8 @@ async function pollSnapshot({ initial = false, force = false } = {}) {
     state.stats = data.stats || state.stats;
     state.alertBudget = data.alert_budget || state.alertBudget;
     state.sensors = Array.isArray(data.sensors) ? data.sensors : state.sensors;
+    state.sensorFleet = data.sensor_fleet || state.sensorFleet;
+    state.captureInterface = data.capture_interface || state.captureInterface;
 
     if (initial) {
       state.flows = [];
@@ -839,6 +1153,8 @@ async function pollSnapshot({ initial = false, force = false } = {}) {
     state.lastError = null;
     state.lastSnapshotAt = Date.now();
     renderAll();
+    if (initial || state.incidentTick % 3 === 0) pollIncidents();
+    state.incidentTick = (state.incidentTick || 0) + 1;
   } catch (error) {
     state.lastError = error;
     state.loading = false;
@@ -852,6 +1168,22 @@ async function pollSnapshot({ initial = false, force = false } = {}) {
     }
     renderHeader();
     renderQueueMeta();
+  }
+}
+
+async function pollIncidents() {
+  try {
+    const response = await apiFetch('/api/incidents?limit=50&open_only=true', { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+    state.incidents = Array.isArray(data.incidents) ? data.incidents : [];
+    const live = new Set(state.incidents.map((incident) => incident.incident_id));
+    for (const key of Object.keys(state.incidentDrafts)) {
+      if (!live.has(key)) delete state.incidentDrafts[key];
+    }
+    renderIncidents();
+  } catch {
+    // Incident polling is auxiliary; the flow snapshot remains the primary view.
   }
 }
 
@@ -1019,6 +1351,27 @@ function bindEvents() {
     else startDemo();
   });
 
+  const incidentList = $('incidentList');
+  if (incidentList) {
+    const updateDraft = (event) => {
+      const target = event.target.closest('[data-incident][data-field]');
+      if (!target) return;
+      const id = target.dataset.incident;
+      state.incidentDrafts[id] = state.incidentDrafts[id] || {};
+      state.incidentDrafts[id][target.dataset.field] = target.value;
+    };
+    incidentList.addEventListener('input', updateDraft);
+    incidentList.addEventListener('change', updateDraft);
+    incidentList.addEventListener('click', (event) => {
+      const action = event.target.closest('[data-incident-action]');
+      if (!action) return;
+      const id = action.dataset.incident;
+      if (action.dataset.incidentAction === 'save') saveIncidentTriage(id);
+      else if (action.dataset.incidentAction === 'plan') loadContainmentPlan(id);
+      else if (action.dataset.incidentAction === 'stix') downloadIncidentStix(id);
+    });
+  }
+
   document.querySelectorAll('[data-filter]').forEach((button) => {
     button.addEventListener('click', () => {
       state.filter = button.dataset.filter;
@@ -1145,6 +1498,9 @@ function init() {
   renderHeader();
   renderQueueMeta();
   renderMix();
+  renderVectors();
+  renderFleet();
+  renderIncidents();
   renderInspector();
   startPolling();
 

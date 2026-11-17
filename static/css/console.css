@@ -1546,6 +1546,353 @@ kbd {
   flex-wrap: wrap;
 }
 
+/* ---------- Ingestion vectors, fleet, incidents ---------- */
+
+.vector-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+}
+
+.vector-bar-label {
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.vector-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vector-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.vector-chip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.vector-chip[data-state="active"] {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--text-hi);
+}
+
+.vector-chip[data-state="active"] i {
+  background: var(--teal-strong);
+}
+
+.vector-bar-note {
+  flex: 1 1 320px;
+  color: var(--text-lo);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.fleet-panel,
+.incident-panel {
+  margin-top: 14px;
+}
+
+.fleet-count {
+  color: var(--text-med);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--line);
+}
+
+.fleet-card {
+  padding: 11px 13px;
+  background: var(--surface);
+}
+
+.fleet-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fleet-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-med);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fleet-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-lo);
+}
+
+.fleet-card[data-status="online"] .fleet-status i {
+  background: var(--green);
+}
+
+.fleet-card[data-status="stale"] .fleet-status i {
+  background: var(--amber);
+}
+
+.fleet-card[data-status="never_reported"] .fleet-status i {
+  background: var(--line-strong);
+}
+
+.fleet-age {
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 9.5px;
+}
+
+.fleet-card h3 {
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fleet-interface {
+  margin-top: 1px;
+  color: var(--text-lo);
+  font-size: 10.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fleet-vector {
+  margin-top: 3px;
+  color: var(--teal-strong);
+  font-size: 10.5px;
+}
+
+.fleet-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 10px;
+  margin-top: 8px;
+}
+
+.fleet-metrics dt {
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fleet-metrics dd {
+  color: var(--text-med);
+  font-size: 10.5px;
+}
+
+.incident-list {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+}
+
+.incident-card {
+  padding: 12px 13px;
+  background: var(--surface);
+}
+
+.incident-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.incident-card header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.severity-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  color: var(--text-med);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+}
+
+.severity-pill[data-severity="P1"],
+.severity-pill[data-severity="P2"] {
+  border-color: var(--red);
+  background: var(--red-wash);
+  color: var(--red);
+}
+
+.severity-pill[data-severity="P3"] {
+  border-color: var(--amber);
+  background: var(--amber-wash);
+  color: var(--amber);
+}
+
+.sla-pill {
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.sla-pill[data-state="overdue"] {
+  color: var(--red);
+}
+
+.sla-pill[data-state="due_soon"] {
+  color: var(--amber);
+}
+
+.sla-pill[data-state="acknowledged"],
+.sla-pill[data-state="closed"] {
+  color: var(--green);
+}
+
+.incident-meta {
+  margin-top: 5px;
+  color: var(--text-med);
+  font-size: 10.5px;
+}
+
+.incident-id {
+  margin-top: 2px;
+  color: var(--text-lo);
+  font-size: 9.5px;
+  overflow-wrap: anywhere;
+}
+
+.incident-controls {
+  display: flex;
+  align-items: end;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+}
+
+.incident-controls label {
+  display: grid;
+  gap: 3px;
+}
+
+.incident-controls label.wide {
+  flex: 1 1 180px;
+}
+
+.incident-controls label span {
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.incident-controls select,
+.incident-controls input {
+  height: 27px;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--bg-subtle);
+  color: var(--text-hi);
+  font-size: 11px;
+}
+
+.incident-controls input {
+  width: 150px;
+}
+
+.incident-controls label.wide input {
+  width: 100%;
+}
+
+.incident-evidence {
+  display: grid;
+  gap: 2px;
+  margin-top: 8px;
+  padding-left: 16px;
+  color: var(--text-lo);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  list-style: disc;
+}
+
+.incident-plan {
+  margin-top: 9px;
+  padding: 9px 10px;
+  border: 1px solid var(--amber);
+  background: var(--amber-wash);
+}
+
+.incident-plan ul {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+  list-style: none;
+}
+
+.incident-plan code {
+  color: var(--text-hi);
+  font-family: var(--mono);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.incident-flash {
+  margin-top: 7px;
+  color: var(--text-lo);
+  font-size: 10.5px;
+}
+
+.incident-flash.is-ok {
+  color: var(--green);
+}
+
+.incident-flash.is-error {
+  color: var(--red);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1220px) {

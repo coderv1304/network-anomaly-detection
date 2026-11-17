@@ -29,7 +29,7 @@ import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from hmac import compare_digest
 
@@ -56,10 +56,29 @@ from evidence_accumulator import (
     isolation_confidence,
     load_calibrator,
 )
-from pcap_parser import pcap_to_flows as _pcap_to_flows
+from pcap_parser import dissect_pcap as _dissect_pcap
 import mfa as mfa_module
 import oidc as oidc_module
-from threat_intel import lookup_abuseipdb
+from capture_metadata import (
+    INGESTION_VECTORS,
+    VECTOR_LABELS,
+    classify_ingestion_vector,
+    ingestion_label,
+)
+from incident_triage import (
+    severity_for,
+    triage_payload,
+    validate_status,
+)
+from sensor_fleet import SensorReportError, merge_fleet, parse_report as parse_sensor_report
+from soar import (
+    PlaybookError,
+    containment_plan,
+    dispatch_webhook,
+    stix_bundle,
+    webhook_config,
+)
+from threat_intel import enrich_ip, lookup_abuseipdb, reputation_stats
 from monitoring.prometheus_metrics import (
     ALERT_DELIVERY_FAILURES,
     ALERT_DELIVERY_LATENCY,
@@ -91,6 +110,17 @@ from training.model_registry import (
     feature_schema_version,
     resolve_serving_path,
 )
+
+# Load an operator-local .env before any environment-derived configuration.
+# Real environment variables win, so a deployment always overrides a file left
+# on disk. The loader never writes or prints a secret; .env is gitignored and
+# excluded from the tracked-file secret scan.
+try:
+    from dotenv import load_dotenv as _load_dotenv
+
+    _load_dotenv(override=False)
+except ImportError:  # python-dotenv is pinned, but keep import failure harmless
+    pass
 
 # ---------------------------------------------------------------------
 # Live capture interface selection (used by the capture thread started at
@@ -1224,6 +1254,101 @@ class FlowReviewAudit(db.Model):
     note_changed = db.Column(db.Boolean, nullable=False, default=False)
     changed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
     flow = db.relationship("Flow")
+
+
+class SensorReport(db.Model):
+    """Last collector-reported heartbeat for one sensor/interface pair.
+
+    Values are stored exactly as the collector sent them. Missing metrics stay
+    NULL; the UI renders them as "not reported" instead of showing a plausible
+    but invented bandwidth, drop rate, or capture driver.
+    """
+
+    __tablename__ = "sensor_reports"
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, nullable=True, index=True)
+    sensor_id = db.Column(db.String(80), nullable=False, index=True)
+    interface = db.Column(db.String(120), nullable=False, default="")
+    interface_description = db.Column(db.String(200), nullable=False, default="")
+    vector = db.Column(db.String(24), nullable=False, default="unknown")
+    vector_basis = db.Column(db.String(32), nullable=False, default="name_heuristic")
+    capture_driver = db.Column(db.String(40), nullable=True)
+    link_type = db.Column(db.String(40), nullable=True)
+    link_speed_mbps = db.Column(db.Float, nullable=True)
+    rx_bytes = db.Column(db.Float, nullable=True)
+    tx_bytes = db.Column(db.Float, nullable=True)
+    rx_packets = db.Column(db.Float, nullable=True)
+    tx_packets = db.Column(db.Float, nullable=True)
+    rx_dropped = db.Column(db.Float, nullable=True)
+    tx_dropped = db.Column(db.Float, nullable=True)
+    uptime_seconds = db.Column(db.Float, nullable=True)
+    reported_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    received_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    __table_args__ = (
+        db.UniqueConstraint(
+            "tenant_id", "sensor_id", "interface", name="uq_sensor_reports_identity"
+        ),
+    )
+
+    def to_report(self) -> dict:
+        return {
+            "sensor_id": self.sensor_id,
+            "interface": self.interface,
+            "interface_description": self.interface_description,
+            "vector": self.vector,
+            "vector_basis": self.vector_basis,
+            "capture_driver": self.capture_driver,
+            "link_type": self.link_type,
+            "link_speed_mbps": self.link_speed_mbps,
+            "rx_bytes": self.rx_bytes,
+            "tx_bytes": self.tx_bytes,
+            "rx_packets": self.rx_packets,
+            "tx_packets": self.tx_packets,
+            "rx_dropped": self.rx_dropped,
+            "tx_dropped": self.tx_dropped,
+            "uptime_seconds": self.uptime_seconds,
+            "reported_at": self.reported_at,
+            "received_at": self.received_at,
+        }
+
+
+class IncidentTriage(db.Model):
+    """Persisted analyst workflow state for one accumulator incident window.
+
+    Detection itself is in-memory and resets on restart. Triage state is stored
+    so an assigned analyst, note, and acknowledgment time survive a restart.
+    Severity is recomputed from the incident; it is not a column because the
+    accumulator's risk points outrank any stale stored copy.
+    """
+
+    __tablename__ = "incident_triage"
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, nullable=True, index=True)
+    incident_id = db.Column(db.String(200), nullable=False, index=True)
+    source_ip = db.Column(db.String(64), nullable=False)
+    status = db.Column(db.String(24), nullable=False, default="new")
+    assignee = db.Column(db.String(120), nullable=True)
+    note = db.Column(db.String(2000), nullable=False, default="")
+    updated_by = db.Column(db.String(120), nullable=False, default="system")
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+    acknowledged_at = db.Column(db.DateTime, nullable=True)
+    __table_args__ = (
+        db.UniqueConstraint(
+            "tenant_id", "incident_id", name="uq_incident_triage_identity"
+        ),
+    )
+
+    def to_record(self) -> dict:
+        return {
+            "status": self.status,
+            "assignee": self.assignee,
+            "note": self.note,
+            "updated_by": self.updated_by,
+            "updated_at": self.updated_at,
+            "acknowledged_at": self.acknowledged_at,
+        }
 
 
 # ---------------------------------------------------------------------
@@ -2496,16 +2621,18 @@ def predict_csv():
         packet_count = None
         capture_type = "CSV flow export"
         capture_filename = None
+        capture_metadata = None
         sample_meta = None
         if "file" in request.files and request.files["file"].filename != "":
             file = request.files["file"]
             filename = file.filename.lower()
             if filename.endswith((".pcap", ".pcapng")):
                 try:
-                    df, _, packet_count = _pcap_to_flows(file.stream)
+                    df, _, capture_metadata = _dissect_pcap(file.stream)
                 except ValueError as e:
                     return jsonify({"error": str(e)}), 400
-                capture_type = "Scapy PCAP dissector"
+                packet_count = capture_metadata["frame_count"]
+                capture_type = "PCAP packet capture (Scapy dissector)"
                 capture_filename = os.path.basename(file.filename)
             elif filename.endswith(".csv"):
                 try:
@@ -2515,6 +2642,8 @@ def predict_csv():
                     file.seek(0)
                     file.seek(0)
                     df = pd.read_csv(file, encoding="cp1252", nrows=250_001, low_memory=False)
+                df.columns = df.columns.str.strip()
+                capture_type = ingestion_label(file.filename, df.columns)
             else:
                 return jsonify({"error": "Only .csv, .pcap, and .pcapng files are supported."}), 415
         elif request.args.get("sample") or ((request.get_json(silent=True) or {}).get("sample") is not None):
@@ -2708,6 +2837,8 @@ def predict_csv():
 
             # MITRE ATT&CK Mapping
             iface = "pcap" if packet_count is not None else "batch"
+            interface_value = (capture_metadata or {}).get("interface_vector") or iface
+            l2_meta = (capture_metadata or {}).get("link_type")
             packet_dissector = row_dict.get("Packet Dissector")
             if not isinstance(packet_dissector, dict):
                 packet_dissector = None
@@ -2735,9 +2866,9 @@ def predict_csv():
                     "model_argmax_label": str(argmax_labels[i]),
                 },
                 "mitre": None,
-                "interface": iface,
+                "interface": interface_value,
                 "interface_label": "Uploaded capture" if packet_count is not None else "CSV upload",
-                "l2_meta": None,
+                "l2_meta": l2_meta,
                 "threat_intel": {
                     "asn": "Not enriched",
                     "geo": "Not enriched",
@@ -2776,25 +2907,60 @@ def predict_csv():
         public_source_ips = list(dict.fromkeys(
             flow["src_ip"] for flow in sample_flows if flow["is_attack"]
         ))[:20]
+        attribution = {}
         abuse_results = {}
-        if os.environ.get("NETSHIELD_THREAT_INTEL_ENABLED", "false").lower() == "true":
+        if public_source_ips:
             with ThreadPoolExecutor(max_workers=5) as executor:
-                abuse_results = dict(zip(public_source_ips, executor.map(lookup_abuseipdb, public_source_ips)))
+                attribution = dict(zip(
+                    public_source_ips,
+                    executor.map(
+                        lambda ip: enrich_ip(str(ip), include_reputation=False),
+                        public_source_ips,
+                    ),
+                ))
+            if os.environ.get("NETSHIELD_THREAT_INTEL_ENABLED", "false").lower() == "true":
+                with ThreadPoolExecutor(max_workers=5) as executor:
+                    abuse_results = dict(zip(public_source_ips, executor.map(lookup_abuseipdb, public_source_ips)))
 
         for flow in sample_flows:
             if not flow["is_attack"]:
                 continue
-            reputation = abuse_results.get(flow["src_ip"], {"status": "not_queried", "abuse_score": None})
             intel = flow["threat_intel"]
+            enriched = attribution.get(flow["src_ip"]) or {}
+            geo = enriched.get("geo") or {}
+            asn = enriched.get("asn") or {}
+            intel["attribution_status"] = geo.get("status") or "not_queried"
+            if asn.get("number") is not None:
+                intel["asn"] = f"AS{asn['number']} {asn.get('organization') or ''}".strip()
+            else:
+                intel["asn"] = "Unknown"
+            if geo.get("country_code"):
+                intel["geo"] = geo.get("country_code")
+            else:
+                intel["geo"] = "Unknown"
+            if enriched.get("note") and not abuse_results:
+                intel["tag"] = enriched["note"]
+            elif geo.get("status") == "not_configured":
+                intel["tag"] = "GeoIP/ASN not configured; no attribution inferred"
+
+            reputation = abuse_results.get(
+                flow["src_ip"], {"status": "not_queried", "abuse_score": None}
+            )
             intel["provider_status"] = reputation["status"]
             intel["abuse_score"] = reputation.get("abuse_score")
             intel["total_reports"] = reputation.get("total_reports")
             if reputation["status"] == "live":
-                intel["asn"] = reputation.get("isp", "Unknown ISP")
-                intel["geo"] = reputation.get("country", "Unknown")
+                if intel["asn"] == "Unknown" and reputation.get("isp"):
+                    intel["asn"] = reputation.get("isp")
+                if intel["geo"] == "Unknown" and reputation.get("country"):
+                    intel["geo"] = reputation.get("country")
                 intel["tag"] = "Tor exit node" if reputation.get("is_tor") else reputation.get("usage_type", "Unknown")
             elif reputation["status"] == "not_configured":
-                intel["tag"] = "Set ABUSEIPDB_API_KEY to enable live checks"
+                intel["tag"] = (
+                    intel["tag"]
+                    if intel["tag"] not in {"Reputation not queried", ""}
+                    else "Set ABUSEIPDB_API_KEY to enable live reputation checks"
+                )
             elif reputation["status"] == "private_address":
                 intel["tag"] = "Private address; external lookup skipped"
             elif reputation["status"] == "unavailable":
@@ -2817,11 +2983,13 @@ def predict_csv():
             },
             "sensor_fleet": [],
             "sensor_status": "No sensor inventory is connected to this research prototype.",
+            "capture_metadata": capture_metadata,
             "ingestion": {
                 "type": capture_type,
                 "filename": capture_filename,
                 "packets_dissected": packet_count,
                 "flows_extracted": len(df) if packet_count is not None else None,
+                "vector": (capture_metadata or {}).get("interface_vector"),
                 "sample": sample_meta,
             }
         })
@@ -3348,6 +3516,106 @@ def _sensor_summary_payload():
     }
 
 
+def _sensor_reports_for_tenant():
+    """Return stored collector heartbeats for the caller's tenant."""
+    tenant_id = current_tenant_id()
+    query = SensorReport.query
+    if tenant_id is not None:
+        query = query.filter(SensorReport.tenant_id == tenant_id)
+    return query.order_by(SensorReport.received_at.desc()).all()
+
+
+def _fleet_payload():
+    """Merge collector heartbeats with flow-derived sensor activity.
+
+    Every measurement in the response was sent by a collector. Nothing is
+    synthesised: an unreported link speed, drop counter, or driver is null.
+    """
+    flow_rows = _sensor_summary_payload()["sensors"]
+    reports = [row.to_report() for row in _sensor_reports_for_tenant()]
+    payload = merge_fleet(reports, flow_rows)
+    for entry in payload["sensors"]:
+        entry["vector_label"] = VECTOR_LABELS.get(
+            entry.get("vector") or "unknown", VECTOR_LABELS["unknown"]
+        )
+    payload["vectors"] = [
+        {"id": vector, "label": VECTOR_LABELS[vector]} for vector in INGESTION_VECTORS
+    ]
+    return payload
+
+
+def _capture_interface_payload():
+    """Describe the local capture selection without inventing adapter facts."""
+    raw_interfaces = CAPTURE_STATUS.get("interfaces") or []
+    interfaces = []
+    for entry in raw_interfaces:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("interface") or ""
+        info = classify_ingestion_vector(name, "")
+        interfaces.append(
+            {
+                **entry,
+                "vector": info["vector"],
+                "vector_label": info["label"],
+                "vector_basis": info["basis"],
+            }
+        )
+    selected = CAPTURE_STATUS.get("interface") or ""
+    primary = classify_ingestion_vector(selected, "")
+    return {
+        "state": CAPTURE_STATUS.get("state"),
+        "selection_mode": CAPTURE_INTERFACE,
+        "selected_interface": selected or None,
+        "vector": primary["vector"],
+        "vector_label": primary["label"],
+        "vector_basis": primary["basis"],
+        "interfaces": interfaces,
+        "unknown_interfaces": CAPTURE_STATUS.get("unknown_interfaces") or [],
+        "flows_received": CAPTURE_STATUS.get("flows_received", 0),
+        "last_flow_at": CAPTURE_STATUS.get("last_flow_at"),
+        "note": (
+            "The capture vector is inferred from adapter names. It is not read "
+            "from the operating system and does not change the model input: "
+            "Layer-3/4 flow statistics are the same on Ethernet, 802.11, "
+            "cellular, or a VPN tunnel."
+        ),
+    }
+
+
+def _triage_map(tenant_id, incident_ids):
+    """Load persisted triage rows for a set of incident windows."""
+    if not incident_ids:
+        return {}
+    query = IncidentTriage.query.filter(IncidentTriage.incident_id.in_(list(incident_ids)))
+    if tenant_id is not None:
+        query = query.filter(IncidentTriage.tenant_id == tenant_id)
+    return {row.incident_id: row.to_record() for row in query.all()}
+
+
+def _decorate_incidents(incidents, tenant_id):
+    """Attach severity, SLA, and stored triage state to accumulator rows."""
+    triage = _triage_map(tenant_id, [row["incident_id"] for row in incidents])
+    for incident in incidents:
+        record = triage.get(incident["incident_id"])
+        incident["severity"] = severity_for(
+            incident.get("max_risk_points", incident.get("risk_points", 0)),
+            incident.get("active_signals", 0),
+        )
+        incident["triage"] = triage_payload(incident, record)
+    return incidents
+
+
+def _incident_for_request(incident_id):
+    snapshot = _EVIDENCE_ACCUMULATOR.snapshot(
+        tenant_id=requested_tenant_id(), open_only=False, limit=500
+    )
+    for incident in snapshot["incidents"]:
+        if incident["incident_id"] == incident_id:
+            return incident
+    return None
+
+
 @app.route("/api/stats", methods=["GET"])
 @limiter.limit(os.environ.get("READ_RATE_LIMIT", "120 per minute"))
 @require_permission("stats:read")
@@ -3387,15 +3655,309 @@ def list_incidents():
     if not 1 <= limit <= 500:
         return jsonify({"error": "limit must be 1-500"}), 400
     open_only = request.args.get("open_only", "true").lower() == "true"
+    tenant_id = requested_tenant_id()
     payload = _EVIDENCE_ACCUMULATOR.snapshot(
-        tenant_id=requested_tenant_id(), open_only=open_only, limit=limit
+        tenant_id=tenant_id, open_only=open_only, limit=limit
     )
+    payload["incidents"] = _decorate_incidents(payload["incidents"], tenant_id)
     payload["enabled"] = MULTI_SIGNAL_ENABLED
     payload["in_memory"] = True
+    payload["triage_persisted"] = True
+    payload["severity_basis"] = "internal_risk_points_not_cvss"
     payload["calibration_status"] = _CALIBRATION_STATUS
     payload["isolation_forest_loaded"] = _load_isolation_bundle() is not None
     payload["threat_intel_on_ingest"] = THREAT_INTEL_ON_INGEST
     return jsonify(payload)
+
+
+_SENSOR_REPORT_FIELDS = {
+    "sensor_id",
+    "interface",
+    "interface_description",
+    "vector",
+    "capture_driver",
+    "link_type",
+    "link_speed_mbps",
+    "rx_bytes",
+    "tx_bytes",
+    "rx_packets",
+    "tx_packets",
+    "rx_dropped",
+    "tx_dropped",
+    "uptime_seconds",
+    "reported_at",
+}
+
+
+@app.route("/api/sensors/heartbeat", methods=["POST"])
+@limiter.limit(os.environ.get("HEARTBEAT_RATE_LIMIT", "240 per minute"))
+@require_api_key
+def sensor_heartbeat():
+    """Store one collector heartbeat. Absent metrics stay absent.
+
+    This endpoint accepts only the documented heartbeat fields. It does not
+    sample the host, open an adapter, or fill in a default driver.
+    """
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "A JSON object is required"}), 400
+    unsupported = sorted(set(body) - _SENSOR_REPORT_FIELDS)
+    if unsupported:
+        return jsonify(
+            {"error": f"Unsupported heartbeat field(s): {', '.join(unsupported)}"}
+        ), 400
+    try:
+        report = parse_sensor_report(body)
+    except SensorReportError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    tenant_id = current_tenant_id()
+    row = SensorReport.query.filter_by(
+        tenant_id=tenant_id,
+        sensor_id=report["sensor_id"],
+        interface=report["interface"],
+    ).first()
+    if row is None:
+        row = SensorReport(
+            tenant_id=tenant_id,
+            sensor_id=report["sensor_id"],
+            interface=report["interface"],
+        )
+        db.session.add(row)
+    for field in (
+        "interface_description",
+        "vector",
+        "vector_basis",
+        "capture_driver",
+        "link_type",
+        "link_speed_mbps",
+        "rx_bytes",
+        "tx_bytes",
+        "rx_packets",
+        "tx_packets",
+        "rx_dropped",
+        "tx_dropped",
+        "uptime_seconds",
+    ):
+        value = report[field]
+        # Preserve a reported zero; only an empty string becomes NULL.
+        setattr(row, field, None if value == "" else value)
+    reported_at = report["reported_at"]
+    if reported_at.tzinfo is not None:
+        reported_at = reported_at.astimezone(timezone.utc).replace(tzinfo=None)
+    row.reported_at = reported_at
+    row.received_at = datetime.utcnow()
+    db.session.commit()
+
+    entry = next(
+        (
+            sensor
+            for sensor in _fleet_payload()["sensors"]
+            if sensor.get("sensor_id") == row.sensor_id
+            and (sensor.get("interface") or "") == (row.interface or "")
+        ),
+        None,
+    )
+    return jsonify({"accepted": True, "sensor": entry}), 202
+
+
+@app.route("/api/sensors/fleet", methods=["GET"])
+@limiter.limit(os.environ.get("READ_RATE_LIMIT", "120 per minute"))
+@require_permission("console:read")
+def sensor_fleet():
+    """Collector-reported fleet health. Missing metrics are null, not zero."""
+    return jsonify(_fleet_payload())
+
+
+@app.route("/api/capture/interface", methods=["GET"])
+@require_permission("console:read")
+def capture_interface():
+    """Report capture provenance as a heuristic vector, not an OS fact."""
+    return jsonify(_capture_interface_payload())
+
+
+@app.route("/api/intel/<path:ip_address>", methods=["GET"])
+@limiter.limit(os.environ.get("READ_RATE_LIMIT", "120 per minute"))
+@require_permission("stats:read")
+def ip_intel(ip_address):
+    """Attribution and optional reputation for one address.
+
+    Missing MaxMind databases or an absent AbuseIPDB key produce explicit
+    unknown/not-configured states. They never produce a "clean" verdict.
+    """
+    reputation_requested = request.args.get("reputation", "false").lower() == "true"
+    reputation_enabled = (
+        os.environ.get("NETSHIELD_THREAT_INTEL_ENABLED", "false").lower() == "true"
+        and bool(os.environ.get("ABUSEIPDB_API_KEY"))
+    )
+    payload = enrich_ip(
+        ip_address, include_reputation=reputation_requested and reputation_enabled
+    )
+    payload["reputation_requested"] = reputation_requested
+    payload["reputation_enabled"] = reputation_enabled
+    if reputation_requested and not reputation_enabled:
+        # Explicit refusal: the request asked for a lookup, the deployment is
+        # not configured for one. No third party was contacted.
+        payload["reputation"] = {
+            "status": "disabled",
+            "abuse_score": None,
+            "note": (
+                "Reputation lookups require NETSHIELD_THREAT_INTEL_ENABLED=true "
+                "and ABUSEIPDB_API_KEY. No external request was made."
+            ),
+        }
+    if payload.get("scope") == "invalid":
+        return jsonify({"error": "A valid IPv4 or IPv6 address is required", **payload}), 400
+    return jsonify(payload)
+
+
+@app.route("/api/incidents/<path:incident_id>/triage", methods=["PUT"])
+@require_permission("flows:review")
+def update_incident_triage(incident_id):
+    """Persist analyst triage state for one open incident window."""
+    incident = _incident_for_request(incident_id)
+    if incident is None:
+        return jsonify(
+            {"error": "Incident window is not in the in-memory accumulator; it may have expired or the service may have restarted."}
+        ), 404
+    body = request.get_json(silent=True) or {}
+    if not isinstance(body, dict):
+        return jsonify({"error": "A JSON object is required"}), 400
+    try:
+        status = validate_status(body.get("status", "new"))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    assignee = str(body.get("assignee") or "").strip()[:120] or None
+    note = str(body.get("note") or "")[:2000]
+    identity = current_identity() or {}
+    actor = identity.get("actor") or "anonymous"
+    tenant_id = requested_tenant_id()
+
+    row = IncidentTriage.query.filter_by(
+        tenant_id=tenant_id, incident_id=incident_id
+    ).first()
+    if row is None:
+        row = IncidentTriage(
+            tenant_id=tenant_id,
+            incident_id=incident_id,
+            source_ip=incident["source_ip"],
+        )
+        db.session.add(row)
+    row.status = status
+    row.assignee = assignee
+    row.note = note
+    row.updated_by = actor
+    row.updated_at = datetime.utcnow()
+    if status in {"investigating", "suppressed", "remediated"} and row.acknowledged_at is None:
+        row.acknowledged_at = datetime.utcnow()
+    db.session.commit()
+    record_audit(
+        "incidents.triage",
+        "incident",
+        incident_id,
+        detail={"status": status, "assignee": assignee, "note_changed": bool(note)},
+        commit=True,
+    )
+    return jsonify(
+        {
+            "incident_id": incident_id,
+            "severity": severity_for(
+                incident.get("max_risk_points", 0), incident.get("active_signals", 0)
+            ),
+            "triage": triage_payload(incident, row.to_record()),
+        }
+    )
+
+
+@app.route("/api/incidents/<path:incident_id>/playbook", methods=["POST"])
+@require_permission("flows:review")
+def run_incident_playbook(incident_id):
+    """Return a dry-run containment plan or attempt an allowlisted webhook.
+
+    No firewall rule is executed. The response states ``executed: false`` for
+    containment plans. A webhook is only sent when explicitly configured and
+    allowlisted; failures are reported as failures.
+    """
+    incident = _incident_for_request(incident_id)
+    if incident is None:
+        return jsonify({"error": "Incident window is not in the accumulator."}), 404
+    body = request.get_json(silent=True) or {}
+    action = str(body.get("action") or "containment_plan").strip().lower()
+    if action in {"containment", "containment_plan", "dry_run"}:
+        try:
+            plan = containment_plan(incident)
+        except PlaybookError as exc:
+            return jsonify({"error": str(exc), "executed": False}), 422
+        record_audit(
+            "incidents.playbook",
+            "incident",
+            incident_id,
+            detail={"action": action, "mode": "dry_run", "executed": False},
+            commit=True,
+        )
+        return jsonify(plan), 200
+    if action in {"notify", "notify_webhook"}:
+        result = dispatch_webhook(incident)
+        record_audit(
+            "incidents.playbook",
+            "incident",
+            incident_id,
+            outcome="success" if result.get("delivered") else "failure",
+            detail={
+                "action": action,
+                "status": result.get("status"),
+                "delivered": result.get("delivered"),
+            },
+            commit=True,
+        )
+        return jsonify(result), 200 if result.get("delivered") else 409
+    return jsonify(
+        {"error": "action must be containment_plan or notify_webhook", "executed": False}
+    ), 400
+
+
+@app.route("/api/incidents/<path:incident_id>/stix", methods=["GET"])
+@require_permission("flows:review")
+def incident_stix(incident_id):
+    """Export a STIX 2.1 bundle for one incident. No threat feed is implied."""
+    incident = _incident_for_request(incident_id)
+    if incident is None:
+        return jsonify({"error": "Incident window is not in the accumulator."}), 404
+    tenant = db.session.get(Tenant, requested_tenant_id()) if requested_tenant_id() else None
+    try:
+        bundle = stix_bundle(incident, tenant_slug=tenant.slug if tenant else None)
+    except PlaybookError as exc:
+        return jsonify({"error": str(exc)}), 422
+    record_audit(
+        "incidents.stix_export",
+        "incident",
+        incident_id,
+        detail={"objects": len(bundle.get("objects", []))},
+        commit=True,
+    )
+    return Response(
+        json.dumps(bundle, indent=2, sort_keys=True),
+        content_type="application/stix+json;version=2.1",
+    )
+
+
+@app.route("/api/soar/config", methods=["GET"])
+@require_permission("flows:review")
+def soar_config():
+    """Report webhook configuration state without disclosing the URL."""
+    config = webhook_config()
+    return jsonify(
+        {
+            "enabled": config["enabled"],
+            "url_configured": bool(config["url"]),
+            "allowlist_hosts": config["allowlist"],
+            "containment_mode": "dry_run_only",
+            "note": (
+                "Containment playbooks never execute firewall changes. Webhook "
+                "delivery requires NETSHIELD_SOAR_ENABLED=true and an allowlisted host."
+            ),
+        }
+    )
 
 
 # ---------------------------------------------------------------------
@@ -3900,6 +4462,8 @@ def console_snapshot():
             "stats": _stats_payload(),
             "alert_budget": _alert_budget_payload(),
             "sensors": _sensor_summary_payload()["sensors"],
+            "sensor_fleet": _fleet_payload(),
+            "capture_interface": _capture_interface_payload(),
             "flows": [row.to_dict() for row in rows],
             "server_time": datetime.utcnow().isoformat() + "Z",
         }
@@ -3952,6 +4516,7 @@ def threat_intel_summary():
     """Report observable application totals without inventing IOCs or risk scores."""
     total = tenant_scoped(Flow).count()
     attacks = tenant_scoped(Flow).filter(Flow.is_attack.is_(True)).count()
+    stats = reputation_stats()
     return jsonify({
         "flow_count": total,
         "flagged_flow_count": attacks,
@@ -3959,11 +4524,17 @@ def threat_intel_summary():
         "ratio_is_calibrated_risk": False,
         "enrichment": {
             "provider": "AbuseIPDB",
+            "configured": bool(os.environ.get("ABUSEIPDB_API_KEY")),
             "enabled": (
                 os.environ.get("NETSHIELD_THREAT_INTEL_ENABLED", "false").lower() == "true"
                 and bool(os.environ.get("ABUSEIPDB_API_KEY"))
             ),
-            "source_records_returned": 0,
+            # Real per-process counters; cached answers are not re-counted.
+            "requests_this_process": stats["queries"],
+            "live_responses": stats["live"],
+            "errors_this_process": stats["errors"],
+            "cache_seconds": 3600,
+            "source_records_returned": stats["live"],
         },
     })
 
