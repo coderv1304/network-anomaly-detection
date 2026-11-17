@@ -26,7 +26,7 @@ bandit==1.7.9
 prometheus-client==0.20.0
 Flask-Limiter==3.5.1
 python-dotenv==1.2.2
-cryptography==46.0.3
+cryptography==50.0.2
 alembic==1.13.3
 
 # Build/install tooling that is present in the runtime image and is scanned by

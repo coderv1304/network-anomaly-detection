@@ -1,56 +1,56 @@
 {
   "drill": "encrypted SQLite backup, authenticated restore, optional off-host copy",
-  "timestamp_utc": "2026-11-12T04:17:32.714686+00:00",
+  "timestamp_utc": "2026-11-17T00:47:13.869958+00:00",
   "source": {
     "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\instance\\network_anomaly.db",
-    "sha256": "3e49f9ecdad06e981479403fc6ffb2bf3789ed42f5f0268ec4f6f61c1bfac137",
-    "last_modified_utc": "2026-11-12T04:15:08.989159+00:00",
+    "sha256": "8baf07e450b80ea92e27ef63a5476943c6b93adcefddcd9afc08c1d921dbc907",
+    "last_modified_utc": "2026-11-16T17:11:02.511868+00:00",
     "tables": {
-      "audit_events": 250,
-      "flow": 21851,
+      "audit_events": 1937,
+      "flow": 75799,
       "flow_review_audit": 2,
       "flow_reviews": 1,
-      "tenants": 1,
-      "users": 1
+      "tenants": 769,
+      "users": 647
     },
     "integrity_check": "ok"
   },
   "backup": {
-    "plaintext_path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\encrypted\\network_anomaly-20261112T041732Z.db",
-    "plaintext_sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
+    "plaintext_path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\backups\\network_anomaly-20261117T004710Z.db",
+    "plaintext_sha256": "09925e84b9e6b968c8db5e7a704b55be770916225d9649c5c58b88ce4488273b",
     "tables": {
-      "audit_events": 250,
-      "flow": 21851,
+      "audit_events": 1937,
+      "flow": 75799,
       "flow_review_audit": 2,
       "flow_reviews": 1,
-      "tenants": 1,
-      "users": 1
+      "tenants": 769,
+      "users": 647
     }
   },
   "encryption": {
-    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\docs\\backup_restore_artifacts\\encrypted\\network_anomaly-20261112T041732Z.db.enc",
-    "sha256": "3cf39a2ecb8a0c1263a8052ddcf8da4352e9ee09daad13bf89921b4976473ccc",
-    "size_bytes": 4218913,
-    "plaintext_sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
-    "nonce_hex": "ec66e7172eb54b4b8a1d2cf1",
+    "path": "C:\\Users\\varun\\OneDrive\\Desktop\\network-anomaly-detection\\backups\\network_anomaly-20261117T004710Z.db.enc",
+    "sha256": "c8aedc4a7480f14c6cc9acf6f9a91c1df403f23e272edf63e571bf0d240dbc40",
+    "size_bytes": 15110177,
+    "plaintext_sha256": "09925e84b9e6b968c8db5e7a704b55be770916225d9649c5c58b88ce4488273b",
+    "nonce_hex": "2fad8ebaa4c30abcbdea8bae",
     "algorithm": "AES-256-GCM"
   },
   "restore": {
-    "sha256": "a1a0bec16b30f89dfde96d9cb6a453307f615c64933b895863d4c6f5f86b0212",
+    "sha256": "09925e84b9e6b968c8db5e7a704b55be770916225d9649c5c58b88ce4488273b",
     "tables": {
-      "audit_events": 250,
-      "flow": 21851,
+      "audit_events": 1937,
+      "flow": 75799,
       "flow_review_audit": 2,
       "flow_reviews": 1,
-      "tenants": 1,
-      "users": 1
+      "tenants": 769,
+      "users": 647
     },
     "integrity_check": "ok",
-    "restore_seconds": 0.12
+    "restore_seconds": 0.768
   },
   "offsite": {
-    "path": "C:\\Users\\varun\\AppData\\Local\\Temp\\netshield-offsite\\network_anomaly-20261112T041732Z.db.enc",
-    "sha256": "3cf39a2ecb8a0c1263a8052ddcf8da4352e9ee09daad13bf89921b4976473ccc",
+    "path": "C:\\Users\\varun\\AppData\\Local\\Temp\\netshield-offsite\\network_anomaly-20261117T004710Z.db.enc",
+    "sha256": "c8aedc4a7480f14c6cc9acf6f9a91c1df403f23e272edf63e571bf0d240dbc40",
     "matches_local_ciphertext": true
   },
   "key": {
@@ -59,13 +59,13 @@
     "note": "The key is not written to the encrypted file or this report."
   },
   "rpo_observation": {
-    "source_last_modified_utc": "2026-11-12T04:15:08.989159+00:00",
-    "backup_started_utc": "1970-01-01T01:45:38.074320+00:00",
+    "source_last_modified_utc": "2026-11-16T17:11:02.511868+00:00",
+    "backup_started_utc": "1970-01-02T21:47:06.790966+00:00",
     "source_age_seconds": 0.0,
     "note": "Single-host observation, not a production RPO measurement."
   },
   "rto_observation": {
-    "restore_seconds": 0.12,
+    "restore_seconds": 0.768,
     "note": "Decrypt plus integrity check on this host, not a production RTO."
   },
   "checks": {

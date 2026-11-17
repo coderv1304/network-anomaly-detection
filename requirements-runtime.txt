@@ -23,7 +23,7 @@ requests==2.33.0
 # MFA encrypts TOTP secrets at rest and OIDC verifies RS256 ID tokens. Both
 # import cryptography directly, so pin it in the serving image rather than
 # relying on a transitive install.
-cryptography==46.0.3
+cryptography==50.0.2
 # Schema migrations are an explicit deploy step. Alembic also backs the
 # startup revision check in staging and production.
 alembic==1.13.3

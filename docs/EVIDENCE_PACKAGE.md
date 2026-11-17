@@ -187,8 +187,8 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `scripts/secret_scan.py` | `c59bc90bbce798e4c3097ba9b099b5224fdded17802601b2680c9deead4ba2f1` |
 | `tests/test_sensor_identity.py` | `2aaf435e998e21820cfd312e23a4cb353b17c92a45c455c7f1c703bb31e5a678` |
 | `tests/test_release_gate.py` | `a771f892e13beccab18ff62f0fab047dc59d56d65d8c915a5a4feec323aaccb3` |
-| `requirements.txt` | `c8b26fe28d02cd8562bc4c829f3d6ae53ef6748ddd2a8a3e2f525e860d3b4904` |
-| `requirements-runtime.txt` | `7f0be552a77ed0eee05a75cba293d50b766b5bec82c2149fe408d63f9f28599e` |
+| `requirements.txt` | `a002047f9a22c6d36c6e94f0636dfa6f4b71ca599c94d0a68e2a1ba0bb8a8702` |
+| `requirements-runtime.txt` | `f4005921fa01ba83ec5a7ae0731a79f3ba1f6904ce49c03f61d3c0fba3615c66` |
 | `app.py` | `a05b111e025675f0e12f8a8d0831a49b5b96c11a0b8f0b479341fbf69e9069a8` |
 | `mfa.py` | `c26900276ad0a7ed02714945e6becc1bd990a1a9468f10c4a327a76c25d9ecaa` |
 | `oidc.py` | `f6d5ab4d3bc4e21c7aa5ca4e0922cc504d23763dcbd3b8dd0dd1d307bc73f06d` |
@@ -409,7 +409,7 @@ Unsupervised drift monitoring used score PSI and two-sample Kolmogorov–Smirnov
 | pandas | 2.2.3 |
 | NumPy | 1.26.1 |
 | Flask | 3.1.3 |
-| cryptography | 46.0.3 (encrypted backup drill) |
+| cryptography | 50.0.2 (encrypted backup drill) |
 | Model artifact | `models/model_bundle_rf_day_based_seed42.pkl` for both the research results and the serving endpoint |
 
 Dependency lock: `requirements.txt` (SHA-256 above).
