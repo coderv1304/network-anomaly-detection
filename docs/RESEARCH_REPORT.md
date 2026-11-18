@@ -106,7 +106,7 @@ Monday–Tuesday           Wednesday            Thursday–Friday
 ## 4. Baseline Model Comparisons
 
 **Training script:** `training/train_pipeline.py`  
-**Runner:** `run_all_baselines.bat`
+**Runner:** `scripts/windows/run_all_baselines.bat`
 
 ### 4.1 Results Table (Seeds 42–46, Mean ± Std)
 
@@ -190,7 +190,7 @@ Traditional detection metrics assume unbounded analyst review capacity. Real SOC
 
 **Design document:** [`docs/ALERT_BURDEN_AND_FEEDBACK.md`](ALERT_BURDEN_AND_FEEDBACK.md)  
 **Code:** `training/simulate_feedback.py`  
-**Runner:** `run_feedback_simulation.bat`
+**Runner:** `scripts/windows/run_feedback_simulation.bat`
 
 ### 6.1 Research Question
 
@@ -239,7 +239,7 @@ Mon–Tue (Train) → Wed (Val threshold freeze) → Thu (Review period) → Fri
 
 **Design document:** [`docs/DRIFT_MONITORING.md`](DRIFT_MONITORING.md)  
 **Code:** `training/drift_monitor.py`  
-**Runner:** `run_drift_monitor.bat`
+**Runner:** `scripts/windows/run_drift_monitor.bat`
 
 ### 7.1 Methodology
 
@@ -418,24 +418,24 @@ REM Activate environment (Windows)
 venv\Scripts\activate
 
 REM Phase 3 — Train all baselines (RF, LR, Isolation Forest) across 5 seeds
-run_all_baselines.bat
+scripts/windows/run_all_baselines.bat
 
 REM Phase 4 — Alert burden metrics are computed automatically inside baseline training
 
 REM Phase 5 — Time-ordered simulated analyst feedback experiment
-run_feedback_simulation.bat
+scripts/windows/run_feedback_simulation.bat
 
 REM Phase 6 — Unsupervised drift monitoring experiment
-run_drift_monitor.bat
+scripts/windows/run_drift_monitor.bat
 
 REM Phase 7 — Live capture feature parity audit
-verify_feature_parity.bat
+scripts/windows/verify_feature_parity.bat
 
 REM Aggregate metrics and produce summary_metrics.json + BASELINE_RESULTS.md
 venv\Scripts\python.exe scripts/aggregate_metrics.py
 
 REM Run all phases in one command
-run_all_experiments.bat
+scripts/windows/run_all_experiments.bat
 
 REM Start the research workbench UI (development mode)
 venv\Scripts\python.exe app.py
@@ -469,12 +469,12 @@ venv\Scripts\python.exe app.py
 
 | Script | Phases |
 |---|---|
-| `run_all_baselines.bat` | RF + LR + Isolation Forest across seeds 42–46 |
-| `run_isolation_forest.bat` | Isolation Forest only |
-| `run_feedback_simulation.bat` | Phase 5 simulated feedback |
-| `run_drift_monitor.bat` | Phase 6 drift monitoring |
-| `verify_feature_parity.bat` | Phase 7 parity audit |
-| `run_all_experiments.bat` | All phases end-to-end |
+| `scripts/windows/run_all_baselines.bat` | RF + LR + Isolation Forest across seeds 42–46 |
+| `scripts/windows/run_isolation_forest.bat` | Isolation Forest only |
+| `scripts/windows/run_feedback_simulation.bat` | Phase 5 simulated feedback |
+| `scripts/windows/run_drift_monitor.bat` | Phase 6 drift monitoring |
+| `scripts/windows/verify_feature_parity.bat` | Phase 7 parity audit |
+| `scripts/windows/run_all_experiments.bat` | All phases end-to-end |
 | `training/d6_unseen_family.py` | D6 five-seed rare/unseen-family experiment |
 | `scripts/cost_sensitive_eval.py` | D9 cost curve and release gate |
 | `scripts/pilot_analysis.py` | S7 pilot metrics and gate analysis (requires a real pilot export) |

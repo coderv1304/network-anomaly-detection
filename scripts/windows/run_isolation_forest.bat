@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 rem ---------------------------------------------------------
 rem Run only the IsolationForest baseline over seeds 42-46.
 rem ---------------------------------------------------------

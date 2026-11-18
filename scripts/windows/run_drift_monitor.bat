@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 rem ---------------------------------------------------------
 rem Phase 6: Time-Ordered Drift Monitoring Experiment
 rem Tracks distribution shift (Score PSI and Feature KS-tests)

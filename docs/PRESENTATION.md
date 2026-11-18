@@ -205,7 +205,7 @@ Fifty runs: five seeds × ten policy/budget cells (no feedback plus four policie
 - Registry version: `serving-rf-day-based-seed42-v1`, calibration `uncalibrated`
 - Dataset hashes: recorded in the manifest
 - Environment: Python 3.12.10, scikit-learn 1.5.2, pandas 2.2.3, NumPy 1.26.1, Flask 2.3.2
-- Reproduction: `run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`
+- Reproduction: `scripts/windows/run_all_baselines.bat`, `scripts/windows/run_feedback_simulation.bat`, `scripts/windows/run_drift_monitor.bat`, `scripts/windows/verify_feature_parity.bat`
 
 **Speaker notes:** Serving, evaluation, and gating now use the same artifact: the Random Forest seed 42 bundle, verified by SHA-256 against the registry entry. That closes the provenance gap; it does not make the model accurate. The Analyze view states this in the interface, and it is still uncalibrated, so no confidence percentage is shown. If someone asks why the Analyze view looks quiet on a DDoS-heavy sample, the answer is the serving model's three-class output vocabulary, not a research result.
 

@@ -1,89 +1,40 @@
-<div align="center">
+# NetShield
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:4B6CB7,100:8E54E9&height=210&section=header&text=NetShield&fontSize=70&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Network%20Anomaly%20Detection%20%7C%20ML%20for%20Volumetric%20and%20Scanning%20Traffic&descAlignY=56&descSize=17" width="100%"/>
+NetShield is a network-flow analysis application: a Flask operator console, a research workbench, batch CSV/PCAP scoring, an optional Go capture collector, and reproducible evaluation tooling. It scores flows for **volumetric and scanning behavior** with a Random Forest trained on CIC-IDS-2017.
 
-<a href="https://github.com/coderv1304/network-anomaly-detection">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=21&pause=1000&color=8E54E9&center=true&vCenter=true&width=820&lines=Flow-based+anomaly+detection+on+CIC-IDS-2017;Random+Forest+%2B+frozen+Tier+A+schema;Flask+console+%2B+research+workbench;Honest+benchmarks%2C+including+negative+results;Research+prototype%2C+not+a+production+NIDS" alt="Typing SVG"/>
-</a>
+The project exists to measure the distance between a strong benchmark number and a usable detector: temporal leakage, class imbalance, dataset quality, prevalence collapse, and the feature mismatch between offline flow exports and live capture. Results are published with the failures intact.
 
-<br/>
+**Frozen scope:** flow-based detection of volumetric and scanning traffic. NetShield is not a general NIDS, does not block traffic, and has no validated live accuracy.
 
-<img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
-<img src="https://img.shields.io/badge/Flask-3.1-000000?style=for-the-badge&logo=flask&logoColor=white"/>
-<img src="https://img.shields.io/badge/scikit--learn-1.5-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white"/>
-<img src="https://img.shields.io/badge/Go-1.26-00ADD8?style=for-the-badge&logo=go&logoColor=white"/>
-<img src="https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge"/>
+## One-Click Demo
 
-<br/>
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python app.py
+```
 
-<img src="https://img.shields.io/badge/Tests-pytest%20%7C%20Go-informational?style=for-the-badge&logo=pytest&logoColor=white"/>
-<img src="https://img.shields.io/badge/Status-Research%20Prototype-orange?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Scope-Volumetric%20%26%20Scanning-8E54E9?style=for-the-badge"/>
+Open <http://localhost:5000> and click **Load 500-Flow Sample**. No dataset download is required.
 
-<br/><br/>
+The button posts to `POST /api/load-sample`, which reads `tests/fixtures/sample_flows_500.csv` through the same inference path, threshold policy, calibration artifact and `EvidenceAccumulator` as any collector ingest:
 
-<a href="http://localhost:5000">🖥️ Console</a> •
-<a href="http://localhost:5000/research">🔬 Research Workbench</a> •
-<a href="docs/MODEL_CARD.md">🧠 Model Card</a> •
-<a href="docs/CLAIM_EVIDENCE_MATRIX.md">📋 Claim Matrix</a> •
-<a href="docs/PHASE_STATUS.md">📌 Phase Status</a>
+- 500 flows: 350 benign across 12 hosts, plus 75 DDoS and 75 PortScan flows from the held-out Friday captures.
+- All 150 attack flows come from **two** source addresses inside **one 300-second window**.
+- On the shipped bundle this produces 88 per-flow alerts and **two** host/window incidents at 100/100 risk points.
+- Stored rows are tagged `provenance=bundled_sample_fixture`; the console queue and incident panel refresh in place.
 
-</div>
+Nothing is mocked. The fixture is an extract of real CIC-IDS-2017 rows with only `Flow ID`, `Source IP`, `Destination IP` and `Timestamp` rewritten; every model feature is the value CICFlowMeter measured. Rebuild and re-verify it with:
 
----
+```bash
+python scripts/build_sample_fixture.py --check
+```
 
-## 🛡️ About NetShield
+If the raw captures are absent, the builder falls back to a deterministic generator that emits the exact serving feature schema. Both paths are scored by the real bundle in the build assertion and in `tests/test_sample_fixture.py`.
 
-**NetShield** is an end-to-end network-flow analysis application that scores traffic for volumetric and scanning behavior using a Random Forest model trained on CIC-IDS-2017.
+Other surfaces: <http://localhost:5000/research> (frozen evaluation evidence, threshold policy, prevalence analysis) and <http://localhost:5000/upload> (batch CSV/PCAP scoring).
 
-It is built to explore the gap between strong benchmark numbers and useful monitoring: leakage, class imbalance, dataset quality, and feature mismatch between offline flow exports and live capture. The project ships a Flask operator console, a research workbench, batch PCAP/CSV analysis, an optional Go capture collector, and reproducible evaluation tooling.
-
-| | |
-|---|---|
-| 🎯 Project Type | Research prototype / engineering portfolio project |
-| 🧪 Detection Scope | Flow-based volumetric and scanning behavior only |
-| 📊 Primary Dataset | CIC-IDS-2017 (day-based split) |
-| 🌍 Transfer Datasets | CIC-IDS-2018, UNSW-NB15 (negative transfer, documented) |
-| 🤖 Serving Model | Random Forest, 80 statistical flow features |
-| 🔑 Serving Artifact | `models/model_bundle_rf_day_based_seed42.pkl` |
-| 🔒 Artifact SHA-256 | `fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350` |
-| ⚖️ Decision Rule | `1 - P(BENIGN) >= 0.002515048908954043` |
-| 🖥️ Console Stack | Flask • Flask-SocketIO • SQLite • Chart.js |
-| 📦 Capture Stack | Go collector • Python PCAP parser • optional Npcap/libpcap |
-| 🚀 Ops Surface | Docker • Prometheus/Grafana • GitHub Actions security gates |
-| 📍 Status | Research prototype • not production-ready |
-
-> **Frozen scope (P0):** NetShield is a flow-based detector for volumetric and scanning behavior. It is **not** a general NIDS. Live accuracy is unvalidated. Botnet, web attacks, infiltration, zero-day, and blocking are out of scope. Every public claim maps to an artifact in the [claim–evidence matrix](docs/CLAIM_EVIDENCE_MATRIX.md).
->
-> **IDS/IPS:** the [roadmap](docs/IDS_IPS_ROADMAP.md) is a planning document, not current capability. The repository does not implement inline enforcement or traffic blocking.
-
----
-
-## 🧰 Tech Stack & Tools
-
-### Core Application
-
-<p>
-<img src="https://skillicons.dev/icons?i=python,flask,sqlite,js,html,css" />
-</p>
-
-### Machine Learning & Data
-
-<p>
-<img src="https://skillicons.dev/icons?i=sklearn,pandas,numpy,jupyter" />
-</p>
-
-### Capture, Deployment & Observability
-
-<p>
-<img src="https://skillicons.dev/icons?i=go,docker,linux,bash,git,githubactions,prometheus,grafana,redis" />
-</p>
-
-**Also used:** pytest • Bandit • pip-audit • Trivy • SHAP • Alembic • Gunicorn • Ruff
-
----
-
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -93,234 +44,167 @@ flowchart LR
     B --> C[Feature mapper]
     C --> D[Random Forest bundle]
     D --> E[Score + frozen threshold]
-    E --> F[(SQLite)]
+    E --> F[(SQLite / Postgres)]
     E --> G[Host/window evidence accumulator]
-    G --> H["/api/incidents"]
-    F --> I[Flask operator console]
+    G --> H[/api/incidents/]
+    F --> I[Operator console]
     F --> J[Research workbench]
     I --> K[Review, audit, retention]
     J --> M[Evaluation reports]
 ```
 
-**Two runnable surfaces:**
+Two runnable surfaces:
 
-- **Operator console** (`/`) — live flow queue, filters, sensor identity, ingestion topology, collector fleet health, host/window incident triage, threat context, review workflow, alert-budget status, provenance, and audit trail.
-- **Research workbench** (`/research`) — evaluation reports, threshold policy, prevalence analysis, calibration, cost model, and cross-dataset results.
+- **Operator console** (`/`) — flow queue, filters, sensor identity, ingestion topology, collector fleet health, host/window incident triage, review workflow, alert-budget status, provenance, audit trail.
+- **Research workbench** (`/research`) — evaluation reports, threshold policy, prevalence and cost analysis, calibration, cross-dataset results.
 
-**Optional capture path:** the Go collector can stream live flow records when a capture driver and interface are configured. Live accuracy is **not validated**; the console is the primary runnable surface.
+Live capture is opt-in (`ENABLE_LOCAL_CAPTURE=true`) and experimental: the live extractor drops ICMP and IPv6 and its flag counts are 0/1 indicators, not measured counts. The console is the primary runnable surface.
 
-**Capture vectors, not consumer network modes:** adapters and PCAP link types are classified as `ethernet`, `wlan`, `wwan`, `vpn`, `virtual`, `loopback`, or `unknown`. The vector is a name/link-type heuristic and does not change the model input. Wi-Fi, cellular, Ethernet, and VPN are never claimed as extra detection capability. See [SOC_CONTEXT.md](docs/SOC_CONTEXT.md).
+## Serving Artifact
 
----
+| Property | Value |
+| --- | --- |
+| Model | Random Forest, 80 CICFlowMeter features, multiclass (BENIGN, FTP-Patator, SSH-Patator) |
+| Artifact | `models/model_bundle_rf_day_based_seed42.pkl` |
+| SHA-256 | `fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350` |
+| Split | Train Monday–Tuesday, validate Wednesday, test Thursday–Friday |
+| Decision rule | `1 - P(BENIGN) >= 0.002515048908954043` |
+| Calibration | Isotonic, fit on Wednesday, hash-bound to the serving artifact |
 
-## 📊 Evidence Snapshot
+The registry-active bundle and its registry are committed so a clone reproduces the documented operating point. The hash match is provenance, not detection evidence.
 
-All numbers below are from the frozen evaluation protocol or from explicitly labelled research/sensitivity runs. They are development evidence, not a blind confirmatory test, and they are reported with their limitations.
+## Evidence Snapshot
+
+All numbers come from the frozen evaluation protocol or from explicitly labelled sensitivity runs. They are development evidence, not a blind confirmatory test.
+
+### Serving model — CIC-IDS-2017
 
 | Evaluation | Result | Reading |
 | --- | --- | --- |
-| Serving model | RF, day-based split, seed 42, 80 features | Monday–Tuesday train, Wednesday validation, Thursday–Friday test |
-| Test partition | 1,162,065 flows, 291,139 positives (25.05%) | Benchmark prevalence is high; real networks are far sparser |
-| Seed-42 test | PR-AUC **0.7900**, ROC-AUC **0.7816** | Strong on the benchmark split |
-| Seed-42 operating point | FPR **0.725%**, recall **57.94%**, precision **96.39%** | At a **15.06%** alert rate |
-| Five-seed variation | PR-AUC **0.7472 ± 0.0749**, FPR **4.11% ± 3.27%**, recall **58.30% ± 14.79%** | The threshold does not transfer cleanly across seeds |
-| Prevalence 0.1% (seed 42) | PPV **7.40%**, **78.27** alerts per 10k flows | Precision collapses outside the benchmark base rate |
-| CIC-IDS-2018 transfer | ROC-AUC **0.7241**, AP **0.2048** | Frozen threshold emits **0 alerts** |
-| UNSW-NB15 transfer | ROC-AUC **0.3793**, AP **0.1028** | Frozen threshold emits **0 alerts** |
-| P3B portable-ratio (CIC-IDS-2018) | ROC-AUC **0.7785**, AP **0.2271** | Both improve, but the validation threshold saturates at **1.000000** |
-| P3B portable-ratio (UNSW-NB15) | ROC-AUC **0.4956**, AP **0.1088** | AP is **0.0001** above the 10.86% prevalence; near chance |
-| P3C corrected-label sensitivity | ROC-AUC **0.9988**, AP **0.9916** | Higher than P3B's **0.9859 / 0.9297**, but the release is also a re-extraction and thresholds still saturate |
-| Cross-dataset conclusion | **Negative baseline / mixed candidate** | Reported, not tuned away |
+| Test partition | 1,162,065 flows, 291,139 positives (25.05%) | Benchmark prevalence is far above any real network |
+| Seed-42 ranking | PR-AUC 0.7900, ROC-AUC 0.7816 | Strong on the benchmark split |
+| Seed-42 operating point | FPR 0.725%, recall 57.94%, precision 96.39% | At a 15.06% alert rate |
+| Five-seed variation | PR-AUC 0.7472 ± 0.0749, FPR 4.11% ± 3.27%, recall 58.30% ± 14.79% | The threshold does not transfer across seeds |
+| Prevalence 0.1% (seed 42) | PPV 7.40%, 78.27 alerts per 10k flows | Precision collapses outside the benchmark base rate |
 
-> **What this does not mean:** a matching artifact hash is provenance, not detection evidence. High benchmark precision is not a production claim. See [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md), [CROSS_DATASET.md](docs/CROSS_DATASET.md), and [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md).
+### Phase 2 — calibrated cross-dataset transfer (`docs/CALIBRATED_TRANSFER_RESULTS.md`)
 
----
+Eight portable-ratio features, thresholds selected on Wednesday benign scores, external data never used for fitting or threshold selection. Candidate B is a histogram gradient boosting classifier.
 
-## 🚀 Quick Start
+| Dataset | Model | Threshold | ROC-AUC | PR-AUC | FPR | Precision | Recall | Alerts | Rows |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| CIC-IDS-2018 | Baseline (published threshold) | 1.0000 | 0.7685 | 0.1859 | 0.00000 | n/a | 0.0000 | 0 | 13,547,083 |
+| CIC-IDS-2018 | **Candidate B** (HistGradientBoosting) | 0.1647 | 0.7764 | 0.2047 | **0.00280** | 0.1849 | 0.0079 | 43,078 | 13,547,083 |
+| UNSW-NB15 | Baseline (published threshold) | 1.0000 | 0.4945 | 0.1145 | 0.00000 | n/a | 0.0000 | 0 | 38,627 |
+| UNSW-NB15 | Candidate B (HistGradientBoosting) | 0.1647 | 0.5683 | 0.1688 | 0.00126 | 0.1731 | 0.0020 | 52 | 38,627 |
+| Thursday–Friday (in-domain) | Candidate B (HistGradientBoosting) | 0.1647 | 0.8218 | 0.4464 | 0.01189 | 0.1596 | 0.0083 | 11,383 | 1,023,182 |
 
-### Requirements
+What this established: the published threshold saturates at **1.0000** and emits zero alerts on both external datasets. Candidate B removes that saturation at both benign-FPR targets (0.005 and 0.001) and holds a **0.28%** benign FPR on 13.5M CIC-IDS-2018 flows. It also showed that a Wednesday-selected FPR guarantee does not travel across days: on Thursday–Friday the realized FPR is 1.19%, 2.4× the target. Natural-prevalence recall is 0.0083, and at 0.1% prevalence precision is 0.001 with 119 alerts per 10,000 rows.
 
-- Python 3.10 or newer
-- Git
-- Optional live capture: Npcap (Windows) or libpcap (Linux/macOS), a valid interface, and the privileges required by that driver
+### Phase 3 — host/window incident evaluation (`docs/WINDOW_INCIDENT_EVAL.md`)
 
-### Install and run
+Replay of Thursday–Friday flows through `EvidenceAccumulator(scoring_mode="calibrated")` with uniform positive downsampling to 0.1% flow prevalence.
 
-```bash
-git clone https://github.com/coderv1304/network-anomaly-detection.git
-cd network-anomaly-detection
+| Alerting unit | Threshold | Alerts | PPV | Recall | Alerts per 10k flows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Single flow | 0.4655 | 14,325 | 0.0000 | 0.0000 | 177.9167 |
+| 300 s host/window incident | 100.0 | 372 | 0.0000 | 0.0000 | 4.6202 |
 
-python -m venv .venv
-```
+Windowing cuts alert volume by **38×** (177.92 → 4.62 per 10,000 flows). It does not rescue precision: at 0.1% prevalence both units report **PPV 0.0000**, and no malicious window opened an incident. At the natural 21.4% prevalence the window policy reaches PPV 0.0080 and recall 0.1667, but transfers to a 0.789% benign-window false-incident rate against a 0.1% target — 7.9× over budget. No Wednesday grid point met that target, so the reported operating point is a fallback and the policy is not validated.
 
-Activate the environment:
+**Read the two phases together.** Aggregation is a real lever on alert volume and a null result on precision at low prevalence. The accumulator remains a triage view over per-flow scores, not a validated detector.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-```
+## Reproducing
 
 ```bash
-# Linux / macOS
-source .venv/bin/activate
+pytest tests -q
+node --check static/js/console.js
+python scripts/secret_scan.py
+python scripts/deployment_check.py
 ```
 
-Install dependencies and launch:
+Go collector tests:
 
 ```bash
-python -m pip install -r requirements.txt
-python app.py
+cd capture && go test ./... && cd ..
 ```
 
-Open:
+Long-running evaluation runners are Windows batch wrappers under `scripts/windows/` (`run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`, `run_all_experiments.bat`, `run_isolation_forest.bat`, `build_capture.bat`). Each changes to the repository root before running, so they work from any directory. The `.github/workflows/security.yml` pipeline additionally runs `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
 
-- **Console:** [http://localhost:5000](http://localhost:5000)
-- **Research workbench:** [http://localhost:5000/research](http://localhost:5000/research)
-- **Batch upload:** [http://localhost:5000/upload](http://localhost:5000/upload)
+## Configuration
 
-Upload a CIC-IDS-2017-format CSV to explore batch analysis. Raw datasets and sample CSVs are not versioned because of size and licensing; point the app at your own local copy. Live packet capture stays disabled unless `ENABLE_LOCAL_CAPTURE=true` is explicitly set.
+Copy `.env.example` to `.env` (gitignored) or export variables directly. Real environment variables win; never commit a key.
 
-### Local container run
+| Setting | Purpose |
+| --- | --- |
+| `ABUSEIPDB_API_KEY` | Optional reputation lookups for eligible public IPs |
+| `ENABLE_LOCAL_CAPTURE` / `NETSHIELD_CAPTURE_INTERFACE` | Enable and select the local capture adapter |
+| `NETSHIELD_DEMO_STREAM` | Emit synthetic demo fixtures |
+| `AUTH_REQUIRED` | Enable authentication and the production artifact gate |
+| `ENABLE_MULTI_SIGNAL_EVIDENCE` | Host/window accumulation during ingest (default `true`) |
+| `NETSHIELD_EVIDENCE_WINDOW_SECONDS` | Evidence window length (default `300`) |
+| `NETSHIELD_INCIDENT_RISK_THRESHOLD` | Points required to open an incident (default `70`) |
+| `NETSHIELD_EVIDENCE_SCORING_MODE` | `calibrated` (default) or `multi_signal` |
+| `NETSHIELD_THREAT_INTEL_ON_INGEST` | AbuseIPDB lookups during ingest (default `false`) |
+| `NETSHIELD_SOAR_ENABLED` / `NETSHIELD_SOAR_WEBHOOK_URL` | Opt-in incident webhook; requires an allowlist match |
+| `SENSOR_OFFLINE_SECONDS` | Heartbeat age before a probe is `stale` (default `90`) |
+
+Local container demo:
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-The included Dockerfile and Compose file are for a **loopback-bound local demo**, not a production deployment. The container runs as a non-root user and does not receive packet-capture capabilities. Do not mount customer data or expose this configuration publicly.
+The Dockerfile and Compose file are loopback-bound and run as a non-root user without capture capabilities. They are not a production deployment.
 
-### Optional integrations
-
-Settings can be exported in the shell or placed in a gitignored `.env` (copied from `.env.example`); the app loads it at startup with `override=False`, so real environment variables win. Never commit a key.
-
-| Setting | Purpose |
-| --- | --- |
-| `ABUSEIPDB_API_KEY` | Optional reputation lookups for eligible public IPs |
-| `ENABLE_LOCAL_CAPTURE` | Enables the local packet-capture adapter |
-| `NETSHIELD_CAPTURE_INTERFACE` | Selects the capture interface |
-| `NETSHIELD_DEMO_STREAM` | Emits synthetic fixtures for demos only |
-| `AUTH_REQUIRED` | Enables authentication and the production artifact gate |
-| `ENABLE_MULTI_SIGNAL_EVIDENCE` | Enables host/window incident accumulation during ingest (default `true`) |
-| `NETSHIELD_EVIDENCE_WINDOW_SECONDS` | Evidence window length (default `300`) |
-| `NETSHIELD_INCIDENT_RISK_THRESHOLD` | Points needed to open an incident (default `70`) |
-| `NETSHIELD_THREAT_INTEL_ON_INGEST` | Allows AbuseIPDB lookups during ingest (default `false`) |
-| `NETSHIELD_THREAT_INTEL_ENABLED` | Master switch for reputation lookups; also requires `ABUSEIPDB_API_KEY` (default `false`) |
-| `NETSHIELD_GEOIP_CITY_DB` / `NETSHIELD_GEOIP_ASN_DB` | Optional operator-supplied MaxMind GeoLite2 databases (no database is bundled) |
-| `SENSOR_OFFLINE_SECONDS` | Heartbeat age after which a probe is `stale` (default `90`) |
-| `NETSHIELD_SOAR_ENABLED` | Enables the opt-in incident webhook (default `false`) |
-| `NETSHIELD_SOAR_WEBHOOK_URL` | Webhook destination; requires an allowlist match |
-| `NETSHIELD_SOAR_WEBHOOK_ALLOWLIST` | Comma-separated exact hosts permitted to receive webhook payloads |
-
-Full configuration and operational notes: [SOC_CONTEXT.md](docs/SOC_CONTEXT.md), [ENTERPRISE_READINESS_REVIEW.md](docs/ENTERPRISE_READINESS_REVIEW.md), [LIVE_CAPTURE_OPERATIONS.md](docs/LIVE_CAPTURE_OPERATIONS.md), [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), and [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md).
-
----
-
-## 🧪 Testing
-
-```bash
-# Python suite
-python -m pytest tests -q
-
-# Go collector
-cd capture
-go test ./...
-cd ..
-
-# Repository security gates
-python scripts/secret_scan.py
-python scripts/deployment_check.py
-```
-
-The CI workflow in `.github/workflows/security.yml` runs the Python suite, a secret scan, the model registry/deployment gate, `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
-
----
-
-## 📁 Repository Map
+## Repository Map
 
 ```text
-network-anomaly-detection/
-├── app.py                     # Flask app: console, research workbench, API
-├── evidence_accumulator.py    # Host/window multi-signal incident logic
-├── live_capture.py            # Optional Python capture adapter
-├── pcap_parser.py             # PCAP/CSV flow parsing
-├── zeek_parser.py             # Optional Zeek conn.log parser/converter
-├── feature_mapper.py          # Schema mapping to the model feature order
-├── models/                    # Serving bundle, registry, metrics, manifests
-├── training/                  # Training, audit, benchmark, SHAP pipelines
-├── scripts/                   # Evaluation, gates, drift, release tooling
-├── monitoring/                # Prometheus metrics and Grafana dashboard
-├── capture/                   # Go live-capture collector
-├── extension/                 # Browser extension prototype
-├── templates/ static/         # Operator console and workbench UI
-├── tests/                     # Python and frontend tests
-├── docs/                      # Protocols, reports, runbooks, claim matrix
-├── deploy/ migrations/        # Deployment and database migration assets
-└── .github/workflows/         # CI security and test workflow
+app.py                     Flask app: console, workbench, API
+evidence_accumulator.py    Host/window multi-signal incident logic
+live_capture.py            Optional Python capture adapter
+pcap_parser.py             PCAP/CSV flow parsing
+zeek_parser.py             Optional Zeek conn.log parser
+feature_mapper.py          Schema mapping to the model feature order
+models/                    Serving bundle, registry, metrics, manifests
+training/                  Training, audit, benchmark, SHAP pipelines
+scripts/                   Evaluation, gates, drift, release tooling
+scripts/windows/           Windows batch runners
+monitoring/                Prometheus metrics and Grafana dashboard
+capture/                   Go live-capture collector
+templates/ static/         Operator console and workbench UI
+tests/fixtures/            Bundled 500-flow sample and parser fixtures
+docs/                      Protocols, reports, runbooks, claim matrix
 ```
 
-Model artifacts are local or registry-managed. The serving bundle and registry are included so a clone can reproduce the documented operating point; larger per-seed experiment bundles are regenerable and gitignored. See [models/README.md](models/README.md).
-
----
-
-## 📚 Documentation
+## Documentation
 
 | Area | Document |
 | --- | --- |
-| Scope and claims | [SCOPE_AND_CLAIMS.md](docs/SCOPE_AND_CLAIMS.md) • [CLAIM_EVIDENCE_MATRIX.md](docs/CLAIM_EVIDENCE_MATRIX.md) |
-| Model and evaluation | [MODEL_CARD.md](docs/MODEL_CARD.md) • [EVALUATION_PROTOCOL_V2.md](docs/EVALUATION_PROTOCOL_V2.md) |
-| Benchmarks | [BENCHMARK_RESULTS.md](docs/BENCHMARK_RESULTS.md) • [BASELINE_RESULTS_V2.md](docs/BASELINE_RESULTS_V2.md) |
-| Prevalence and cost | [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md) • [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md) |
-| Cross-dataset transfer | [CROSS_DATASET.md](docs/CROSS_DATASET.md) • [CROSS_DATASET_MAPPING.md](docs/CROSS_DATASET_MAPPING.md) |
-| Research candidates | [PORTABLE_TRANSFER.md](docs/PORTABLE_TRANSFER.md) • [CORRECTED_LABEL_SENSITIVITY.md](docs/CORRECTED_LABEL_SENSITIVITY.md) • [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md) • [WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md) |
-| Optional collection | [ZEEK_COLLECTOR.md](docs/ZEEK_COLLECTOR.md) |
-| Features and labels | [PORTABLE_FEATURES.md](docs/PORTABLE_FEATURES.md) • [LABEL_POLICY.md](docs/LABEL_POLICY.md) |
-| Dataset audits | [DISTRINET_CICIDS2017_AUDIT.md](docs/DISTRINET_CICIDS2017_AUDIT.md) • [EXTERNAL_DATASET_AUDIT.md](docs/EXTERNAL_DATASET_AUDIT.md) |
-| Operations | [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md) • [INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) |
-| Security | [SECURITY_AND_COMPLIANCE.md](docs/SECURITY_AND_COMPLIANCE.md) • [PRODUCT_BOUNDARY_AND_THREAT_MODEL.md](docs/PRODUCT_BOUNDARY_AND_THREAT_MODEL.md) |
-| Tenancy and access | [TENANCY_AND_ACCESS_CONTROL.md](docs/TENANCY_AND_ACCESS_CONTROL.md) |
+| Scope and claims | [SCOPE_AND_CLAIMS.md](docs/SCOPE_AND_CLAIMS.md), [CLAIM_EVIDENCE_MATRIX.md](docs/CLAIM_EVIDENCE_MATRIX.md) |
+| Model and protocol | [MODEL_CARD.md](docs/MODEL_CARD.md), [EVALUATION_PROTOCOL_V2.md](docs/EVALUATION_PROTOCOL_V2.md) |
+| Benchmarks | [BENCHMARK_RESULTS.md](docs/BENCHMARK_RESULTS.md), [BASELINE_RESULTS_V2.md](docs/BASELINE_RESULTS_V2.md) |
+| Prevalence and cost | [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md), [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md) |
+| Cross-dataset transfer | [CROSS_DATASET.md](docs/CROSS_DATASET.md), [CALIBRATED_TRANSFER_RESULTS.md](docs/CALIBRATED_TRANSFER_RESULTS.md) |
+| Incidents | [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), [WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md) |
+| Operations | [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md), [SOC_CONTEXT.md](docs/SOC_CONTEXT.md), [INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) |
+| Security and tenancy | [SECURITY_AND_COMPLIANCE.md](docs/SECURITY_AND_COMPLIANCE.md), [TENANCY_AND_ACCESS_CONTROL.md](docs/TENANCY_AND_ACCESS_CONTROL.md) |
 | Phase status | [PHASE_STATUS.md](docs/PHASE_STATUS.md) |
-| IDS/IPS roadmap | [IDS_IPS_ROADMAP.md](docs/IDS_IPS_ROADMAP.md) — **planned, not implemented** |
+| IDS/IPS roadmap | [IDS_IPS_ROADMAP.md](docs/IDS_IPS_ROADMAP.md) — planned, not implemented |
 
----
+## Limitations
 
-## ⚠️ Limitations and Responsible Use
-
-- **Not a general NIDS.** The frozen scope is volumetric and scanning behavior. Botnet, web attacks, infiltration, zero-day, and arbitrary novel attacks are out of scope.
-- **Live accuracy is unvalidated.** Offline benchmark results do not transfer automatically to live capture, and the live BPF path drops ICMP and IPv6 while the upload path keeps them.
-- **Benchmark prevalence is unrealistic.** At 25.05% positives the model looks strong; at 0.1% prevalence precision falls sharply.
-- **Cross-dataset transfer is negative.** CIC-IDS-2018 and UNSW-NB15 do not reproduce the CIC-IDS-2017 operating point. The frozen threshold emits zero alerts on both. The P3B ratio-only candidate improves ranking on both datasets, but UNSW-NB15 AP stays essentially at chance and its threshold saturates, so this is not a deployable cross-dataset detector.
-- **The serving model is uncalibrated.** The console deliberately shows no confidence percentage.
-- **Host/window incidents are experimental and did not pass their own gate.** Risk points are a triage heuristic, not a probability, and the in-memory store resets on restart. A labelled 300 s host/window evaluation now exists ([WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md)): no Wednesday grid point reached the 0.1% benign-window false-incident target, the frozen point transferred to a 0.79% benign-window rate on Thursday-Friday, and at 0.1% flow prevalence window precision and recall were both 0.0000. Aggregation is therefore not a validated remedy, and the serving path still alerts per flow.
-- **The optional Zeek parser is not validated detection.** It maps `conn.log` fields honestly but leaves per-packet maxima and exact flag counts unavailable.
-- **Console labels are model predictions, not ground truth.**
-- **No containment.** NetShield does not block hosts, change firewalls, or execute response actions.
+- **Not a general NIDS.** Botnet, web attacks, infiltration, zero-day and arbitrary novel attacks are out of scope; the multiclass head cannot emit those labels.
+- **Live accuracy is unvalidated.** Offline benchmark numbers do not transfer to live capture automatically, and the live and upload extractors disagree on several numeric features.
+- **Benchmark prevalence is unrealistic.** At 25.05% positives the model looks strong; at 0.1% precision falls to 7.40% (serving model) or 0.0000 (window evaluation).
+- **Cross-dataset transfer is negative.** Neither external dataset reproduces the CIC-IDS-2017 operating point without a redesigned feature set and threshold policy.
+- **The serving path is uncalibrated for display.** The console shows no confidence percentage; the stored attack score is the raw model score.
+- **Host/window incidents are experimental.** Risk points are a triage heuristic, not a probability, and the accumulator is in-memory and resets on restart.
+- **The Zeek parser is not validated detection.** It maps `conn.log` fields honestly and leaves per-packet maxima and exact flag counts unavailable.
+- **No containment.** NetShield does not block hosts, change firewall rules, or execute response actions.
 - **Do not use as a production intrusion-prevention system.** Use it for education, experimentation, and controlled lab work.
 
----
+## License
 
-<div align="center">
-
-## 🤝 Let's Connect
-
-<a href="https://github.com/coderv1304">
-<img src="https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white"/>
-</a>
-<a href="https://www.linkedin.com/in/varun-nair-019574400">
-<img src="https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
-</a>
-<a href="mailto:coderv1304@gmail.com">
-<img src="https://img.shields.io/badge/Email-Contact%20Me-D14836?style=for-the-badge&logo=gmail&logoColor=white"/>
-</a>
-<a href="https://varun-portfolio-rouge.vercel.app/">
-<img src="https://img.shields.io/badge/Portfolio-Visit-8E54E9?style=for-the-badge&logo=vercel&logoColor=white"/>
-</a>
-
-<br/><br/>
-
-**Flow-based detection. Reproducible evaluation. Honest results.**
-
-*Measure the gap. Document the failure. Improve the evidence.*
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:8E54E9,100:4B6CB7&height=110&section=footer" width="100%"/>
-
-</div>
+MIT. See [LICENSE](LICENSE).

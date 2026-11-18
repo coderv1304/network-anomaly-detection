@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 rem ---------------------------------------------------------
 rem Phase 5: Time-Ordered Analyst Feedback Simulation
 rem Compares No-Feedback Baseline, Random Selection, Top-Alert

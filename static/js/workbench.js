@@ -327,6 +327,35 @@
     });
   }
 
+  // One-click demo: ingest the bundled 500-flow fixture into the console and
+  // let a real host/window incident open. No dataset download required.
+  const btnBundledSample = $('btnBundledSample');
+  const bundledSampleStatus = $('bundledSampleStatus');
+  if (btnBundledSample) {
+    btnBundledSample.addEventListener('click', async () => {
+      if (btnBundledSample.dataset.busy === 'true') return;
+      btnBundledSample.dataset.busy = 'true';
+      btnBundledSample.disabled = true;
+      if (bundledSampleStatus) bundledSampleStatus.textContent = 'Scoring the bundled sample…';
+      try {
+        const response = await apiFetch('/api/load-sample', { method: 'POST' });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `Sample load failed (${response.status})`);
+        const incidents = Number(data.incidents || 0);
+        if (bundledSampleStatus) {
+          bundledSampleStatus.innerHTML = `Stored ${formatInt(data.accepted)} flows with ${formatInt(data.alerts)} flow alerts. ${formatInt(incidents)} host/window incident${incidents === 1 ? '' : 's'} opened — <a href="/">open the console</a>.`;
+        }
+      } catch (error) {
+        if (bundledSampleStatus) {
+          bundledSampleStatus.textContent = error.message || 'The bundled sample could not be loaded.';
+        }
+      } finally {
+        btnBundledSample.disabled = false;
+        btnBundledSample.dataset.busy = 'false';
+      }
+    });
+  }
+
   /* ---------- Results rendering ---------- */
 
   function ingestionText(payload) {

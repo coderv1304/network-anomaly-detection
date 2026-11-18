@@ -446,16 +446,16 @@ venv\Scripts\activate
 pip install -r requirements.txt
 
 REM Baseline training and evaluation, seeds 42-46
-run_all_baselines.bat
+scripts/windows/run_all_baselines.bat
 
 REM Alert-burden metrics are computed inside baseline evaluation
 REM See training/evaluate.py -> evaluate_alert_budgets()
 
 REM Simulated analyst feedback (Phase 5)
-run_feedback_simulation.bat
+scripts/windows/run_feedback_simulation.bat
 
 REM Unsupervised drift monitoring (Phase 6)
-run_drift_monitor.bat
+scripts/windows/run_drift_monitor.bat
 
 REM Data/label/feature/split audit (Phase D2)
 venv\Scripts\python.exe training\audit_pipeline_v2.py
@@ -470,7 +470,7 @@ REM Live-vs-upload parity audit (Phase P1)
 venv\Scripts\python.exe training\parity_live_capture.py
 
 REM Phase 7 reference-CSV vs upload-parser parity audit
-verify_feature_parity.bat
+scripts/windows/verify_feature_parity.bat
 
 REM Aggregate metrics and regenerate summary_metrics.json
 venv\Scripts\python.exe scripts\aggregate_metrics.py

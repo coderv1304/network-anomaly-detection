@@ -1150,6 +1150,10 @@ class Flow(db.Model):
     # are nullable because legacy rows and uploads have no sensor identity.
     sensor_id = db.Column(db.String(80), nullable=True, index=True)
     interface = db.Column(db.String(120), nullable=True, index=True)
+    # Where the row came from when it was not a collector: for example
+    # ``bundled_sample_fixture`` for the one-click demo. NULL for ordinary
+    # collector and upload traffic, so no provenance is invented for it.
+    provenance = db.Column(db.String(64), nullable=True, index=True)
     # S3 provenance: every stored prediction records which artifact produced it
     # and which decision rule was applied. These columns are nullable so an
     # older database can be migrated in place.
@@ -1207,6 +1211,7 @@ class Flow(db.Model):
             "sensor_id": self.sensor_id,
             "interface": self.interface,
             "provenance": {
+                "ingestion_source": self.provenance,
                 "model_version": self.model_version,
                 "artifact_sha256": self.artifact_sha256,
                 "feature_schema_version": self.feature_schema_version,
@@ -1406,6 +1411,8 @@ def _ensure_flow_provenance_columns():
         # unattributed rather than being assigned a fabricated sensor.
         "sensor_id": "VARCHAR(80)",
         "interface": "VARCHAR(120)",
+        # Ingestion provenance for rows that did not arrive from a collector.
+        "provenance": "VARCHAR(64)",
     }
     for name, column_type in additions.items():
         if name in existing:
@@ -1419,6 +1426,7 @@ def _ensure_flow_provenance_columns():
     for index_name, column in (
         ("ix_flow_sensor_id", "sensor_id"),
         ("ix_flow_interface", "interface"),
+        ("ix_flow_provenance", "provenance"),
     ):
         try:
             db.session.execute(
@@ -1954,9 +1962,24 @@ MULTI_SIGNAL_ENABLED = (
 THREAT_INTEL_ON_INGEST = (
     os.environ.get("NETSHIELD_THREAT_INTEL_ON_INGEST", "false").lower() == "true"
 )
+# The repository ships one corroborating signal (the calibrated supervised
+# score): the Isolation Forest bundle is gitignored and threat-intel lookups are
+# off by default. Under ``multi_signal`` no single signal may reach the incident
+# threshold, so a single-signal deployment can never open an incident. The
+# calibrated policy is therefore the default; operators who configure a second
+# real signal can restore the multi-signal correlator with this variable.
+EVIDENCE_SCORING_MODE = os.environ.get(
+    "NETSHIELD_EVIDENCE_SCORING_MODE", "calibrated"
+).strip().lower()
+if EVIDENCE_SCORING_MODE not in {"calibrated", "multi_signal"}:
+    EVIDENCE_SCORING_MODE = "calibrated"
 _EVIDENCE_ACCUMULATOR = EvidenceAccumulator(
     window_seconds=_env_int("NETSHIELD_EVIDENCE_WINDOW_SECONDS", 300),
     incident_threshold=_env_float("NETSHIELD_INCIDENT_RISK_THRESHOLD", 70.0),
+    scoring_mode=EVIDENCE_SCORING_MODE,
+    p_floor=_env_float("NETSHIELD_EVIDENCE_P_FLOOR", 0.50),
+    per_flow_cap=_env_float("NETSHIELD_EVIDENCE_PER_FLOW_CAP", 50.0),
+    window_cap=_env_float("NETSHIELD_EVIDENCE_WINDOW_CAP", 100.0),
 )
 _CALIBRATOR = None
 _CALIBRATION_METADATA = {}
@@ -3184,6 +3207,182 @@ def ingest_flow():
     if isinstance(response_payload, dict):
         response_payload = {**response_payload, "request_id": getattr(g, "request_id", None)}
     return jsonify(response_payload), 201
+
+
+# ---------------------------------------------------------------------
+# Bundled demo sample
+# ---------------------------------------------------------------------
+# The fixture is a held-out CIC-IDS-2017 extract built by
+# ``scripts/build_sample_fixture.py``. It is scored here by the same pipeline,
+# threshold policy, calibration artifact and evidence accumulator as any other
+# ingest; the only difference is where the rows came from.
+BUNDLED_SAMPLE_PROVENANCE = "bundled_sample_fixture"
+BUNDLED_SAMPLE_RELATIVE_PATH = "tests/fixtures/sample_flows_500.csv"
+BUNDLED_SAMPLE_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), *BUNDLED_SAMPLE_RELATIVE_PATH.split("/")
+)
+_PROTOCOL_LABELS = {
+    "6": "TCP", "6.0": "TCP", "17": "UDP", "17.0": "UDP",
+    "1": "ICMP", "1.0": "ICMP", "58": "ICMPv6", "58.0": "ICMPv6",
+}
+
+
+@app.route("/api/load-sample", methods=["POST"])
+@limiter.limit(os.environ.get("SAMPLE_LOAD_RATE_LIMIT", "20 per minute"))
+@require_api_key
+@ingest_admission
+def load_sample():
+    """Score the bundled 500-flow fixture through the production ingest path.
+
+    Writes stored ``Flow`` rows tagged ``provenance=bundled_sample_fixture`` and
+    feeds the same evidence accumulator as ``POST /api/flows``. Every score is
+    the serving bundle's own output; nothing is injected.
+    """
+    started = time.perf_counter()
+    if not os.path.isfile(BUNDLED_SAMPLE_PATH):
+        return jsonify({"error": "Bundled sample fixture is not installed."}), 404
+    try:
+        frame = pd.read_csv(BUNDLED_SAMPLE_PATH, low_memory=False)
+    except Exception:  # noqa: BLE001
+        app.logger.exception("Bundled sample fixture could not be read")
+        return jsonify({"error": "Bundled sample fixture could not be read."}), 500
+    frame.columns = [str(column).strip() for column in frame.columns]
+    if frame.empty or "Source IP" not in frame.columns:
+        return jsonify({"error": "Bundled sample fixture is malformed."}), 500
+    flow_dicts = frame.to_dict(orient="records")
+
+    identity = current_identity()
+    if identity is not None:
+        tenant_id = identity.get("tenant_id")
+    else:
+        ingest_tenant = Tenant.query.filter_by(
+            slug=INGEST_TENANT_SLUG, is_active=True
+        ).first()
+        if ingest_tenant is None:
+            return jsonify({"error": "Ingest tenant is not configured or is inactive"}), 403
+        tenant_id = ingest_tenant.id
+
+    classify_started = time.perf_counter()
+    try:
+        evidence_rows = classify_flows_with_evidence(flow_dicts)
+    except Exception:  # noqa: BLE001
+        INGEST_REQUESTS.labels(outcome="failed").inc()
+        app.logger.exception("Bundled sample classification failed")
+        return jsonify({"error": "Bundled sample classification failed"}), 500
+    finally:
+        INGEST_STAGE_LATENCY.labels("classify").observe(
+            time.perf_counter() - classify_started
+        )
+
+    records = []
+    alerts = 0
+    for flow_dict, evidence in zip(flow_dicts, evidence_rows):
+        src_ip = str(_extract_flow_field(flow_dict, "src_ip", "Source IP") or "—")
+        dst_ip = str(_extract_flow_field(flow_dict, "dst_ip", "Destination IP") or "—")
+        src_port = _safe_int(_extract_flow_field(flow_dict, "src_port", "Source Port"))
+        dst_port = _safe_int(_extract_flow_field(flow_dict, "dst_port", "Destination Port"))
+        raw_proto = str(
+            _extract_flow_field(flow_dict, "protocol", "Protocol", default="")
+        ).strip()
+        protocol_str = _PROTOCOL_LABELS.get(raw_proto, raw_proto.upper() or "TCP")
+        if evidence["is_attack"]:
+            alerts += 1
+        records.append(
+            Flow(
+                tenant_id=tenant_id,
+                src_ip=src_ip,
+                dst_ip=dst_ip,
+                src_port=src_port,
+                dst_port=dst_port,
+                protocol=protocol_str,
+                predicted_label=str(evidence["predicted_label"] or "BENIGN"),
+                is_attack=bool(evidence["is_attack"]),
+                interface="bundled_sample",
+                provenance=BUNDLED_SAMPLE_PROVENANCE,
+                model_version=evidence.get("model_version"),
+                artifact_sha256=evidence.get("artifact_sha256"),
+                feature_schema_version=evidence.get("feature_schema_version"),
+                threshold_policy=evidence.get("threshold_policy"),
+                calibration_version=evidence.get("calibration_version"),
+                attack_score=evidence.get("attack_score"),
+                model_argmax_label=evidence.get("argmax_label"),
+                decision_basis=evidence.get("decision_basis"),
+                threshold_value=evidence.get("threshold"),
+            )
+        )
+        _accumulate_flow_evidence(
+            tenant_id, flow_dict, evidence, src_ip, dst_ip, dst_port
+        )
+
+    persist_started = time.perf_counter()
+    try:
+        db.session.add_all(records)
+        record_audit(
+            "flows.load_sample",
+            "flow_batch",
+            None,
+            detail={
+                "accepted": len(records),
+                "alerts": alerts,
+                "provenance": BUNDLED_SAMPLE_PROVENANCE,
+            },
+            tenant_id=tenant_id,
+        )
+        db.session.commit()
+        STORAGE_OPERATIONS.labels("insert", "success").inc()
+    except Exception:  # noqa: BLE001
+        db.session.rollback()
+        STORAGE_OPERATIONS.labels("insert", "failure").inc()
+        INGEST_REQUESTS.labels(outcome="failed").inc()
+        app.logger.exception("Bundled sample persistence failed")
+        return jsonify({"error": "Bundled sample records could not be stored"}), 500
+    finally:
+        STORAGE_LATENCY.labels("insert").observe(
+            time.perf_counter() - persist_started
+        )
+
+    FLOW_STORE_ROWS.inc(len(records))
+    INGEST_REQUESTS.labels(outcome="accepted").inc()
+    INGEST_FLOWS.labels(outcome="accepted").inc(len(records))
+
+    snapshot = _EVIDENCE_ACCUMULATOR.snapshot(
+        tenant_id=tenant_id, open_only=False, limit=500
+    )
+    fixture_sources = {str(flow.get("Source IP")) for flow in flow_dicts}
+    incidents = [
+        incident
+        for incident in snapshot["incidents"]
+        if incident["incident_open"] and incident["source_ip"] in fixture_sources
+    ]
+    elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
+    app.logger.info(
+        "sample.loaded",
+        extra={
+            "event": "ingest",
+            "outcome": "bundled_sample",
+            "flow_count": len(records),
+            "alerts": alerts,
+            "incidents": len(incidents),
+            "duration_ms": elapsed_ms,
+        },
+    )
+    return jsonify(
+        {
+            "status": "loaded",
+            "provenance": BUNDLED_SAMPLE_PROVENANCE,
+            "fixture": BUNDLED_SAMPLE_RELATIVE_PATH,
+            "accepted": len(records),
+            "alerts": alerts,
+            "incidents": len(incidents),
+            "incident_ids": [incident["incident_id"] for incident in incidents],
+            "incident_threshold": _EVIDENCE_ACCUMULATOR.incident_threshold,
+            "scoring_mode": _EVIDENCE_ACCUMULATOR.scoring_mode,
+            "threshold_value": _serving_threshold,
+            "calibration_status": _CALIBRATION_STATUS,
+            "elapsed_ms": elapsed_ms,
+            "request_id": getattr(g, "request_id", None),
+        }
+    ), 200
 
 
 @app.route("/api/flows", methods=["GET"])

@@ -258,6 +258,11 @@
             <button class="btn" type="button" id="btnLoadSample">Load sample and score</button>
           </div>
 
+          <div class="sample-row">
+            <button class="btn" type="button" id="btnBundledSample">Load 500-Flow Sample</button>
+            <span class="small" id="bundledSampleStatus">Stores 500 scored flows (350 benign, 150 Friday DDoS/PortScan) in the console and opens host/window incidents. No external dataset needed.</span>
+          </div>
+
           <label class="dropzone" id="dropZone" for="fileInput">
             <input type="file" id="fileInput" accept=".csv,.pcap,.pcapng" aria-label="Choose a flow file">
             <strong>Drop a file here, or choose from disk</strong>

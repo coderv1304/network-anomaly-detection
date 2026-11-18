@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 rem ---------------------------------------------------------
 rem Run the three baselines (RF, LR, IsolationForest) over
 rem seeds 42 43 44 45 46 using the day‑based split.

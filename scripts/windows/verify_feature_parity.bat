@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 rem ---------------------------------------------------------
 rem Phase 7: Live Capture Feature Parity Verification
 rem Compares live parser features against training pipeline,

@@ -1187,6 +1187,39 @@ async function pollIncidents() {
   }
 }
 
+/* ---------- bundled 500-flow sample ---------- */
+
+async function loadBundledSample() {
+  const button = $('btnSampleLoad');
+  if (!button || button.dataset.busy === 'true') return;
+  const original = button.textContent;
+  button.dataset.busy = 'true';
+  button.disabled = true;
+  button.textContent = 'Loading…';
+  state.lastError = null;
+  try {
+    const response = await apiFetch('/api/load-sample', { method: 'POST' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Sample load failed (${response.status})`);
+    const incidents = Number(data.incidents || 0);
+    button.textContent = `Loaded ${data.accepted || 0} · ${incidents} incident${incidents === 1 ? '' : 's'}`;
+    state.prevTotal = 0;
+    state.prevAttack = 0;
+    state.pendingNew = 0;
+    state.pendingAttack = 0;
+    await Promise.all([pollSnapshot({ force: true }), pollIncidents()]);
+  } catch (error) {
+    state.lastError = error;
+    button.textContent = 'Sample failed';
+    $('captureSummary').textContent = `Bundled sample failed: ${error.message || 'request failed'}.`;
+    renderHeader();
+  } finally {
+    button.disabled = false;
+    button.dataset.busy = 'false';
+    setTimeout(() => { button.textContent = original; }, 5000);
+  }
+}
+
 function startPolling() {
   pollSnapshot({ initial: true });
   if (state.pollTimer) clearInterval(state.pollTimer);
@@ -1350,6 +1383,9 @@ function bindEvents() {
     if (state.demoRunning) stopDemo();
     else startDemo();
   });
+
+  const sampleButton = $('btnSampleLoad');
+  if (sampleButton) sampleButton.addEventListener('click', loadBundledSample);
 
   const incidentList = $('incidentList');
   if (incidentList) {

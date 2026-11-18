@@ -1,4 +1,6 @@
 @echo off
+rem Run from the repository root so relative data/model paths resolve.
+cd /d "%~dp0..\.."
 REM =========================================================
 REM  NetShield Research Workbench — Full Experiment Runner
 REM  Phases 3-7 (Baselines, Alert Burden, Feedback,
