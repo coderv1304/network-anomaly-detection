@@ -6,6 +6,9 @@ The project exists to measure the distance between a strong benchmark number and
 
 **Frozen scope:** flow-based detection of volumetric and scanning traffic. NetShield is not a general NIDS, does not block traffic, and has no validated live accuracy.
 
+![NetShield Operator Console](docs/images/operator-console.png)
+![NetShield Research Workbench](docs/images/research-workbench.png)
+
 ## One-Click Demo
 
 ```bash

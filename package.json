@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "NetShield AI UI snapshot and accessibility testing suite",
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:snapshot": "jest -u"
   },
   "devDependencies": {

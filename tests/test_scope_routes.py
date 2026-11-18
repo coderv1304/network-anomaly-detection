@@ -62,9 +62,11 @@ def test_research_serves_prevalence_view(monkeypatch):
     assert "How much precision survives realistic attack prevalence?" in body
 
 
-def test_legacy_dashboard_is_archived_not_served():
+def test_legacy_dashboard_is_removed_not_served(monkeypatch):
     assert not (PROJECT_ROOT / "templates" / "dashboard.html").exists()
-    archived = PROJECT_ROOT / "archive" / "legacy_dashboard"
-    assert (archived / "dashboard.html").exists()
-    assert (archived / "dashboard.css").exists()
-    assert (archived / "dashboard.js").exists()
+    # The archived legacy dashboard was deleted from the repository entirely.
+    assert not (PROJECT_ROOT / "archive" / "legacy_dashboard").exists()
+
+    response = _test_client(monkeypatch).get("/dashboard")
+    assert response.status_code == 301
+    assert response.headers["Location"].endswith("/")

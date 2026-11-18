@@ -1,36 +1,40 @@
 /* ============================================================
    NetShield Live Capture Console
-   Dense operational surface. Graphite or warm off-white base,
-   muted teal structure, amber caution, red high severity.
+   Dense operational surface. 60-30-10 SOC palette:
+   60% deep obsidian canvas, 30% elevated slate structure,
+   10% sky accent with red/amber/green semantic status.
    No gradients, glass, glows, or decorative card stripes.
    ============================================================ */
 
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #101516;
-  --bg-subtle: #151c1e;
-  --surface: #192224;
-  --surface-raised: #202b2e;
-  --surface-hover: #273438;
-  --line: #2d3b3e;
-  --line-strong: #3d4f53;
-  --text-hi: #eef3f2;
-  --text-med: #b3c2c0;
-  --text-lo: #7f918e;
-  --teal: #4a9d8e;
-  --teal-strong: #66b9a7;
-  --teal-wash: #17312d;
-  --amber: #d18a2f;
-  --amber-wash: #33240f;
-  --red: #d05a54;
-  --red-wash: #351a19;
-  --green: #4e9b68;
-  --green-wash: #15291d;
-  --focus: #7fd0bf;
-  --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
-  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --radius: 3px;
+  /* 60% dominant base */
+  --bg: #0b0f17;
+  --bg-subtle: #0f1522;
+  /* 30% secondary surface and structure */
+  --surface: #151c2c;
+  --surface-raised: #1a2334;
+  --surface-hover: #1e293b;
+  --line: #263248;
+  --line-strong: #37455f;
+  --text-hi: #f1f5f9;
+  --text-med: #cbd5e1;
+  --text-lo: #94a3b8;
+  /* 10% functional accent and semantic status */
+  --teal: #38bdf8;
+  --teal-strong: #7dd3fc;
+  --teal-wash: #0c2a3d;
+  --amber: #f59e0b;
+  --amber-wash: #2b210c;
+  --red: #ef4444;
+  --red-wash: #2e1519;
+  --green: #10b981;
+  --green-wash: #0b2a21;
+  --focus: #38bdf8;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  --sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --radius: 8px;
 }
 
 :root[data-theme="light"] {
@@ -640,7 +644,7 @@ textarea {
 
 .status-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -1928,7 +1932,7 @@ kbd {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .status-cell:nth-child(4) {
+  .status-cell:nth-child(3n + 1) {
     border-left: 0;
   }
 
@@ -2061,4 +2065,53 @@ kbd {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ---------- SOC surface polish (60-30-10) ---------- */
+
+.queue-table,
+.status-value,
+.kv dd,
+.incident-meta,
+.incident-id,
+.fleet-metrics dd,
+.sla-pill {
+  font-variant-numeric: tabular-nums;
+}
+
+.queue-table td.mono,
+.kv dd,
+.incident-id {
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+}
+
+/* The one-click demo CTA is the single 10% accent on this surface. */
+#btnSampleLoad {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--teal-strong);
+  font-weight: 600;
+}
+
+#btnSampleLoad:hover:not(:disabled) {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #06121e;
+}
+
+#btnSampleLoad:disabled {
+  opacity: 0.6;
+}
+
+.panel,
+.sensor-bar,
+.status-strip {
+  border-radius: var(--radius);
+}
+
+.panel-head,
+.panel-foot {
+  padding-left: 16px;
+  padding-right: 16px;
 }

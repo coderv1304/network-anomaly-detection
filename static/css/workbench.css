@@ -1,34 +1,39 @@
 /* ============================================================
    NetShield Research Workbench
-   A restrained evidence surface: solid graphite or warm off-white,
-   muted teal for structure, amber for caution, red for high severity.
+   A restrained evidence surface using the same 60-30-10 SOC palette:
+   60% deep obsidian canvas, 30% elevated slate structure,
+   10% sky accent with red/amber/green semantic status.
    ============================================================ */
 
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #101516;
-  --bg-subtle: #151c1e;
-  --surface: #192224;
-  --surface-raised: #202b2e;
-  --surface-hover: #273438;
-  --line: #2d3b3e;
-  --line-strong: #3d4f53;
-  --text-hi: #eef3f2;
-  --text-med: #b3c2c0;
-  --text-lo: #7f918e;
-  --teal: #4a9d8e;
-  --teal-strong: #66b9a7;
-  --teal-wash: #17312d;
-  --amber: #d18a2f;
-  --amber-wash: #33240f;
-  --red: #d05a54;
-  --red-wash: #351a19;
-  --green: #4e9b68;
-  --green-wash: #15291d;
-  --focus: #7fd0bf;
-  --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
-  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  /* 60% dominant base */
+  --bg: #0b0f17;
+  --bg-subtle: #0f1522;
+  /* 30% secondary surface and structure */
+  --surface: #151c2c;
+  --surface-raised: #1a2334;
+  --surface-hover: #1e293b;
+  --line: #263248;
+  --line-strong: #37455f;
+  --text-hi: #f1f5f9;
+  --text-med: #cbd5e1;
+  --text-lo: #94a3b8;
+  /* 10% functional accent and semantic status */
+  --teal: #38bdf8;
+  --teal-strong: #7dd3fc;
+  --teal-wash: #0c2a3d;
+  --amber: #f59e0b;
+  --amber-wash: #2b210c;
+  --red: #ef4444;
+  --red-wash: #2e1519;
+  --green: #10b981;
+  --green-wash: #0b2a21;
+  --focus: #38bdf8;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  --sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --radius: 8px;
 }
 
 :root[data-theme="light"] {
@@ -1615,4 +1620,64 @@ summary:hover {
     background: #ffffff;
     color: #111111;
   }
+}
+
+/* ---------- SOC surface polish (60-30-10) ---------- */
+
+.evidence-strip,
+.callout,
+.upload-panel,
+.dropzone,
+.btn,
+input[type="text"],
+input[type="search"],
+select,
+textarea {
+  border-radius: var(--radius);
+}
+
+.meta-pill,
+.topbar-link,
+.theme-toggle,
+.rail-item {
+  border-radius: 6px;
+}
+
+.section-note,
+.small,
+.caption,
+.file-name,
+.meta-pill,
+.evidence-strip {
+  font-variant-numeric: tabular-nums;
+}
+
+.file-name,
+.meta-pill,
+.evidence-value,
+.metric-value {
+  font-family: var(--mono);
+}
+
+/* The one-click demo CTA is the single 10% accent on this surface. */
+#btnBundledSample {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--teal-strong);
+  font-weight: 600;
+}
+
+#btnBundledSample:hover:not(:disabled) {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #06121e;
+}
+
+#btnBundledSample:disabled {
+  opacity: 0.6;
+}
+
+.dropzone {
+  border-width: 1px;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }

@@ -60,6 +60,53 @@ def test_fixture_scores_and_opens_incidents_without_mocked_scores():
     assert report["calibration_status"] == "rf-day-based-seed42-isotonic-v1"
 
 
+def test_fallback_builder_is_deterministic_schema_exact_and_scores(tmp_path):
+    """A fresh clone has no raw captures: the fallback must still build a real fixture."""
+    import joblib
+
+    builder = _builder()
+    first = tmp_path / "fallback_a.csv"
+    second = tmp_path / "fallback_b.csv"
+    builder.write_fixture(builder._build_fallback(), str(first))
+    builder.write_fixture(builder._build_fallback(), str(second))
+
+    # Same seed, same bytes: the fallback is reproducible, not random noise.
+    assert first.read_bytes() == second.read_bytes()
+    assert first.stat().st_size < 250 * 1024
+
+    frame = pd.read_csv(first, low_memory=False)
+    frame.columns = [str(column).strip() for column in frame.columns]
+    assert len(frame) == 500
+    # The serving schema plus the five metadata columns the ingest path reads.
+    assert len(frame.columns) == 85
+    features = list(joblib.load(builder.BUNDLE_PATH)["feature_names"])
+    assert set(features).issubset(frame.columns)
+    assert frame["Label"].astype(str).str.strip().value_counts().to_dict() == {
+        "BENIGN": 350,
+        "DDoS": 75,
+        "PortScan": 75,
+    }
+
+    report = builder.score_and_accumulate(str(first))
+    assert report["flow_alerts"] >= 1
+    assert report["incidents"] >= 1
+
+
+def test_cli_falls_back_when_the_raw_captures_are_absent(tmp_path):
+    builder = _builder()
+    output = tmp_path / "fresh_clone_sample.csv"
+    exit_code = builder.main(
+        [
+            "--source-dir",
+            str(tmp_path / "no-captures-here"),
+            "--output",
+            str(output),
+        ]
+    )
+    assert exit_code == 0, "the fresh-clone fallback must build and self-verify"
+    assert output.stat().st_size < 250 * 1024
+
+
 def test_load_sample_endpoint_returns_200_and_surfaces_an_incident():
     app_module._EVIDENCE_ACCUMULATOR.reset()
     response = _client().post("/api/load-sample")

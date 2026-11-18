@@ -120,7 +120,7 @@ The Flask app serves two templates. Any claim audit must distinguish them.
 | --- | --- | --- | --- | --- |
 | Console | `/`, `/console` | `templates/console.html`, `static/js/console.js` | **Active** | Predictions are model output, not ground truth. No calibrated confidence. Sensor state and data boundary must stay visible. |
 | Research workbench | `/research`, `/upload` | `templates/index.html`, `static/js/workbench.js` | **Active** | Frozen evaluation evidence and limitations. Development evidence is labelled as such. |
-| Legacy dashboard | `/dashboard` | Redirects to `/` with HTTP 301 | **Not served** | `archive/legacy_dashboard/dashboard.html`, `archive/legacy_dashboard/dashboard.js`, and `static/js/main.js` are legacy. They are not referenced by any served route. |
+| Legacy dashboard | `/dashboard` | Redirects to `/` with HTTP 301 | **Removed** | The archived legacy dashboard was deleted from the repository. `static/js/main.js` remains legacy and is not referenced by any served route. |
 | Legacy threat-intel/SOAR strings | none | `static/js/main.js` | **Not served** | Contains “confidence”, AbuseIPDB enrichment, and response-preview strings. They are not part of the active console and must not be cited as product behavior. |
 
 If a legacy file is ever re-served, it must be re-audited before it can carry any claim. Until then, only the console and research workbench are product surfaces.

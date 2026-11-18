@@ -213,9 +213,9 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `tests/test_preflight.py` | `e77f80abaee49ea03e21922b2819d075328d348135ca5760cd3bee01eda1a1e1` |
 | `templates/account.html` | `62e64155b245794ce218cc2ad802ea16c79df2c3e91ee125f48714fb13f0a5d6` |
 | `static/js/account.js` | `6345e73ad5e86dd980811ca40c5c6cc02a52f85d175bc0ca4871166aa66b2c23` |
-| `templates/console.html` | `8c19d715c78ea4f6fcd3465667e310bf4e7084ba8275e813e173cbb193e9a3e4` |
+| `templates/console.html` | `c06d94048aa9b99efc14c5c959c47fea1ba5565b783146729ccdcbdc293fddf8` |
 | `static/js/console.js` | `2453d51d743c22dcbe90cf4ef8926efa01dfaa4ba719496ba57fecd2594e4956` |
-| `static/css/console.css` | `00623cf71cfd27ffd71b3fd711dfc0214fd076229408c0846b327dcd5721a0d4` |
+| `static/css/console.css` | `a49d931f3bfb4c691bb4b3f96a09a3b72a53972ee0328ffef76f2fd838599bdd` |
 | `docs/SOC_CONTEXT.md` | `41f7777d4bafa8eab89fb13c3280427d07014cb9a550503d8db11afba25ce966` |
 | `docs/ENTERPRISE_READINESS_REVIEW.md` | `d0678d1f6c3dfc3a1fc89ef50a129203612a9c537922e9b4202c168eaa8be1ac` |
 | `tests/test_capture_metadata.py` | `e826deeb19010b054e2e975fe71bc7d262d016e58773be1b4832f2954052b21d` |

@@ -86,8 +86,8 @@ Repository audit:
 
 - `data/` contains eight CIC-IDS-2017 flow CSVs.
 - `data/samples/` contains two smaller CSVs derived from CIC-IDS-2017.
-- `scratch/` contains four local experiment directories.
-- Recursive search for `.pcap` and `.pcapng` under `data/`, `data/samples/`, and `scratch/` returns **0 files**.
+- `scratch/` is a local, gitignored workspace for regenerable experiment artifacts; it holds no capture files in a fresh clone.
+- Recursive search for `.pcap` and `.pcapng` under `data/` and `data/samples/` returns **0 files**.
 - The CIC CSV filenames contain `pcap_ISCX`, but their extension is `.csv`; they are per-flow exports, not packet captures.
 
 ### Why fan-out is not approximated

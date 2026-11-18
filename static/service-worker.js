@@ -6,7 +6,7 @@
  * - NEVER caches /predict (file upload) or /socket.io/* (live WebSocket traffic)
  */
 
-const VERSION = 'v3.3.0';
+const VERSION = 'v3.4.2';
 const STATIC_CACHE = `netshield-static-${VERSION}`;
 const RUNTIME_CACHE = `netshield-runtime-${VERSION}`;
 
@@ -16,8 +16,8 @@ const RUNTIME_CACHE = `netshield-runtime-${VERSION}`;
 const APP_SHELL = [
   '/offline.html',
   '/static/manifest.json',
-  '/static/css/console.css?v=5',
-  '/static/css/workbench.css?v=2',
+  '/static/css/console.css?v=10',
+  '/static/css/workbench.css?v=5',
   '/static/js/console.js?v=9',
   '/static/js/theme.js?v=4',
   '/static/js/workbench.js?v=3',
