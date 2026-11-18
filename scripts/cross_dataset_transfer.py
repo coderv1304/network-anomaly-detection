@@ -25,11 +25,8 @@ Examples:
 from __future__ import annotations
 
 import argparse
-import collections
 import gc
-import hashlib
 import json
-import math
 import os
 import sys
 import time
@@ -55,11 +52,9 @@ from scripts.external_dataset_audit import (  # noqa: E402
     UNSW_TIER_A_MAP,
     cic2018_family,
     cic2018_label_class,
-    normalize_label,
     unsw_label_class,
 )
 from scripts.rule_baselines import (  # noqa: E402
-    EXCLUDED_LABELS,
     NEGATIVE_LABELS,
     POSITIVE_LABELS,
     _sha256_file,

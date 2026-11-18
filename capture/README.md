@@ -2,7 +2,7 @@
 
 This directory will host the high-performance live network capture and flow assembler service written in **Go**.
 
-## Architecture & Goals (Phase 2 Roadmap)
+## Architecture & Goals
 1. **Engine**: Packet capture using `gopacket` / `pcap` binding.
 2. **Flow Tracking Table**: Concurrent 5-tuple table (`SrcIP`, `DstIP`, `SrcPort`, `DstPort`, `Protocol`) tracking bidirectional flows.
 3. **Timeout & State Engine**:

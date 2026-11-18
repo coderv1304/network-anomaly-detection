@@ -244,7 +244,6 @@ def test_flows_to_detection_counts_attack_flows_until_the_trigger():
 
 
 def test_wednesday_tuning_respects_the_false_incident_target():
-    rng = np.random.default_rng(7)
     # 40 benign hosts, one window each, no evidence.
     benign_hosts = np.repeat(np.arange(40, dtype=np.int64), 2)
     benign_times = np.tile(np.array([0.0, 60.0]), 40)

@@ -303,8 +303,8 @@ def service_worker():
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['Service-Worker-Allowed'] = '/'
     return response
- 
- 
+
+
 @app.route('/manifest.json')
 def manifest_alias():
     # Optional convenience alias so /manifest.json also works;
@@ -312,12 +312,12 @@ def manifest_alias():
     response = send_from_directory('static', 'manifest.json')
     response.headers['Content-Type'] = 'application/manifest+json'
     return response
- 
- 
+
+
 @app.route('/offline.html')
 def offline_page():
     return send_from_directory('static', 'offline.html')
- 
+
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins=_allowed_origins, async_mode="threading")
 limiter = Limiter(
@@ -437,12 +437,16 @@ def service_unavailable(error):
         {"Retry-After": "1"},
     )
 
+
 # Metrics are opt-in so importing the application has no network side effects.
 if os.environ.get("METRICS_ENABLED", "false").lower() == "true":
     start_metrics_server(
         int(os.environ.get("METRICS_PORT", "8000")),
         addr=os.environ.get("METRICS_HOST", "127.0.0.1"),
     )
+
+
+# ---------------------------------------------------------------------
 # API key auth for write endpoints
 # ---------------------------------------------------------------------
 def require_api_key(view_func):
@@ -1026,10 +1030,7 @@ def authorize_socket_connection(auth=None):
 
 
 # ---------------------------------------------------------------------
-# Database model
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# Tenancy, identity, and audit models
+# Database models
 # ---------------------------------------------------------------------
 class Tenant(db.Model):
     """A tenant boundary. Every stored flow, review, and audit row belongs to one."""

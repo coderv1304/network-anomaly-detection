@@ -29,7 +29,6 @@ import argparse
 import json
 import os
 import random
-import statistics
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor

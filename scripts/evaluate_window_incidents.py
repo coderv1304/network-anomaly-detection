@@ -59,7 +59,6 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-import joblib  # noqa: E402
 
 from evidence_accumulator import (  # noqa: E402
     EvidenceAccumulator,
@@ -68,7 +67,6 @@ from evidence_accumulator import (  # noqa: E402
 )
 from training.train_calibrated import (  # noqa: E402
     SEED,
-    TARGET_FPRS,
     PortableDataset,
     attack_probability,
     benign_fpr_threshold_report,

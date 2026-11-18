@@ -1,0 +1,34 @@
+[project]
+name = "netshield"
+version = "1.0.0"
+description = "Network-flow anomaly detection: Flask operator console, batch scoring, and reproducible evaluation tooling."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Varun Nair", email = "coderv13@gmail.com" }]
+keywords = ["network-security", "anomaly-detection", "intrusion-detection", "scikit-learn"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Security",
+]
+
+# Runtime pins live in requirements.txt (installed by `make setup`); this file
+# holds tooling configuration only, so there is one source of dependency truth.
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["venv", "archive", "data", "models"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+# app.py and the scripts prepend the repository root to sys.path (and app.py
+# loads .env) before importing first-party modules, so imports are not at the
+# top of the file by design.
+ignore = ["E402"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

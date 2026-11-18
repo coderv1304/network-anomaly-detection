@@ -49,8 +49,6 @@ if PROJECT_ROOT not in sys.path:
 
 import pcap_parser  # noqa: E402
 from feature_mapper import (  # noqa: E402
-    FEATURE_NAME_OVERRIDES,
-    _auto_normalize,
     normalize_flow_features,
 )
 
@@ -689,9 +687,6 @@ def main() -> None:
     comparison = compare(live_flows, reference_frame, expected)
     probes = probe_malformed(tmpdir)
 
-    live_available = sum(
-        1 for feature in expected if comparison["feature_presence"].get(feature, 0) > 0
-    )
     # The live path maps all 80 names even when a flow has no value for one;
     # coverage is about the schema the mapper can fill, not per-flow presence.
     live_mapped_sample = map_features(live_flows[0], expected) if live_flows else {}

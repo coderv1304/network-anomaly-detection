@@ -184,12 +184,12 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `docs/secret_scan.json` | `9945a86324b73f461c7705d026f49b3c00663e1b69e02fb6f37afb23464588e8` |
 | `docs/deployment_check.json` | `757d2ff8692bc64e431a29bc4237f89871a8f9b9e3127f464d5c5697e880d4f3` |
 | `scripts/release_gate.py` | `e604a024ee89b50da32742da83127ffc33db3d513d4ad3211864be7b68cb5d48` |
-| `scripts/secret_scan.py` | `c59bc90bbce798e4c3097ba9b099b5224fdded17802601b2680c9deead4ba2f1` |
+| `scripts/secret_scan.py` | `08a0b7497b2c8e3d0049cfbf167baf4d22a94a8f3d3069d23f2a24aa0a82bb0e` |
 | `tests/test_sensor_identity.py` | `2aaf435e998e21820cfd312e23a4cb353b17c92a45c455c7f1c703bb31e5a678` |
 | `tests/test_release_gate.py` | `a771f892e13beccab18ff62f0fab047dc59d56d65d8c915a5a4feec323aaccb3` |
 | `requirements.txt` | `a002047f9a22c6d36c6e94f0636dfa6f4b71ca599c94d0a68e2a1ba0bb8a8702` |
 | `requirements-runtime.txt` | `f4005921fa01ba83ec5a7ae0731a79f3ba1f6904ce49c03f61d3c0fba3615c66` |
-| `app.py` | `e9d30577cb39438e2cf86be4af815b246885e61dabd7c2831d0078939b2e4b32` |
+| `app.py` | `dc6f698678cbc7b1d29cafe01ddb01d8560f90455512596ed3f77d866bc4ed86` |
 | `capture_metadata.py` | `8f73a1104d051e4181079d1634e1b156d6640b2c97bbedea4b13b20efa3cad77` |
 | `pcap_parser.py` | `b2c805b899da6bb62e5830e68db1c25bf755ad925607ed703baea4f5c31273b4` |
 | `threat_intel.py` | `e5e0ad8f20a3a028920cfeef3d5a2a8bf44aa2f8a29404e4098296a3f5460789` |

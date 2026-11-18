@@ -20,7 +20,6 @@ Outputs:
 
 import json
 import os
-import glob
 import numpy as np
 
 MODELS_DIR = "models"

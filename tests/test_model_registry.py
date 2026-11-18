@@ -7,7 +7,6 @@ real serving path.
 """
 
 import json
-import os
 
 import joblib
 import pytest

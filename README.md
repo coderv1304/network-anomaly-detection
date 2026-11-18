@@ -2,7 +2,7 @@
 
 NetShield is a network-flow analysis application: a Flask operator console, a research workbench, batch CSV/PCAP scoring, an optional Go capture collector, and reproducible evaluation tooling. It scores flows for **volumetric and scanning behavior** with a Random Forest trained on CIC-IDS-2017.
 
-The project exists to measure the distance between a strong benchmark number and a usable detector: temporal leakage, class imbalance, dataset quality, prevalence collapse, and the feature mismatch between offline flow exports and live capture. Results are published with the failures intact.
+The project measures the distance between a strong benchmark number and a usable detector: temporal leakage, class imbalance, dataset quality, prevalence collapse, and the feature mismatch between offline flow exports and live capture. Results are published with the failures intact.
 
 **Frozen scope:** flow-based detection of volumetric and scanning traffic. NetShield is not a general NIDS, does not block traffic, and has no validated live accuracy.
 
@@ -23,11 +23,11 @@ Open <http://localhost:5000> and click **Load 500-Flow Sample**. No dataset down
 The button posts to `POST /api/load-sample`, which reads `tests/fixtures/sample_flows_500.csv` through the same inference path, threshold policy, calibration artifact and `EvidenceAccumulator` as any collector ingest:
 
 - 500 flows: 350 benign across 12 hosts, plus 75 DDoS and 75 PortScan flows from the held-out Friday captures.
-- All 150 attack flows come from **two** source addresses inside **one 300-second window**.
+- All 150 attack flows come from **two** source addresses inside **one** 300-second window.
 - On the shipped bundle this produces 88 per-flow alerts and **two** host/window incidents at 100/100 risk points.
 - Stored rows are tagged `provenance=bundled_sample_fixture`; the console queue and incident panel refresh in place.
 
-Nothing is mocked. The fixture is an extract of real CIC-IDS-2017 rows with only `Flow ID`, `Source IP`, `Destination IP` and `Timestamp` rewritten; every model feature is the value CICFlowMeter measured. Rebuild and re-verify it with:
+The fixture is an extract of real CIC-IDS-2017 rows with only `Flow ID`, `Source IP`, `Destination IP` and `Timestamp` rewritten; every model feature is the value CICFlowMeter measured. Nothing is mocked. Rebuild and re-verify it with:
 
 ```bash
 python scripts/build_sample_fixture.py --check
@@ -80,7 +80,7 @@ The registry-active bundle and its registry are committed so a clone reproduces 
 
 All numbers come from the frozen evaluation protocol or from explicitly labelled sensitivity runs. They are development evidence, not a blind confirmatory test.
 
-### Serving model — CIC-IDS-2017
+### Serving Model on CIC-IDS-2017
 
 | Evaluation | Result | Reading |
 | --- | --- | --- |
@@ -90,9 +90,9 @@ All numbers come from the frozen evaluation protocol or from explicitly labelled
 | Five-seed variation | PR-AUC 0.7472 ± 0.0749, FPR 4.11% ± 3.27%, recall 58.30% ± 14.79% | The threshold does not transfer across seeds |
 | Prevalence 0.1% (seed 42) | PPV 7.40%, 78.27 alerts per 10k flows | Precision collapses outside the benchmark base rate |
 
-### Phase 2 — calibrated cross-dataset transfer (`docs/CALIBRATED_TRANSFER_RESULTS.md`)
+### Cross-Dataset Transfer (Calibrated HistGradientBoosting)
 
-Eight portable-ratio features, thresholds selected on Wednesday benign scores, external data never used for fitting or threshold selection. Candidate B is a histogram gradient boosting classifier.
+Eight portable-ratio features; thresholds selected on Wednesday benign scores. External data is never used for fitting or threshold selection. Candidate B is a histogram gradient boosting classifier. Full results: [`docs/CALIBRATED_TRANSFER_RESULTS.md`](docs/CALIBRATED_TRANSFER_RESULTS.md).
 
 | Dataset | Model | Threshold | ROC-AUC | PR-AUC | FPR | Precision | Recall | Alerts | Rows |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -102,26 +102,27 @@ Eight portable-ratio features, thresholds selected on Wednesday benign scores, e
 | UNSW-NB15 | Candidate B (HistGradientBoosting) | 0.1647 | 0.5683 | 0.1688 | 0.00126 | 0.1731 | 0.0020 | 52 | 38,627 |
 | Thursday–Friday (in-domain) | Candidate B (HistGradientBoosting) | 0.1647 | 0.8218 | 0.4464 | 0.01189 | 0.1596 | 0.0083 | 11,383 | 1,023,182 |
 
-What this established: the published threshold saturates at **1.0000** and emits zero alerts on both external datasets. Candidate B removes that saturation at both benign-FPR targets (0.005 and 0.001) and holds a **0.28%** benign FPR on 13.5M CIC-IDS-2018 flows. It also showed that a Wednesday-selected FPR guarantee does not travel across days: on Thursday–Friday the realized FPR is 1.19%, 2.4× the target. Natural-prevalence recall is 0.0083, and at 0.1% prevalence precision is 0.001 with 119 alerts per 10,000 rows.
+The published threshold saturates at **1.0000** and emits zero alerts on both external datasets. Candidate B clears that saturation at both benign-FPR targets (0.005 and 0.001) and holds a **0.28%** benign FPR on 13.5M CIC-IDS-2018 flows. A Wednesday-selected FPR guarantee does not travel across days: realized Thursday–Friday FPR is 1.19%, 2.4× the target. Natural-prevalence recall is 0.0083; at 0.1% prevalence precision is 0.001 with 119 alerts per 10,000 rows.
 
-### Phase 3 — host/window incident evaluation (`docs/WINDOW_INCIDENT_EVAL.md`)
+### Host/Window Incident Aggregation (300 s Window)
 
-Replay of Thursday–Friday flows through `EvidenceAccumulator(scoring_mode="calibrated")` with uniform positive downsampling to 0.1% flow prevalence.
+Replay of Thursday–Friday flows through `EvidenceAccumulator(scoring_mode="calibrated")` with uniform positive downsampling to 0.1% flow prevalence. Full results: [`docs/WINDOW_INCIDENT_EVAL.md`](docs/WINDOW_INCIDENT_EVAL.md).
 
 | Alerting unit | Threshold | Alerts | PPV | Recall | Alerts per 10k flows |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Single flow | 0.4655 | 14,325 | 0.0000 | 0.0000 | 177.9167 |
 | 300 s host/window incident | 100.0 | 372 | 0.0000 | 0.0000 | 4.6202 |
 
-Windowing cuts alert volume by **38×** (177.92 → 4.62 per 10,000 flows). It does not rescue precision: at 0.1% prevalence both units report **PPV 0.0000**, and no malicious window opened an incident. At the natural 21.4% prevalence the window policy reaches PPV 0.0080 and recall 0.1667, but transfers to a 0.789% benign-window false-incident rate against a 0.1% target — 7.9× over budget. No Wednesday grid point met that target, so the reported operating point is a fallback and the policy is not validated.
+Windowing cuts alert volume by **38×** (177.92 → 4.62 per 10,000 flows) but does not rescue precision: at 0.1% prevalence both units report **PPV 0.0000**, and no malicious window opened an incident. At the natural 21.4% prevalence the window policy reaches PPV 0.0080 and recall 0.1667, at a 0.789% benign-window false-incident rate against a 0.1% target — 7.9× over budget. No Wednesday grid point met that target, so the reported operating point is a fallback and the policy is not validated.
 
-**Read the two phases together.** Aggregation is a real lever on alert volume and a null result on precision at low prevalence. The accumulator remains a triage view over per-flow scores, not a validated detector.
+**Read both evaluations together.** Aggregation is a real lever on alert volume and a null result on precision at low prevalence. The accumulator remains a triage view over per-flow scores, not a validated detector.
 
 ## Reproducing
 
 ```bash
-pytest tests -q
-node --check static/js/console.js
+make setup      # create .venv and install requirements.txt
+make test       # pytest tests -q
+make lint       # ruff check + node --check on both UI bundles
 python scripts/secret_scan.py
 python scripts/deployment_check.py
 ```
@@ -132,7 +133,7 @@ Go collector tests:
 cd capture && go test ./... && cd ..
 ```
 
-Long-running evaluation runners are Windows batch wrappers under `scripts/windows/` (`run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`, `run_all_experiments.bat`, `run_isolation_forest.bat`, `build_capture.bat`). Each changes to the repository root before running, so they work from any directory. The `.github/workflows/security.yml` pipeline additionally runs `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
+Long-running evaluation runners are Windows batch wrappers under `scripts/windows/` (`run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`, `run_all_experiments.bat`, `run_isolation_forest.bat`, `build_capture.bat`). Each changes to the repository root first, so they run from any directory. `.github/workflows/security.yml` additionally runs `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
 
 ## Configuration
 
@@ -179,6 +180,8 @@ capture/                   Go live-capture collector
 templates/ static/         Operator console and workbench UI
 tests/fixtures/            Bundled 500-flow sample and parser fixtures
 docs/                      Protocols, reports, runbooks, claim matrix
+Makefile                   setup, run, test, lint, docker targets
+pyproject.toml             Project metadata, Ruff and pytest configuration
 ```
 
 ## Documentation
@@ -193,7 +196,7 @@ docs/                      Protocols, reports, runbooks, claim matrix
 | Incidents | [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md), [WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md) |
 | Operations | [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md), [SOC_CONTEXT.md](docs/SOC_CONTEXT.md), [INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) |
 | Security and tenancy | [SECURITY_AND_COMPLIANCE.md](docs/SECURITY_AND_COMPLIANCE.md), [TENANCY_AND_ACCESS_CONTROL.md](docs/TENANCY_AND_ACCESS_CONTROL.md) |
-| Phase status | [PHASE_STATUS.md](docs/PHASE_STATUS.md) |
+| Project status | [PHASE_STATUS.md](docs/PHASE_STATUS.md) |
 | IDS/IPS roadmap | [IDS_IPS_ROADMAP.md](docs/IDS_IPS_ROADMAP.md) — planned, not implemented |
 
 ## Limitations

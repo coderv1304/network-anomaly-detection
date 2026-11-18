@@ -2,7 +2,7 @@
 
 This directory contains containerization, orchestration, and monitoring infrastructure.
 
-## Roadmap & Milestones (Phase 3: Engineering Signals)
+## Roadmap & Milestones
 1. **Containerization (Docker)**:
    - Multi-stage Dockerfile for Go capture binary with minimal base image.
    - Non-root user execution, using only necessary Linux capabilities (`CAP_NET_RAW`, `CAP_NET_ADMIN`).

@@ -7,7 +7,6 @@ production downloads, the score caches, or the serving artifact.
 from __future__ import annotations
 
 import pandas as pd
-import pytest
 
 from scripts.external_dataset_audit import (
     audit_cic,

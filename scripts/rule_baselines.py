@@ -938,8 +938,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.append("")
     lines.append("**Status:** complete. **Scope:** flow-based volumetric and scanning behavior; not a general NIDS.")
     lines.append("")
-    lines.append(f"**Artifact:** [`rule_baselines.json`](rule_baselines.json). "
-                 f"**Script:** [`../scripts/rule_baselines.py`](../scripts/rule_baselines.py).")
+    lines.append("**Artifact:** [`rule_baselines.json`](rule_baselines.json). "
+                 "**Script:** [`../scripts/rule_baselines.py`](../scripts/rule_baselines.py).")
     lines.append("")
     lines.append("This report defines the Tier A rule baselines that any later model must beat. "
                  "It adds no model, does not touch the serving artifact, and does not tune on test labels.")
@@ -1024,7 +1024,6 @@ def render_markdown(payload: dict[str, Any]) -> str:
             cells = []
             for p in columns:
                 cells.append(_pct(by_p[p]["ppv"], 4))
-            benchmark = block["benchmark_prevalence"]
             cells.append(_pct(block["precision_at_benchmark"], 2))
             lines.append(f"| `{rule}` | " + " | ".join(cells) + " |")
         lines.append("")

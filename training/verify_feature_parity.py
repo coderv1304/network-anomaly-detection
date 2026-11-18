@@ -39,10 +39,8 @@ import argparse
 import io
 import json
 import numpy as np
-import pandas as pd
 
 from preprocessor import IDENTIFIER_COLUMNS
-from feature_mapper import normalize_flow_features, FEATURE_NAME_OVERRIDES, _auto_normalize
 from pcap_parser import pcap_to_flows
 
 
@@ -78,7 +76,6 @@ def audit_feature_schema(expected_features: list[str]) -> dict:
 
     matched = sorted(expected_set & generated_set)
     missing_from_parser = sorted(expected_set - generated_set)
-    extra_in_parser = sorted(generated_set - expected_set)
 
     # Identify features where parser uses dummy or zero placeholders
     dummy_features = [
@@ -105,7 +102,7 @@ def stress_test_malformed_inputs() -> dict:
     results = {}
 
     try:
-        from scapy.layers.inet import IP, TCP, UDP
+        from scapy.layers.inet import IP, TCP
         from scapy.layers.l2 import Ether, ARP
         from scapy.utils import PcapWriter
     except ImportError:

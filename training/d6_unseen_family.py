@@ -794,7 +794,6 @@ def main() -> int:
         val_benign_mask = validation_a["binary_truth"] == 0
         sup_val_norm = normalise(validation_a["score"][val_benign_mask], validation_a["score"])
         anom_val_norm = normalise(validation_c["score"][val_benign_mask], validation_c["score"])
-        test_benign_mask = test_a["binary_truth"] == 0
         sup_test_norm = normalise(validation_a["score"][val_benign_mask], test_a["score"])
         anom_test_norm = normalise(validation_c["score"][val_benign_mask], test_c["score"])
         best_alpha = None

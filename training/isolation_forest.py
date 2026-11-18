@@ -29,7 +29,6 @@ import platform
 import sklearn
 import joblib
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import precision_recall_curve, auc, roc_auc_score

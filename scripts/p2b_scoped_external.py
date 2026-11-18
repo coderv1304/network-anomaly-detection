@@ -29,10 +29,8 @@ Examples:
 from __future__ import annotations
 
 import argparse
-import collections
 import gc
 import json
-import math
 import os
 import sys
 import time
@@ -73,7 +71,6 @@ from scripts.prevalence_eval import (  # noqa: E402
 from scripts.rule_baselines import (  # noqa: E402
     _finite_or_none,
     _sha256_file,
-    alert_budget_k,
     bootstrap_prevalence,
     build_rule_scores,
     confusion_counts,
@@ -611,7 +608,7 @@ def render_report(payload: dict[str, Any]) -> str:
         f"**Status:** {payload['status']}.",
         f"**Scope:** {SCOPE_STATEMENT}",
         f"**Date:** {payload['date']}.",
-        f"**Artifact:** [`p2b_scoped_external.json`](p2b_scoped_external.json).",
+        "**Artifact:** [`p2b_scoped_external.json`](p2b_scoped_external.json).",
         "**Script:** [`../scripts/p2b_scoped_external.py`](../scripts/p2b_scoped_external.py).",
         "",
         "## 1. Amendment",
@@ -662,8 +659,8 @@ def render_report(payload: dict[str, Any]) -> str:
         f"| Seeds | {', '.join(str(seed) for seed in payload['seeds'])} |",
         f"| Budgets | {', '.join(str(budget) for budget in payload['budgets'])} alerts / 10k |",
         f"| Training cap | {payload['train_cap']:,} rows (validation/test scored in full) |",
-        f"| Threshold partition | validation only |",
-        f"| Test partition | held out; one pass |",
+        "| Threshold partition | validation only |",
+        "| Test partition | held out; one pass |",
         "",
         "## 4. Results at 100 alerts / 10k",
         "",

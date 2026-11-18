@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import collections
-import hashlib
 import json
 import os
 import sys
@@ -702,7 +701,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.append(f"| Official source | {cidds['provenance']['official_source']} |")
     lines.append(f"| Citation | {cidds['provenance']['citation']} |")
     lines.append(f"| Licence | {cidds['provenance']['licence_status']} |")
-    lines.append(f"| Format | Unidirectional NetFlow |")
+    lines.append("| Format | Unidirectional NetFlow |")
     lines.append(f"| Raw rows | {_fmt(cidds['rows']['raw'])} |")
     lines.append(f"| Unique flow keys | {_fmt(cidds['rows']['unique_flow_keys'])} |")
     lines.append(f"| Duplicate records removed | {_fmt(cidds['rows']['duplicate_rows'])} |")

@@ -1162,7 +1162,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.append(f"| Status | **{unsw['status']}** |")
     lines.append(f"| Official source | {unsw['provenance']['official_source']} |")
     lines.append(f"| Licence | {unsw['provenance']['licence_status']} |")
-    lines.append(f"| Official split | 175,341 train / 82,332 test |")
+    lines.append("| Official split | 175,341 train / 82,332 test |")
     lines.append(f"| Filename swap corrected | {unsw['provenance']['filename_swap_corrected']} |")
     lines.append(f"| Positive families | {', '.join(unsw['label_policy']['positive_labels'])} |")
     lines.append(f"| Negative family | {', '.join(unsw['label_policy']['negative_labels'])} |")
