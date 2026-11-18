@@ -1,0 +1,1016 @@
+{
+  "accumulator_parity": {
+    "all_match": true,
+    "compared_windows": 3919,
+    "incident_flags_match": true,
+    "max_abs_points_delta": 0.0,
+    "sampled_flows": 20000,
+    "sampled_windows": 3919,
+    "status": "ok",
+    "windows_missing_from_accumulator": 0
+  },
+  "artifact_version": "window-incident-eval-v1",
+  "candidate": {
+    "calibration": "sigmoid (Platt)",
+    "estimator": "RandomForestClassifier",
+    "name": "Candidate A",
+    "scores_source": "cache"
+  },
+  "elapsed_seconds": 76.53,
+  "evaluation": {
+    "flow_prevalence_0_001": {
+      "benign_rows": 804347,
+      "dropped_rows_without_timestamp": 0,
+      "matched_false_alarm_budget": {
+        "benign_flows": 804347,
+        "benign_windows": 47177,
+        "implied_flow_fpr_budget": 5.865254672423718e-05,
+        "note": "Flow-level threshold that spends the same number of benign false alarms as the window policy's target. Computed here, not tuned on test data.",
+        "window_target_fpr": 0.001
+      },
+      "matched_flow_budget": {
+        "alert_rate": 6.45840785342395e-05,
+        "alerts": 52,
+        "alerts_per_10k": 0.645840785342395,
+        "benign_rows": 804347,
+        "comparison": ">",
+        "f1": null,
+        "fn": 805,
+        "fp": 52,
+        "fpr": 6.464871504462626e-05,
+        "positive_rows": 805,
+        "pr_auc": 0.0034887201470130886,
+        "precision": 0.0,
+        "prevalence": 0.0009998112157704384,
+        "realized_benign_fpr": 6.481406465202949e-05,
+        "recall": 0.0,
+        "roc_auc": 0.8486244491664228,
+        "rows": 805152,
+        "saturated": false,
+        "threshold": 0.999999976636015,
+        "threshold_key": "matched_budget",
+        "tn": 804295,
+        "tp": 0
+      },
+      "name": "Thursday-Friday (0.1% flow prevalence)",
+      "positive_rows": 805,
+      "prevalence": 0.0009998112157704384,
+      "rows": 805152,
+      "sampling": {
+        "benign_rows": 804347,
+        "positives_available": 218835,
+        "positives_dropped": 218030,
+        "positives_sampled": 805,
+        "realized_prevalence": 0.0009998112157704384,
+        "seed": 42,
+        "target_prevalence": 0.001
+      },
+      "scored_rows": 805152,
+      "single_flow": {
+        "phase2_flow_fpr_0.001": {
+          "alert_rate": 0.009316253328564048,
+          "alerts": 7501,
+          "alerts_per_10k": 93.16253328564048,
+          "benign_rows": 804347,
+          "comparison": ">",
+          "f1": null,
+          "fn": 805,
+          "fp": 7501,
+          "fpr": 0.009325577145187338,
+          "positive_rows": 805,
+          "pr_auc": 0.0034887201470130886,
+          "precision": 0.0,
+          "prevalence": 0.0009998112157704384,
+          "recall": 0.0,
+          "roc_auc": 0.8486244491664228,
+          "rows": 805152,
+          "threshold": 0.9996764011485699,
+          "threshold_key": "phase2_flow_fpr_0.001",
+          "tn": 796846,
+          "tp": 0,
+          "unit": "flow"
+        },
+        "phase2_flow_fpr_0.005": {
+          "alert_rate": 0.01779167163467271,
+          "alerts": 14325,
+          "alerts_per_10k": 177.9167163467271,
+          "benign_rows": 804347,
+          "comparison": ">",
+          "f1": null,
+          "fn": 805,
+          "fp": 14325,
+          "fpr": 0.017809477750274447,
+          "positive_rows": 805,
+          "pr_auc": 0.0034887201470130886,
+          "precision": 0.0,
+          "prevalence": 0.0009998112157704384,
+          "recall": 0.0,
+          "roc_auc": 0.8486244491664228,
+          "rows": 805152,
+          "threshold": 0.4654722386214051,
+          "threshold_key": "phase2_flow_fpr_0.005",
+          "tn": 790022,
+          "tp": 0,
+          "unit": "flow"
+        }
+      },
+      "window_incident": {
+        "alerted_windows": 372,
+        "attack_flow_coverage": 0.0,
+        "burst": {
+          "benign_windows": 47178,
+          "definition": "sum(y_true) >= 3",
+          "f1": null,
+          "fn": 9,
+          "fp": 372,
+          "fpr_benign_windows": 0.007885031158590869,
+          "incidents": 372,
+          "malicious_windows": 9,
+          "min_positive_flows": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "tn": 46806,
+          "tp": 0,
+          "windows": 47187
+        },
+        "cap_saturated_share": 0.00788352724267277,
+        "cap_saturated_windows": 372,
+        "flows_to_detection": {
+          "malicious_windows": 10,
+          "mean_attack_flows_before_trigger": null,
+          "mean_flows_before_trigger": null,
+          "median_attack_flows_before_trigger": null,
+          "median_flows_before_trigger": null,
+          "triggered_malicious_windows": 0
+        },
+        "incidents_per_10k_flows": 4.6202456182186715,
+        "parameters": {
+          "incident_threshold": 100.0,
+          "min_signals": 1,
+          "p_floor": 0.8,
+          "per_flow_cap": 50.0,
+          "scoring_mode": "calibrated",
+          "selection": "wednesday_only",
+          "window_cap": 100.0,
+          "window_seconds": 300
+        },
+        "primary": {
+          "benign_windows": 47177,
+          "definition": "sum(y_true) >= 1",
+          "f1": null,
+          "fn": 10,
+          "fp": 372,
+          "fpr_benign_windows": 0.007885198295779723,
+          "incidents": 372,
+          "malicious_windows": 10,
+          "min_positive_flows": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "tn": 46805,
+          "tp": 0,
+          "windows": 47187
+        },
+        "ranking": {
+          "burst": {
+            "positives": 9,
+            "pr_auc": 0.00019073049780659929,
+            "roc_auc": 0.49116113442706344
+          },
+          "primary": {
+            "positives": 10,
+            "pr_auc": 0.00021192277534066585,
+            "roc_auc": 0.4911609470716663
+          }
+        },
+        "window_seconds": 300,
+        "windows": 47187
+      }
+    },
+    "natural": {
+      "benign_rows": 804347,
+      "dropped_rows_without_timestamp": 0,
+      "matched_false_alarm_budget": {
+        "benign_flows": 804347,
+        "benign_windows": 47176,
+        "implied_flow_fpr_budget": 5.865130347971709e-05,
+        "note": "Flow-level threshold that spends the same number of benign false alarms as the window policy's target. Computed here, not tuned on test data.",
+        "window_target_fpr": 0.001
+      },
+      "matched_flow_budget": {
+        "alert_rate": 5.082184792148415e-05,
+        "alerts": 52,
+        "alerts_per_10k": 0.5082184792148415,
+        "benign_rows": 804347,
+        "comparison": ">",
+        "f1": null,
+        "fn": 218835,
+        "fp": 52,
+        "fpr": 6.464871504462626e-05,
+        "positive_rows": 218835,
+        "pr_auc": 0.479330948651082,
+        "precision": 0.0,
+        "prevalence": 0.21387690557496125,
+        "realized_benign_fpr": 6.481406465202949e-05,
+        "recall": 0.0,
+        "roc_auc": 0.8513506261018503,
+        "rows": 1023182,
+        "saturated": false,
+        "threshold": 0.9999999766394966,
+        "threshold_key": "matched_budget",
+        "tn": 804295,
+        "tp": 0
+      },
+      "name": "Thursday-Friday (natural prevalence)",
+      "positive_rows": 218835,
+      "prevalence": 0.21387690557496125,
+      "rows": 1023182,
+      "sampling": null,
+      "scored_rows": 1023182,
+      "single_flow": {
+        "phase2_flow_fpr_0.001": {
+          "alert_rate": 0.007351575770488535,
+          "alerts": 7522,
+          "alerts_per_10k": 73.51575770488535,
+          "benign_rows": 804347,
+          "comparison": ">",
+          "f1": 0.0001855476084238614,
+          "fn": 218814,
+          "fp": 7501,
+          "fpr": 0.009325577145187338,
+          "positive_rows": 218835,
+          "pr_auc": 0.479330948651082,
+          "precision": 0.0027918106886466367,
+          "prevalence": 0.21387690557496125,
+          "recall": 9.596271163205155e-05,
+          "roc_auc": 0.8513506261018503,
+          "rows": 1023182,
+          "threshold": 0.9996764011485699,
+          "threshold_key": "phase2_flow_fpr_0.001",
+          "tn": 796846,
+          "tp": 21,
+          "unit": "flow"
+        },
+        "phase2_flow_fpr_0.005": {
+          "alert_rate": 0.01402389799664185,
+          "alerts": 14349,
+          "alerts_per_10k": 140.2389799664185,
+          "benign_rows": 804347,
+          "comparison": ">",
+          "f1": 0.0002058460271716756,
+          "fn": 218811,
+          "fp": 14325,
+          "fpr": 0.017809477750274447,
+          "positive_rows": 218835,
+          "pr_auc": 0.479330948651082,
+          "precision": 0.00167259042441982,
+          "prevalence": 0.21387690557496125,
+          "recall": 0.00010967167043663034,
+          "roc_auc": 0.8513506261018503,
+          "rows": 1023182,
+          "threshold": 0.4654722386214051,
+          "threshold_key": "phase2_flow_fpr_0.005",
+          "tn": 790022,
+          "tp": 24,
+          "unit": "flow"
+        }
+      },
+      "window_incident": {
+        "alerted_windows": 375,
+        "attack_flow_coverage": 0.03700047981355816,
+        "burst": {
+          "benign_windows": 47178,
+          "definition": "sum(y_true) >= 3",
+          "f1": 0.015345268542199489,
+          "fn": 13,
+          "fp": 372,
+          "fpr_benign_windows": 0.007885031158590869,
+          "incidents": 375,
+          "malicious_windows": 16,
+          "min_positive_flows": 3,
+          "precision": 0.008,
+          "recall": 0.1875,
+          "tn": 46806,
+          "tp": 3,
+          "windows": 47194
+        },
+        "cap_saturated_share": 0.007945925329491036,
+        "cap_saturated_windows": 375,
+        "flows_to_detection": {
+          "malicious_windows": 18,
+          "mean_attack_flows_before_trigger": 696.3333333333334,
+          "mean_flows_before_trigger": 696.3333333333334,
+          "median_attack_flows_before_trigger": 799.0,
+          "median_flows_before_trigger": 799.0,
+          "triggered_malicious_windows": 3
+        },
+        "incidents_per_10k_flows": 3.665037109722415,
+        "parameters": {
+          "incident_threshold": 100.0,
+          "min_signals": 1,
+          "p_floor": 0.8,
+          "per_flow_cap": 50.0,
+          "scoring_mode": "calibrated",
+          "selection": "wednesday_only",
+          "window_cap": 100.0,
+          "window_seconds": 300
+        },
+        "primary": {
+          "benign_windows": 47176,
+          "definition": "sum(y_true) >= 1",
+          "f1": 0.015267175572519083,
+          "fn": 15,
+          "fp": 372,
+          "fpr_benign_windows": 0.007885365440054266,
+          "incidents": 375,
+          "malicious_windows": 18,
+          "min_positive_flows": 1,
+          "precision": 0.008,
+          "recall": 0.16666666666666666,
+          "tn": 46804,
+          "tp": 3,
+          "windows": 47194
+        },
+        "ranking": {
+          "burst": {
+            "positives": 16,
+            "pr_auc": 0.0017754587447556894,
+            "roc_auc": 0.5858292000508711
+          },
+          "primary": {
+            "positives": 18,
+            "pr_auc": 0.0016511703465129748,
+            "roc_auc": 0.5753101859702674
+          }
+        },
+        "window_seconds": 300,
+        "windows": 47194
+      }
+    }
+  },
+  "feature_schema": {
+    "count": 8,
+    "features": [
+      "log_bytes_per_packet",
+      "log_fwd_bytes_per_packet",
+      "log_bwd_bytes_per_packet",
+      "fwd_packet_ratio",
+      "packet_count_balance",
+      "fwd_byte_ratio",
+      "log_down_up_ratio",
+      "packet_size_asymmetry"
+    ],
+    "sha256": "50b17ff0342dafe9b6c8c61cb781ab0cbc8de6c73f048b5ebf8033c8b18d4e39",
+    "version": "portable-ratio-v1"
+  },
+  "flow_thresholds": {
+    "phase2_flow_fpr_0.001": 0.9996764011485699,
+    "phase2_flow_fpr_0.005": 0.4654722386214051
+  },
+  "generated_at": "2026-11-18T03:51:34.927315+00:00",
+  "grouping_key": "(Source IP, floor(epoch_seconds / 300) * 300)",
+  "limitations": [
+    "A window's ground truth is derived from the flows inside it: `sum(y_true) >= 1` (primary) or `>= 3` (burst). One attack flow therefore makes an entire window malicious, which flatters window recall relative to a per-flow detector.",
+    "The 300-second window is the only window size evaluated. Nothing here says 60 s or 900 s behaves the same way.",
+    "Grouping uses the real `Source IP` column. NAT and campus egress aggregation collapse many real hosts into one key; a shared egress address can therefore accumulate somebody else's evidence.",
+    "The frozen export's timestamps are minute-resolution on the attack days and use an unreliable 12-hour clock. Window boundaries are quantised to the stored minute, and absolute wall-clock time is not meaningful.",
+    "Window parameters were selected on the Wednesday calibration partition, which is the same partition that fitted the Phase 2 sigmoid calibrator. The choice is leakage-safe with respect to Thursday-Friday, but it is not a third independent split.",
+    "The two alerting units consume different false-alarm budgets: a flow threshold bounds per-flow false positives, while the window threshold bounds per-window false incidents. The report states both and adds a matched-budget sensitivity rather than implying the budgets are equal.",
+    "The 0.1% regime is produced by dropping individual positive flows from the Thursday-Friday set. It keeps each flow's score but removes most within-window co-occurrence, so it measures sparse labels rather than a sparse but bursty attacker.",
+    "The serving artifact is untouched. No candidate is promoted by this evaluation."
+  ],
+  "phase2_cross_check": {
+    "available": true,
+    "candidate": "A",
+    "max_abs_delta": 2.9255318648724327e-06,
+    "path": "docs\\CALIBRATED_TRANSFER_RESULTS.json",
+    "published_pr_auc": 0.4793314161753071,
+    "published_roc_auc": 0.8513535516337152,
+    "published_test_rows": 1023182,
+    "recomputed_pr_auc": 0.479330948651082,
+    "recomputed_roc_auc": 0.8513506261018503,
+    "recomputed_test_rows": 1023182,
+    "refit_reproduced_phase2": true,
+    "rows_match": true
+  },
+  "primary_flow_key": "phase2_flow_fpr_0.005",
+  "protocol": {
+    "deviation": "The literal Monday-Tuesday training split has zero in-scope positives, so it cannot fit either candidate. Wednesday groups were split 70/30 by a deterministic group hash (group key: source and destination IP/port plus transport protocol plus normalised label), 70% joined the Monday-Tuesday benign rows in training and 30% formed a disjoint calibration partition. Thursday-Friday and every external dataset were never used for fitting or threshold selection.",
+    "executed": {
+      "calibration": {
+        "benign": 123430,
+        "positive": 57122,
+        "rows": 180552
+      },
+      "calibration_days": [
+        "Wednesday (30% of groups)"
+      ],
+      "test": {
+        "benign": 804347,
+        "positive": 218835,
+        "rows": 1023182
+      },
+      "test_days": [
+        "Thursday",
+        "Friday"
+      ],
+      "train": {
+        "benign": 1132173,
+        "positive": 136626,
+        "rows": 1268799
+      },
+      "train_days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday (70% of groups)"
+      ],
+      "wednesday_train_rows": 422176
+    },
+    "provenance": "wednesday_group_split_fallback",
+    "strict_requested": {
+      "benign_rows": 915770,
+      "calibration_days": [
+        "Wednesday"
+      ],
+      "feasible": false,
+      "positive_rows": 0,
+      "reason": "Monday-Tuesday contains zero in-scope positive rows: Monday is benign-only and Tuesday carries only FTP/SSH Patator, which the frozen policy excludes. A supervised classifier cannot be fitted.",
+      "rows": 915770,
+      "test_days": [
+        "Thursday",
+        "Friday"
+      ],
+      "train_days": [
+        "Monday",
+        "Tuesday"
+      ]
+    },
+    "train_calibration_group_overlap": 0
+  },
+  "scoring": {
+    "accumulator_scoring_mode": "calibrated",
+    "formula": "points = min(per_flow_cap, 100 * max(0, (p - p_floor) / (1 - p_floor)))",
+    "incident": "round(window_total, 4) >= incident_threshold",
+    "window_total": "min(window_cap, sum(per-flow points))"
+  },
+  "seed": 42,
+  "serving": {
+    "artifact": "model_bundle_rf_day_based_seed42.pkl",
+    "present_sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "sha256": "fa4c78a38b9ae6e596df37708107a0c1c727b38a774243bbc24318860ae01350",
+    "untouched": true
+  },
+  "tuning": {
+    "benign_windows": 12564,
+    "feasible": false,
+    "grid": [
+      {
+        "benign_incidents": 312,
+        "benign_window_fpr": 0.024832855778414518,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 308,
+        "benign_window_fpr": 0.02451448583253741,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 306,
+        "benign_window_fpr": 0.024355300859598854,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 305,
+        "benign_window_fpr": 0.024275708373129576,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 231,
+        "benign_window_fpr": 0.018385864374403055,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 229,
+        "benign_window_fpr": 0.018226679401464503,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 223,
+        "benign_window_fpr": 0.01774912448264884,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 178,
+        "benign_window_fpr": 0.014167462591531359,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.3,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 186,
+        "benign_window_fpr": 0.014804202483285577,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 186,
+        "benign_window_fpr": 0.014804202483285577,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 173,
+        "benign_window_fpr": 0.013769500159184973,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 158,
+        "benign_window_fpr": 0.012575612862145813,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 144,
+        "benign_window_fpr": 0.011461318051575931,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 131,
+        "benign_window_fpr": 0.010426615727475327,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 122,
+        "benign_window_fpr": 0.00971028334925183,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 113,
+        "benign_window_fpr": 0.008993950971028335,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.4,
+        "window_recall": 0.9047619047619048
+      },
+      {
+        "benign_incidents": 67,
+        "benign_window_fpr": 0.005332696593441579,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 65,
+        "benign_window_fpr": 0.005173511620503024,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 64,
+        "benign_window_fpr": 0.005093919134033747,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 62,
+        "benign_window_fpr": 0.004934734161095192,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 62,
+        "benign_window_fpr": 0.004934734161095192,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 62,
+        "benign_window_fpr": 0.004934734161095192,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.5,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 61,
+        "benign_window_fpr": 0.004855141674625915,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 61,
+        "benign_window_fpr": 0.004855141674625915,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 61,
+        "benign_window_fpr": 0.004855141674625915,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.6,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 60,
+        "benign_window_fpr": 0.004775549188156638,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 57,
+        "benign_window_fpr": 0.004536771728748806,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 54,
+        "benign_window_fpr": 0.004297994269340974,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.7,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 58,
+        "benign_window_fpr": 0.004616364215218083,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 57,
+        "benign_window_fpr": 0.004536771728748806,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 55,
+        "benign_window_fpr": 0.004377586755810251,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 54,
+        "benign_window_fpr": 0.004297994269340974,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 54,
+        "benign_window_fpr": 0.004297994269340974,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 54,
+        "benign_window_fpr": 0.004297994269340974,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.8,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 55.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 60.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 65.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 70.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 75.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 80.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 90.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      },
+      {
+        "benign_incidents": 53,
+        "benign_window_fpr": 0.004218401782871697,
+        "feasible": false,
+        "incident_threshold": 100.0,
+        "malicious_windows": 21,
+        "p_floor": 0.9,
+        "window_recall": 0.8571428571428571
+      }
+    ],
+    "grid_axes": {
+      "incident_threshold": [
+        55.0,
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+        80.0,
+        90.0,
+        100.0
+      ],
+      "p_floor": [
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9
+      ]
+    },
+    "malicious_windows": 21,
+    "selected": {
+      "benign_incidents": 53,
+      "benign_window_fpr": 0.004218401782871697,
+      "feasible": false,
+      "incident_threshold": 100.0,
+      "malicious_windows": 21,
+      "p_floor": 0.8,
+      "window_recall": 0.8571428571428571
+    },
+    "selection_rule": "maximise Wednesday window recall subject to benign-window FPR <= target; ties -> lower FPR, then higher threshold",
+    "target_window_fpr": 0.001,
+    "windows": 12585
+  },
+  "window_parameters": {
+    "incident_threshold": 100.0,
+    "min_signals": 1,
+    "p_floor": 0.8,
+    "per_flow_cap": 50.0,
+    "scoring_mode": "calibrated",
+    "selection": "wednesday_only",
+    "window_cap": 100.0,
+    "window_seconds": 300
+  }
+}

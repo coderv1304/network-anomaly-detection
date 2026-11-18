@@ -271,7 +271,7 @@ Model artifacts are local or registry-managed. The serving bundle and registry a
 | Benchmarks | [BENCHMARK_RESULTS.md](docs/BENCHMARK_RESULTS.md) • [BASELINE_RESULTS_V2.md](docs/BASELINE_RESULTS_V2.md) |
 | Prevalence and cost | [PREVALENCE_EVAL.md](docs/PREVALENCE_EVAL.md) • [COST_MODEL_AND_RELEASE_GATE.md](docs/COST_MODEL_AND_RELEASE_GATE.md) |
 | Cross-dataset transfer | [CROSS_DATASET.md](docs/CROSS_DATASET.md) • [CROSS_DATASET_MAPPING.md](docs/CROSS_DATASET_MAPPING.md) |
-| Research candidates | [PORTABLE_TRANSFER.md](docs/PORTABLE_TRANSFER.md) • [CORRECTED_LABEL_SENSITIVITY.md](docs/CORRECTED_LABEL_SENSITIVITY.md) • [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md) |
+| Research candidates | [PORTABLE_TRANSFER.md](docs/PORTABLE_TRANSFER.md) • [CORRECTED_LABEL_SENSITIVITY.md](docs/CORRECTED_LABEL_SENSITIVITY.md) • [MULTI_SIGNAL_EVIDENCE.md](docs/MULTI_SIGNAL_EVIDENCE.md) • [WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md) |
 | Optional collection | [ZEEK_COLLECTOR.md](docs/ZEEK_COLLECTOR.md) |
 | Features and labels | [PORTABLE_FEATURES.md](docs/PORTABLE_FEATURES.md) • [LABEL_POLICY.md](docs/LABEL_POLICY.md) |
 | Dataset audits | [DISTRINET_CICIDS2017_AUDIT.md](docs/DISTRINET_CICIDS2017_AUDIT.md) • [EXTERNAL_DATASET_AUDIT.md](docs/EXTERNAL_DATASET_AUDIT.md) |
@@ -290,7 +290,7 @@ Model artifacts are local or registry-managed. The serving bundle and registry a
 - **Benchmark prevalence is unrealistic.** At 25.05% positives the model looks strong; at 0.1% prevalence precision falls sharply.
 - **Cross-dataset transfer is negative.** CIC-IDS-2018 and UNSW-NB15 do not reproduce the CIC-IDS-2017 operating point. The frozen threshold emits zero alerts on both. The P3B ratio-only candidate improves ranking on both datasets, but UNSW-NB15 AP stays essentially at chance and its threshold saturates, so this is not a deployable cross-dataset detector.
 - **The serving model is uncalibrated.** The console deliberately shows no confidence percentage.
-- **Host/window incidents are experimental.** Risk points are a triage heuristic, not a probability, and the in-memory store resets on restart. No labelled host/window evaluation exists.
+- **Host/window incidents are experimental and did not pass their own gate.** Risk points are a triage heuristic, not a probability, and the in-memory store resets on restart. A labelled 300 s host/window evaluation now exists ([WINDOW_INCIDENT_EVAL.md](docs/WINDOW_INCIDENT_EVAL.md)): no Wednesday grid point reached the 0.1% benign-window false-incident target, the frozen point transferred to a 0.79% benign-window rate on Thursday-Friday, and at 0.1% flow prevalence window precision and recall were both 0.0000. Aggregation is therefore not a validated remedy, and the serving path still alerts per flow.
 - **The optional Zeek parser is not validated detection.** It maps `conn.log` fields honestly but leaves per-packet maxima and exact flag counts unavailable.
 - **Console labels are model predictions, not ground truth.**
 - **No containment.** NetShield does not block hosts, change firewalls, or execute response actions.

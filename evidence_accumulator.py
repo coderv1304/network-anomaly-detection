@@ -15,6 +15,26 @@ capped per signal per window, so a host cannot manufacture an incident by
 sending more flows. The result is an explainable host/window record rather
 than another per-flow alert.
 
+Calibrated scoring mode
+-----------------------
+The default ``multi_signal`` mode deliberately scores each signal on a
+0-to-weight scale, which makes it a multi-signal correlator rather than a
+single-score accumulator. When a caller only has one *calibrated* probability
+per flow and wants to test whether windowing repairs low-prevalence precision,
+``scoring_mode="calibrated"`` replaces that policy with an explicit, auditable
+one:
+
+* ``points = 100 * max(0, (p - p_floor) / (1 - p_floor))`` per flow, capped at
+  ``per_flow_cap``;
+* window points are the sum of per-flow points, capped at ``window_cap``;
+* an incident opens when window points reach ``incident_threshold``.
+
+Because ``per_flow_cap < incident_threshold`` is enforced, one flow can never
+open an incident; corroboration by at least two flows in the same
+``(tenant, source IP, window)`` bucket is required. ``min_signals`` is forced
+to 1 in this mode: it is a single-signal accumulator by definition, and
+pretending otherwise would misreport what was measured.
+
 The module is deliberately dependency-free and does not import Flask. The
 application owns wiring and persistence.
 """
@@ -44,6 +64,38 @@ DEFAULT_MINIMUMS = {
     "unsupervised": 0.50,
     "reputation": 50.0,  # AbuseIPDB confidence is 0-100
 }
+
+# Calibrated single-score mode (see module docstring).
+SCORING_MODES = ("multi_signal", "calibrated")
+DEFAULT_SCORING_MODE = "multi_signal"
+DEFAULT_P_FLOOR = 0.50
+DEFAULT_PER_FLOW_CAP = 50.0
+DEFAULT_WINDOW_CAP = 100.0
+CALIBRATED_POINT_SCALE = 100.0
+
+
+def calibrated_flow_points(
+    probabilities,
+    *,
+    p_floor: float = DEFAULT_P_FLOOR,
+    per_flow_cap: float = DEFAULT_PER_FLOW_CAP,
+):
+    """Vectorised twin of the accumulator's calibrated per-flow score.
+
+    ``points = 100 * max(0, (p - p_floor) / (1 - p_floor))``, clamped to
+    ``per_flow_cap``. Batch evaluation of a million flows needs this path; it
+    must stay numerically identical to the scalar path used by
+    :meth:`EvidenceAccumulator.observe`, which is asserted by a unit test.
+    """
+    import numpy as np
+
+    if not 0.0 <= float(p_floor) < 1.0:
+        raise ValueError("p_floor must be in [0, 1)")
+    values = np.clip(np.asarray(probabilities, dtype=np.float64), 0.0, 1.0)
+    excess = (values - float(p_floor)) / max(1e-12, 1.0 - float(p_floor))
+    return np.minimum(
+        CALIBRATED_POINT_SCALE * np.maximum(0.0, excess), float(per_flow_cap)
+    )
 
 
 @dataclass(frozen=True)
@@ -121,11 +173,46 @@ class EvidenceAccumulator:
         min_signals: int = 2,
         max_destination_tracking: int = 500,
         max_windows_per_source: int = 12,
+        scoring_mode: str = DEFAULT_SCORING_MODE,
+        p_floor: float = DEFAULT_P_FLOOR,
+        per_flow_cap: float = DEFAULT_PER_FLOW_CAP,
+        window_cap: float = DEFAULT_WINDOW_CAP,
     ) -> None:
         if window_seconds <= 0:
             raise ValueError("window_seconds must be positive")
         if incident_threshold <= 0:
             raise ValueError("incident_threshold must be positive")
+        if scoring_mode not in SCORING_MODES:
+            raise ValueError(
+                f"scoring_mode must be one of {SCORING_MODES}, got {scoring_mode!r}"
+            )
+        if not 0.0 <= float(p_floor) < 1.0:
+            raise ValueError("p_floor must be in [0, 1)")
+        if per_flow_cap <= 0:
+            raise ValueError("per_flow_cap must be positive")
+        if window_cap <= 0:
+            raise ValueError("window_cap must be positive")
+        self.scoring_mode = scoring_mode
+        self.p_floor = float(p_floor)
+        self.per_flow_cap = float(per_flow_cap)
+        self.window_cap = float(window_cap)
+        if scoring_mode == "calibrated":
+            # The single-flow invariant is the entire point of this mode: a
+            # capped flow must not be able to open an incident on its own.
+            if self.per_flow_cap >= float(incident_threshold):
+                raise ValueError(
+                    "calibrated mode requires per_flow_cap < incident_threshold "
+                    f"({self.per_flow_cap} >= {incident_threshold}); otherwise a "
+                    "single flow could open an incident"
+                )
+            if self.window_cap < float(incident_threshold):
+                raise ValueError(
+                    "calibrated mode requires window_cap >= incident_threshold "
+                    f"({self.window_cap} < {incident_threshold}); otherwise no "
+                    "window could ever open an incident"
+                )
+            # Calibrated mode is a single-signal accumulator by construction.
+            min_signals = 1
         self.window_seconds = int(window_seconds)
         self.incident_threshold = float(incident_threshold)
         self.weights = {**DEFAULT_WEIGHTS, **(weights or {})}
@@ -137,10 +224,21 @@ class EvidenceAccumulator:
         self._lock = threading.Lock()
 
     # -- signal contribution -------------------------------------------------
+    def _signal_cap(self, signal: str) -> float:
+        """Per-window ceiling for one signal under the active scoring mode."""
+        if signal == "supervised" and self.scoring_mode == "calibrated":
+            return self.window_cap
+        return self.weights[signal]
+
     def _supervised_points(self, probability: float | None) -> float:
         if probability is None or not math.isfinite(probability):
             return 0.0
         p = min(max(float(probability), 0.0), 1.0)
+        if self.scoring_mode == "calibrated":
+            excess = (p - self.p_floor) / max(1e-12, 1.0 - self.p_floor)
+            return min(
+                self.per_flow_cap, CALIBRATED_POINT_SCALE * max(0.0, excess)
+            )
         minimum = self.minimums["supervised"]
         if p < minimum:
             return 0.0
@@ -215,7 +313,8 @@ class EvidenceAccumulator:
                     continue
                 # Cap each signal once per window. More flows from the same host
                 # strengthen the count but cannot inflate the score indefinitely.
-                remaining = max(0.0, self.weights[signal] - window.points[signal])
+                cap = self._signal_cap(signal)
+                remaining = max(0.0, cap - window.points[signal])
                 applied = min(points, remaining)
                 if applied <= 0.0:
                     continue
@@ -323,6 +422,12 @@ class EvidenceAccumulator:
             "window_seconds": self.window_seconds,
             "incident_threshold": self.incident_threshold,
             "min_signals": self.min_signals,
+            "scoring_mode": self.scoring_mode,
+            "p_floor": self.p_floor if self.scoring_mode == "calibrated" else None,
+            "per_flow_cap": (
+                self.per_flow_cap if self.scoring_mode == "calibrated" else None
+            ),
+            "window_cap": self.window_cap if self.scoring_mode == "calibrated" else None,
             "signals": list(self.points_signals()),
             "incidents": rows,
         }

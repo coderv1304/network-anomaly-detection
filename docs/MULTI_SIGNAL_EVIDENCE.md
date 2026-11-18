@@ -111,8 +111,13 @@ The endpoint is tenant-scoped through the normal request identity and requires
 ## 7. Limits
 
 - **Not validated detection.** The 70-point/2-signal policy is a triage design,
-  not a measured detector. No labelled host/window dataset exists here, so its
-  precision and recall are unknown.
+  not a measured detector. A labelled evaluation of the *calibrated
+  single-signal* variant now exists ([WINDOW_INCIDENT_EVAL.md](WINDOW_INCIDENT_EVAL.md)):
+  no Wednesday grid point met the 0.1% benign-window false-incident target, the
+  frozen point transferred to a 0.79% benign-window rate on Thursday-Friday, and
+  at 0.1% flow prevalence window precision and recall were both 0.0000. The
+  default multi-signal policy itself remains unmeasured, and this evaluation does
+  not license any precision or recall claim for it.
 - **In-memory only.** State is lost on restart and is not shared across
   processes. A multi-worker deployment will show per-worker incidents. There is
   no database migration or durable incident table.
