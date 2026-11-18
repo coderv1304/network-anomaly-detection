@@ -394,6 +394,11 @@ def dissect_pcap(file_stream, max_packets=250_000):
         # names; emit both so the schema is complete without mapper tricks.
         row["Max Packet Length"] = packet_max
         row["Min Packet Length"] = packet_min
+        # CICFlowMeter exports "Fwd Header Length" twice (pandas renames the
+        # second copy "Fwd Header Length.1") and the two columns are identical
+        # in the published CSVs. Mirroring the duplicate keeps the upload
+        # schema at 80 features instead of leaving the column to imputation.
+        row["Fwd Header Length.1"] = flow["fwd_header_bytes"]
         records.append(row)
         details.append(flow["header"])
 
