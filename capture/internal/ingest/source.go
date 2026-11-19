@@ -16,6 +16,9 @@ import (
 type SourceStats struct {
 	// Received is the number of normalized IP packets delivered.
 	Received uint64
+	// DecodeErrors is the number of frames that failed decoding and were
+	// discarded instead of producing a normalized packet.
+	DecodeErrors uint64
 	// DroppedKernel is the number of packets the kernel dropped before the
 	// sensor could read them (live AF_PACKET only).
 	DroppedKernel uint64
@@ -66,11 +69,12 @@ func OpenLive(iface string) (PacketSource, error) {
 // PcapFileSource replays a classic PCAP file with the pure-Go pcapgo reader.
 // No CGo, Npcap, or libpcap installation is required.
 type PcapFileSource struct {
-	file     *os.File
-	reader   *pcapgo.Reader
-	linkType layers.LinkType
-	received atomic.Uint64
-	closed   atomic.Bool
+	file         *os.File
+	reader       *pcapgo.Reader
+	linkType     layers.LinkType
+	received     atomic.Uint64
+	decodeErrors atomic.Uint64
+	closed       atomic.Bool
 }
 
 // OpenPcapFile opens a classic `.pcap` file for deterministic offline replay.
@@ -119,6 +123,9 @@ func (s *PcapFileSource) NextPacket() (Packet, error) {
 		pkt := gopacket.NewPacket(data, s.linkType, opts)
 		normalized, ok := FromGopacket(pkt)
 		if !ok {
+			if DecodeFailed(pkt) {
+				s.decodeErrors.Add(1)
+			}
 			continue
 		}
 		// pcapgo already applies the capture timestamp; trust it over any
@@ -143,5 +150,5 @@ func (s *PcapFileSource) Close() error {
 
 // Stats returns how many normalized IP packets were delivered.
 func (s *PcapFileSource) Stats() SourceStats {
-	return SourceStats{Received: s.received.Load()}
+	return SourceStats{Received: s.received.Load(), DecodeErrors: s.decodeErrors.Load()}
 }

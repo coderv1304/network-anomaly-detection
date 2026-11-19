@@ -1,7 +1,9 @@
 package flow
 
 import (
+	"bytes"
 	"errors"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -22,12 +24,15 @@ const (
 var ErrEngineClosed = errors.New("flow engine is closed")
 
 // Table is a single-shard bidirectional flow table. It is intentionally not
-// safe for concurrent use: one goroutine owns one Table.
+// safe for concurrent use: one goroutine owns one Table, which is what removes
+// per-flow locking from the packet path.
 type Table struct {
 	flows map[ingest.FlowKey]*Flow
 
-	clockUS         int64
-	clockSet        bool
+	// shardClock is the virtual packet clock in epoch microseconds. It only
+	// ever moves forward from packet capture timestamps, never from time.Now.
+	shardClock      int64
+	shardClockSet   bool
 	lastSweepUS     int64
 	idleTimeoutUS   int64
 	activeTimeoutUS int64
@@ -55,8 +60,8 @@ func NewTable(idle, active time.Duration) *Table {
 // Len returns the number of active flows in the shard.
 func (t *Table) Len() int { return int(t.active.Load()) }
 
-// ClockUS returns the shard's virtual clock.
-func (t *Table) ClockUS() int64 { return t.clockUS }
+// ClockUS returns the shard's virtual clock in epoch microseconds.
+func (t *Table) ClockUS() int64 { return t.shardClock }
 
 // Process advances the virtual clock, applies timeouts, and folds one packet
 // into its flow. The emit callback is invoked zero or more times when a flow
@@ -65,7 +70,7 @@ func (t *Table) Process(p *ingest.Packet, emit func(Snapshot)) {
 	if p == nil {
 		return
 	}
-	now := t.advanceClock(p.TimestampUS)
+	now := t.advanceShardClock(p.TimestampUS)
 	t.maybeSweep(now, emit)
 
 	key := p.Key().Canonical()
@@ -88,36 +93,54 @@ func (t *Table) Process(p *ingest.Packet, emit func(Snapshot)) {
 }
 
 // Sweep evicts idle and active flows relative to the supplied virtual time.
+// Only the expiring flows are sorted, so an empty sweep allocates nothing.
 func (t *Table) Sweep(nowUS int64, emit func(Snapshot)) {
-	for key, current := range t.flows {
+	var expired []*Flow
+	for _, current := range t.flows {
 		if t.expired(current, nowUS) {
-			emit(current.Snapshot())
-			delete(t.flows, key)
-			t.active.Add(-1)
+			expired = append(expired, current)
 		}
 	}
-}
-
-// Flush evicts every flow. It is called at EOF and on graceful shutdown.
-func (t *Table) Flush(emit func(Snapshot)) {
-	for key, current := range t.flows {
+	if len(expired) == 0 {
+		return
+	}
+	sortFlows(expired)
+	for _, current := range expired {
 		emit(current.Snapshot())
-		delete(t.flows, key)
-		t.active.Add(-1)
+		t.delete(current.canonical)
 	}
 }
 
-func (t *Table) advanceClock(packetUS int64) int64 {
-	if !t.clockSet {
-		t.clockSet = true
-		t.clockUS = packetUS
+// Flush evicts every flow in canonical (start time, five-tuple) order. It is
+// called at EOF and on graceful shutdown so output never depends on map order.
+func (t *Table) Flush(emit func(Snapshot)) {
+	if len(t.flows) == 0 {
+		return
+	}
+	pending := make([]*Flow, 0, len(t.flows))
+	for _, current := range t.flows {
+		pending = append(pending, current)
+	}
+	sortFlows(pending)
+	for _, current := range pending {
+		emit(current.Snapshot())
+		t.delete(current.canonical)
+	}
+}
+
+// advanceShardClock moves the virtual clock forward to the packet timestamp and
+// ignores timestamps that would move it backwards.
+func (t *Table) advanceShardClock(packetUS int64) int64 {
+	if !t.shardClockSet {
+		t.shardClockSet = true
+		t.shardClock = packetUS
 		t.lastSweepUS = packetUS
-		return t.clockUS
+		return t.shardClock
 	}
-	if packetUS > t.clockUS {
-		t.clockUS = packetUS
+	if packetUS > t.shardClock {
+		t.shardClock = packetUS
 	}
-	return t.clockUS
+	return t.shardClock
 }
 
 func (t *Table) maybeSweep(nowUS int64, emit func(Snapshot)) {
@@ -139,6 +162,29 @@ func (t *Table) delete(key ingest.FlowKey) {
 	if _, ok := t.flows[key]; ok {
 		delete(t.flows, key)
 		t.active.Add(-1)
+	}
+}
+
+// sortFlows orders flows by start timestamp, then canonical five-tuple. Keys
+// are computed once per flow so the comparison stays allocation-free.
+type sortableFlow struct {
+	flow    *Flow
+	sortKey []byte
+}
+
+func sortFlows(flows []*Flow) {
+	keyed := make([]sortableFlow, len(flows))
+	for i, current := range flows {
+		keyed[i] = sortableFlow{flow: current, sortKey: current.canonical.SortKey()}
+	}
+	sort.Slice(keyed, func(i, j int) bool {
+		if keyed[i].flow.startUS != keyed[j].flow.startUS {
+			return keyed[i].flow.startUS < keyed[j].flow.startUS
+		}
+		return bytes.Compare(keyed[i].sortKey, keyed[j].sortKey) < 0
+	})
+	for i := range keyed {
+		flows[i] = keyed[i].flow
 	}
 }
 

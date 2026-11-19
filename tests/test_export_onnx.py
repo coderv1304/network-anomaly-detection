@@ -1,7 +1,7 @@
 """Contract tests for the ONNX export bridge and the committed artifacts.
 
 These tests do not re-train the model. They pin the model SHA-256, assert the
-24-feature schema matches the Go sensor, and re-run the 1,000-row parity
+24-input model schema matches the Go sensor, and re-run the 1,000-row parity
 fixture through ONNX Runtime against the recorded scikit-learn reference.
 """
 
@@ -41,12 +41,15 @@ def parity() -> dict:
 
 
 def _go_feature_names() -> list[str]:
+    # The canonical training schema lives in schema.go (netshield-flow-v1, 26
+    # features). This test pins the shipped model's own 24-input order, which
+    # the Go sensor declares as ModelFeatureNames.
     with open(FEATURE_SOURCE, "r", encoding="utf-8") as handle:
         source = handle.read()
     match = re.search(
-        r"var FeatureNames = \[\]string\{(?P<body>.*?)\}", source, re.S
+        r"var ModelFeatureNames = \[\]string\{(?P<body>.*?)\}", source, re.S
     )
-    assert match, "could not locate FeatureNames in features.go"
+    assert match, "could not locate ModelFeatureNames in features.go"
     return re.findall(r'"([^"]+)"', match.group("body"))
 
 

@@ -6,7 +6,11 @@ import (
 )
 
 func TestCanonicalKeyIsSymmetric(t *testing.T) {
-	a := FlowKey{SrcIP: ip16("10.0.0.1"), DstIP: ip16("10.0.0.2"), SrcPort: 1234, DstPort: 80, Proto: ProtoTCP}
+	a := FlowKey{
+		Src:   Endpoint{IP: ip16("10.0.0.1"), Port: 1234},
+		Dst:   Endpoint{IP: ip16("10.0.0.2"), Port: 80},
+		Proto: ProtoTCP,
+	}
 	b := a.Reverse()
 
 	if a.Canonical() != b.Canonical() {
@@ -22,19 +26,48 @@ func TestCanonicalKeyIsSymmetric(t *testing.T) {
 	}
 }
 
+func TestCanonicalShardIsSymmetricAndBounded(t *testing.T) {
+	a := FlowKey{
+		Src:   Endpoint{IP: ip16("192.0.2.10"), Port: 51515},
+		Dst:   Endpoint{IP: ip16("198.51.100.20"), Port: 443},
+		Proto: ProtoTCP,
+	}
+	b := a.Reverse()
+	for _, workers := range []uint64{1, 2, 3, 7, 16, 64, 257} {
+		if a.CanonicalShard(workers) != b.CanonicalShard(workers) {
+			t.Fatalf("reverse keys routed to different shards for %d workers", workers)
+		}
+		if got := a.CanonicalShard(workers); got >= workers {
+			t.Fatalf("shard %d is outside [0,%d)", got, workers)
+		}
+	}
+	if a.CanonicalShard(0) != 0 {
+		t.Fatalf("zero workers must map to shard 0, got %d", a.CanonicalShard(0))
+	}
+}
+
 func TestCanonicalKeyPreservesDirectionalValues(t *testing.T) {
-	a := FlowKey{SrcIP: ip16("10.0.0.9"), DstIP: ip16("10.0.0.1"), SrcPort: 5555, DstPort: 443, Proto: ProtoTCP}
+	a := FlowKey{
+		Src:   Endpoint{IP: ip16("10.0.0.9"), Port: 5555},
+		Dst:   Endpoint{IP: ip16("10.0.0.1"), Port: 443},
+		Proto: ProtoTCP,
+	}
 	canonical := a.Canonical()
-	if canonical.SrcIP != ip16("10.0.0.1") || canonical.SrcPort != 443 {
+	if canonical.Src.IP != ip16("10.0.0.1") || canonical.Src.Port != 443 {
 		t.Fatalf("canonical form did not order endpoints: %v", canonical)
 	}
-	if a.SrcIP != ip16("10.0.0.9") || a.SrcPort != 5555 {
+	if a.Src.IP != ip16("10.0.0.9") || a.Src.Port != 5555 {
 		t.Fatalf("canonicalization mutated the directional key")
 	}
 }
 
 func TestIPv4AndIPv6KeysAreDistinct(t *testing.T) {
-	v4 := FlowKey{SrcIP: ip16("10.0.0.1"), DstIP: ip16("10.0.0.2"), SrcPort: 1, DstPort: 2, Proto: ProtoTCP, IsIPv6: false}
+	v4 := FlowKey{
+		Src:    Endpoint{IP: ip16("10.0.0.1"), Port: 1},
+		Dst:    Endpoint{IP: ip16("10.0.0.2"), Port: 2},
+		Proto:  ProtoTCP,
+		IsIPv6: false,
+	}
 	v6 := v4
 	v6.IsIPv6 = true
 	if v4.Canonical() == v6.Canonical() {
@@ -47,12 +80,10 @@ func TestIPv4AndIPv6KeysAreDistinct(t *testing.T) {
 
 func TestIPv6CanonicalKey(t *testing.T) {
 	a := FlowKey{
-		SrcIP:   ip16("2001:db8::2"),
-		DstIP:   ip16("2001:db8::1"),
-		SrcPort: 9000,
-		DstPort: 443,
-		Proto:   ProtoTCP,
-		IsIPv6:  true,
+		Src:    Endpoint{IP: ip16("2001:db8::2"), Port: 9000},
+		Dst:    Endpoint{IP: ip16("2001:db8::1"), Port: 443},
+		Proto:  ProtoTCP,
+		IsIPv6: true,
 	}
 	if a.Canonical() != a.Reverse().Canonical() {
 		t.Fatal("IPv6 reverse keys produced different canonical forms")

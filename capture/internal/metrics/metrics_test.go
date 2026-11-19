@@ -5,6 +5,7 @@ import "testing"
 func TestCollectorNames(t *testing.T) {
 	m := New()
 	m.PacketsReceived.Inc()
+	m.PacketsDecodeErrors.Inc()
 	m.PacketsDroppedKernel.Inc()
 	m.ActiveFlows.Set(3)
 	m.FlowsCompleted.Inc()
@@ -23,6 +24,7 @@ func TestCollectorNames(t *testing.T) {
 	}
 	for _, expected := range []string{
 		"netshield_packets_received_total",
+		"netshield_packets_decode_errors_total",
 		"netshield_packets_dropped_kernel_total",
 		"netshield_active_flows",
 		"netshield_flows_completed_total",

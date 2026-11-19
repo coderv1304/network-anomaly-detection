@@ -8,9 +8,11 @@ import (
 	"capture/internal/ingest"
 )
 
-// FeatureNames is the frozen 24-feature schema produced by the Go sensor. The
-// ONNX manifest and the Python export bridge must use exactly this order.
-var FeatureNames = []string{
+// ModelFeatureNames is the frozen 24-input order of the shipped ONNX flow
+// classifier (models/netshield_flow_manifest.json). The canonical training
+// schema is FeatureNames in schema.go; the sensor keeps feeding the model the
+// vector it was trained on through ModelFeatureValues.
+var ModelFeatureNames = []string{
 	"duration_sec",
 	"fwd_pkts",
 	"bwd_pkts",
@@ -37,8 +39,8 @@ var FeatureNames = []string{
 	"iat_cv",
 }
 
-// FeatureCount is the number of model inputs.
-const FeatureCount = 24
+// ModelFeatureCount is the number of inputs the shipped model was trained on.
+const ModelFeatureCount = 24
 
 // RatioEpsilon guards every division that could otherwise produce NaN or Inf.
 const RatioEpsilon = 1e-6
@@ -97,55 +99,98 @@ func (s *Snapshot) DurationSeconds() float64 {
 	return math.Max(float64(s.EndUS-s.StartUS)/float64(microsPerSecond), RatioEpsilon)
 }
 
-// FeatureValues returns the 24 model inputs in FeatureNames order. Every value
-// is finite: malformed ratios fall back to zero.
+// FeatureValues returns the canonical 26 features in FeatureNames order. Time
+// statistics are microseconds, lengths are bytes, and every value is finite:
+// malformed ratios fall back to zero.
 func (s *Snapshot) FeatureValues() [FeatureCount]float64 {
 	var out [FeatureCount]float64
 	duration := s.DurationSeconds()
 	totalPackets := s.FwdPkts + s.BwdPkts
 	totalBytes := s.FwdBytes + s.BwdBytes
 
-	out[0] = duration
-	out[1] = float64(s.FwdPkts)
-	out[2] = float64(s.BwdPkts)
-	out[3] = float64(s.FwdBytes)
-	out[4] = float64(s.BwdBytes)
-	out[5] = float64(s.FwdHdrBytes)
-	out[6] = float64(s.BwdHdrBytes)
-	out[7] = finite(s.AllLen.Mean)
-	out[8] = finite(s.AllLen.Std)
-	out[9] = finite(s.FlowIAT.Mean)
-	out[10] = finite(s.FlowIAT.Std)
-	out[11] = float64(s.FinCnt)
-	out[12] = float64(s.SynCnt)
-	out[13] = float64(s.RstCnt)
-	out[14] = float64(s.PshCnt)
-	out[15] = float64(s.AckCnt)
+	out[0] = float64(s.ForwardKey.Proto)
+	out[1] = duration
+	out[2] = float64(s.FwdPkts)
+	out[3] = float64(s.BwdPkts)
+	out[4] = float64(s.FwdBytes)
+	out[5] = float64(s.BwdBytes)
+	out[6] = float64(s.FwdHdrBytes)
+	out[7] = float64(s.BwdHdrBytes)
+	out[8] = float64(s.FinCnt)
+	out[9] = float64(s.SynCnt)
+	out[10] = float64(s.RstCnt)
+	out[11] = float64(s.PshCnt)
+	out[12] = float64(s.AckCnt)
+	out[13] = float64(s.UrgCnt)
+	out[14] = float64(s.EceCnt)
+	out[15] = float64(s.CwrCnt)
+	out[16] = finite(s.FlowIAT.Mean)
+	out[17] = finite(s.FlowIAT.Std)
+	out[18] = finite(s.FlowIAT.Max)
+	out[19] = finite(s.AllLen.Mean)
+	out[20] = finite(s.AllLen.Std)
+	out[21] = finite(s.AllLen.Max)
+	out[22] = safeDiv(float64(totalBytes), duration)
+	out[23] = safeDiv(float64(totalPackets), duration)
+	out[24] = safeDiv(float64(s.FwdPkts), float64(maxUint(s.BwdPkts, 1)))
+	out[25] = safeDiv(float64(s.SynCnt), float64(maxUint(s.AckCnt, 1)))
 
-	out[16] = safeDiv(float64(totalBytes), duration)
-	out[17] = safeDiv(float64(totalPackets), duration)
-	out[18] = safeDiv(float64(s.FwdPkts), float64(maxUint(s.BwdPkts, 1)))
+	sanitizeFeatures(out[:])
+	return out
+}
+
+// ModelFeatureValues projects the canonical statistics onto the 24-input order
+// the shipped model was trained on. The shared features are read from
+// FeatureValues so training and serving cannot drift; the four model-only
+// ratios are derived from the same counters.
+func (s *Snapshot) ModelFeatureValues() [ModelFeatureCount]float64 {
+	canonical := s.FeatureValues()
+	totalPackets := s.FwdPkts + s.BwdPkts
+	totalBytes := s.FwdBytes + s.BwdBytes
+	iatMean := finite(s.FlowIAT.Mean)
+	iatStd := finite(s.FlowIAT.Std)
+
+	var out [ModelFeatureCount]float64
+	out[0] = canonical[1]   // duration_sec
+	out[1] = canonical[2]   // fwd_pkts
+	out[2] = canonical[3]   // bwd_pkts
+	out[3] = canonical[4]   // fwd_bytes
+	out[4] = canonical[5]   // bwd_bytes
+	out[5] = canonical[6]   // fwd_hdr_bytes
+	out[6] = canonical[7]   // bwd_hdr_bytes
+	out[7] = canonical[19]  // pkt_len_mean
+	out[8] = canonical[20]  // pkt_len_std
+	out[9] = canonical[16]  // iat_mean
+	out[10] = canonical[17] // iat_std
+	out[11] = canonical[8]  // fin_cnt
+	out[12] = canonical[9]  // syn_cnt
+	out[13] = canonical[10] // rst_cnt
+	out[14] = canonical[11] // psh_cnt
+	out[15] = canonical[12] // ack_cnt
+	out[16] = canonical[22] // bytes_per_sec
+	out[17] = canonical[23] // pkts_per_sec
+	out[18] = canonical[24] // fwd_bwd_pkt_ratio
 	out[19] = safeDiv(float64(s.FwdBytes), float64(maxUint(s.BwdBytes, 1)))
-	out[20] = safeDiv(float64(s.SynCnt), float64(maxUint(s.AckCnt, 1)))
+	out[20] = canonical[25] // syn_ack_ratio
 	out[21] = safeDiv(float64(s.FinCnt+s.RstCnt), float64(maxUint(totalPackets, 1)))
 	out[22] = safeDiv(float64(totalBytes), float64(maxUint(totalPackets, 1)))
-	out[23] = safeDiv(finite(s.FlowIAT.Std), math.Max(finite(s.FlowIAT.Mean), RatioEpsilon))
+	out[23] = safeDiv(iatStd, math.Max(iatMean, RatioEpsilon))
 
+	sanitizeFeatures(out[:])
 	return out
 }
 
 // FeatureVector returns the model inputs as float32 for zero-copy tensor input.
 func (s *Snapshot) FeatureVector() []float32 {
-	values := s.FeatureValues()
-	out := make([]float32, FeatureCount)
+	values := s.ModelFeatureValues()
+	out := make([]float32, ModelFeatureCount)
 	for i, value := range values {
 		out[i] = float32(value)
 	}
 	return out
 }
 
-// FeatureMap returns the 24 features keyed by their Go names. It is used by
-// deterministic extract output.
+// FeatureMap returns the canonical features keyed by their schema names.
 func (s *Snapshot) FeatureMap() map[string]float64 {
 	values := s.FeatureValues()
 	out := make(map[string]float64, FeatureCount)
@@ -176,81 +221,81 @@ func (s *Snapshot) CICMap() map[string]any {
 	totalBytes := s.FwdBytes + s.BwdBytes
 
 	out := map[string]any{
-		"flow_id":               s.FlowID(),
-		"src_ip":                s.ForwardKey.SrcString(),
-		"dst_ip":                s.ForwardKey.DstString(),
-		"src_port":              int(s.ForwardKey.SrcPort),
-		"dst_port":              int(s.ForwardKey.DstPort),
-		"protocol":              int(s.ForwardKey.Proto),
-		"timestamp":             float64(s.StartUS) / float64(microsPerSecond),
-		"flow_duration":         durationUS,
-		"tot_fwd_pkts":          int(s.FwdPkts),
-		"tot_bwd_pkts":          int(s.BwdPkts),
-		"totlen_fwd_pkts":       int(s.FwdBytes),
-		"totlen_bwd_pkts":       int(s.BwdBytes),
-		"fwd_header_len":        int(s.FwdHdrBytes),
-		"bwd_header_len":        int(s.BwdHdrBytes),
-		"fwd_pkt_len_mean":      finite(s.FwdLen.Mean),
-		"fwd_pkt_len_std":       finite(s.FwdLen.Std),
-		"fwd_pkt_len_max":       finite(s.FwdLen.Max),
-		"fwd_pkt_len_min":       finite(s.FwdLen.Min),
-		"bwd_pkt_len_mean":      finite(s.BwdLen.Mean),
-		"bwd_pkt_len_std":       finite(s.BwdLen.Std),
-		"bwd_pkt_len_max":       finite(s.BwdLen.Max),
-		"bwd_pkt_len_min":       finite(s.BwdLen.Min),
-		"pkt_len_mean":          finite(s.AllLen.Mean),
-		"pkt_len_std":           finite(s.AllLen.Std),
-		"pkt_len_max":           finite(s.AllLen.Max),
-		"pkt_len_min":           finite(s.AllLen.Min),
-		"pkt_len_var":           finite(s.AllLen.Std * s.AllLen.Std),
-		"flow_iat_total":        float64(s.FlowIATTotalUS),
-		"flow_iat_mean":         finite(s.FlowIAT.Mean),
-		"flow_iat_std":          finite(s.FlowIAT.Std),
-		"flow_iat_max":          finite(s.FlowIAT.Max),
-		"flow_iat_min":          finite(s.FlowIAT.Min),
-		"fwd_iat_mean":          finite(s.FwdIAT.Mean),
-		"fwd_iat_std":           finite(s.FwdIAT.Std),
-		"fwd_iat_max":           finite(s.FwdIAT.Max),
-		"fwd_iat_min":           finite(s.FwdIAT.Min),
-		"bwd_iat_mean":          finite(s.BwdIAT.Mean),
-		"bwd_iat_std":           finite(s.BwdIAT.Std),
-		"bwd_iat_max":           finite(s.BwdIAT.Max),
-		"bwd_iat_min":           finite(s.BwdIAT.Min),
-		"flow_byts_s":           safeDiv(float64(totalBytes), durationSeconds),
-		"flow_pkts_s":           safeDiv(float64(totalPackets), durationSeconds),
-		"fwd_pkts_s":            safeDiv(float64(s.FwdPkts), durationSeconds),
-		"bwd_pkts_s":            safeDiv(float64(s.BwdPkts), durationSeconds),
-		"fin_flag_cnt":          int(s.FinCnt),
-		"syn_flag_cnt":          int(s.SynCnt),
-		"rst_flag_cnt":          int(s.RstCnt),
-		"psh_flag_cnt":          int(s.PshCnt),
-		"ack_flag_cnt":          int(s.AckCnt),
-		"urg_flag_cnt":          int(s.UrgCnt),
-		"ece_flag_cnt":          int(s.EceCnt),
-		"cwe_flag_count":        int(s.CwrCnt),
-		"fwd_psh_flags":         int(s.FwdPSHCnt),
-		"bwd_psh_flags":         int(s.BwdPSHCnt),
-		"fwd_urg_flags":         int(s.FwdURGCnt),
-		"bwd_urg_flags":         int(s.BwdURGCnt),
-		"init_fwd_win_byts":     int(s.InitFwdWin),
-		"init_bwd_win_byts":     int(s.InitBwdWin),
-		"fwd_act_data_pkts":     int(s.FwdPayloadPkts),
-		"fwd_seg_size_avg":      finite(s.FwdLen.Mean),
-		"bwd_seg_size_avg":      finite(s.BwdLen.Mean),
-		"pkt_size_avg":          safeDiv(float64(totalBytes), float64(maxUint(totalPackets, 1))),
-		"down_up_ratio":         safeDiv(float64(s.BwdPkts), float64(maxUint(s.FwdPkts, 1))),
-		"subflow_fwd_pkts":      int(s.FwdPkts),
-		"subflow_fwd_byts":      int(s.FwdBytes),
-		"subflow_bwd_pkts":      int(s.BwdPkts),
-		"subflow_bwd_byts":      int(s.BwdBytes),
-		"active_mean":           finite(s.FlowIAT.Mean),
-		"active_std":            finite(s.FlowIAT.Std),
-		"active_max":            finite(s.FlowIAT.Max),
-		"active_min":            finite(s.FlowIAT.Min),
-		"idle_mean":             0.0,
-		"idle_std":              0.0,
-		"idle_max":              0.0,
-		"idle_min":              0.0,
+		"flow_id":           s.FlowID(),
+		"src_ip":            s.ForwardKey.SrcString(),
+		"dst_ip":            s.ForwardKey.DstString(),
+		"src_port":          int(s.ForwardKey.Src.Port),
+		"dst_port":          int(s.ForwardKey.Dst.Port),
+		"protocol":          int(s.ForwardKey.Proto),
+		"timestamp":         float64(s.StartUS) / float64(microsPerSecond),
+		"flow_duration":     durationUS,
+		"tot_fwd_pkts":      int(s.FwdPkts),
+		"tot_bwd_pkts":      int(s.BwdPkts),
+		"totlen_fwd_pkts":   int(s.FwdBytes),
+		"totlen_bwd_pkts":   int(s.BwdBytes),
+		"fwd_header_len":    int(s.FwdHdrBytes),
+		"bwd_header_len":    int(s.BwdHdrBytes),
+		"fwd_pkt_len_mean":  finite(s.FwdLen.Mean),
+		"fwd_pkt_len_std":   finite(s.FwdLen.Std),
+		"fwd_pkt_len_max":   finite(s.FwdLen.Max),
+		"fwd_pkt_len_min":   finite(s.FwdLen.Min),
+		"bwd_pkt_len_mean":  finite(s.BwdLen.Mean),
+		"bwd_pkt_len_std":   finite(s.BwdLen.Std),
+		"bwd_pkt_len_max":   finite(s.BwdLen.Max),
+		"bwd_pkt_len_min":   finite(s.BwdLen.Min),
+		"pkt_len_mean":      finite(s.AllLen.Mean),
+		"pkt_len_std":       finite(s.AllLen.Std),
+		"pkt_len_max":       finite(s.AllLen.Max),
+		"pkt_len_min":       finite(s.AllLen.Min),
+		"pkt_len_var":       finite(s.AllLen.Std * s.AllLen.Std),
+		"flow_iat_total":    float64(s.FlowIATTotalUS),
+		"flow_iat_mean":     finite(s.FlowIAT.Mean),
+		"flow_iat_std":      finite(s.FlowIAT.Std),
+		"flow_iat_max":      finite(s.FlowIAT.Max),
+		"flow_iat_min":      finite(s.FlowIAT.Min),
+		"fwd_iat_mean":      finite(s.FwdIAT.Mean),
+		"fwd_iat_std":       finite(s.FwdIAT.Std),
+		"fwd_iat_max":       finite(s.FwdIAT.Max),
+		"fwd_iat_min":       finite(s.FwdIAT.Min),
+		"bwd_iat_mean":      finite(s.BwdIAT.Mean),
+		"bwd_iat_std":       finite(s.BwdIAT.Std),
+		"bwd_iat_max":       finite(s.BwdIAT.Max),
+		"bwd_iat_min":       finite(s.BwdIAT.Min),
+		"flow_byts_s":       safeDiv(float64(totalBytes), durationSeconds),
+		"flow_pkts_s":       safeDiv(float64(totalPackets), durationSeconds),
+		"fwd_pkts_s":        safeDiv(float64(s.FwdPkts), durationSeconds),
+		"bwd_pkts_s":        safeDiv(float64(s.BwdPkts), durationSeconds),
+		"fin_flag_cnt":      int(s.FinCnt),
+		"syn_flag_cnt":      int(s.SynCnt),
+		"rst_flag_cnt":      int(s.RstCnt),
+		"psh_flag_cnt":      int(s.PshCnt),
+		"ack_flag_cnt":      int(s.AckCnt),
+		"urg_flag_cnt":      int(s.UrgCnt),
+		"ece_flag_cnt":      int(s.EceCnt),
+		"cwe_flag_count":    int(s.CwrCnt),
+		"fwd_psh_flags":     int(s.FwdPSHCnt),
+		"bwd_psh_flags":     int(s.BwdPSHCnt),
+		"fwd_urg_flags":     int(s.FwdURGCnt),
+		"bwd_urg_flags":     int(s.BwdURGCnt),
+		"init_fwd_win_byts": int(s.InitFwdWin),
+		"init_bwd_win_byts": int(s.InitBwdWin),
+		"fwd_act_data_pkts": int(s.FwdPayloadPkts),
+		"fwd_seg_size_avg":  finite(s.FwdLen.Mean),
+		"bwd_seg_size_avg":  finite(s.BwdLen.Mean),
+		"pkt_size_avg":      safeDiv(float64(totalBytes), float64(maxUint(totalPackets, 1))),
+		"down_up_ratio":     safeDiv(float64(s.BwdPkts), float64(maxUint(s.FwdPkts, 1))),
+		"subflow_fwd_pkts":  int(s.FwdPkts),
+		"subflow_fwd_byts":  int(s.FwdBytes),
+		"subflow_bwd_pkts":  int(s.BwdPkts),
+		"subflow_bwd_byts":  int(s.BwdBytes),
+		"active_mean":       finite(s.FlowIAT.Mean),
+		"active_std":        finite(s.FlowIAT.Std),
+		"active_max":        finite(s.FlowIAT.Max),
+		"active_min":        finite(s.FlowIAT.Min),
+		"idle_mean":         0.0,
+		"idle_std":          0.0,
+		"idle_max":          0.0,
+		"idle_min":          0.0,
 	}
 	return out
 }

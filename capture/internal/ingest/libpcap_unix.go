@@ -16,9 +16,10 @@ import (
 // Npcap SDK headers are not part of the zero-friction build; use the
 // AF_PACKET backend on Linux or a PCAP file on Windows.
 type libpcapSource struct {
-	handle   *pcap.Handle
-	received atomic.Uint64
-	closed   atomic.Bool
+	handle       *pcap.Handle
+	received     atomic.Uint64
+	decodeErrors atomic.Uint64
+	closed       atomic.Bool
 }
 
 func openLibpcap(iface string) (PacketSource, error, bool) {
@@ -45,6 +46,9 @@ func (s *libpcapSource) NextPacket() (Packet, error) {
 		pkt := gopacket.NewPacket(data, s.handle.LinkType(), gopacket.DecodeOptions{Lazy: true, NoCopy: true})
 		normalized, ok := FromGopacket(pkt)
 		if !ok {
+			if DecodeFailed(pkt) {
+				s.decodeErrors.Add(1)
+			}
 			continue
 		}
 		normalized.TimestampUS = ci.Timestamp.UnixMicro()
@@ -65,7 +69,7 @@ func (s *libpcapSource) Close() error {
 }
 
 func (s *libpcapSource) Stats() SourceStats {
-	stats := SourceStats{Received: s.received.Load()}
+	stats := SourceStats{Received: s.received.Load(), DecodeErrors: s.decodeErrors.Load()}
 	if s.handle != nil {
 		if pcapStats, err := s.handle.Stats(); err == nil {
 			stats.DroppedKernel = uint64(pcapStats.PacketsDropped)

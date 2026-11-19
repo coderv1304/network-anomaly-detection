@@ -21,8 +21,7 @@ type Flow struct {
 
 	// Forward anchor. The initial packet defines it; a mid-stream reverse SYN
 	// flips it to the true TCP initiator.
-	fwdSrcIP   [16]byte
-	fwdSrcPort uint16
+	fwd ingest.Endpoint
 
 	startUS    int64
 	lastUS     int64
@@ -76,8 +75,7 @@ func NewFlow(p *ingest.Packet) *Flow {
 	return &Flow{
 		canonical:  key.Canonical(),
 		initialKey: key,
-		fwdSrcIP:   p.SrcIP,
-		fwdSrcPort: p.SrcPort,
+		fwd:        ingest.Endpoint{IP: p.SrcIP, Port: p.SrcPort},
 		startUS:    p.TimestampUS,
 		lastUS:     p.TimestampUS,
 		firstSeqUS: p.TimestampUS,
@@ -96,7 +94,7 @@ func (f *Flow) LastSeenUS() int64 { return f.lastUS }
 // IsForward reports whether the packet travels in the anchored forward
 // direction.
 func (f *Flow) IsForward(p *ingest.Packet) bool {
-	return p.SrcIP == f.fwdSrcIP && p.SrcPort == f.fwdSrcPort
+	return p.SrcIP == f.fwd.IP && p.SrcPort == f.fwd.Port
 }
 
 // AddPacket updates counters and statistics for one packet. It returns true
@@ -222,12 +220,10 @@ func (f *Flow) countFlags(p *ingest.Packet, forward bool) {
 // flipDirection swaps the forward and backward anchors and all directional
 // accumulators. Whole-flow counters are unaffected.
 func (f *Flow) flipDirection() {
-	if f.fwdSrcIP == f.canonical.SrcIP && f.fwdSrcPort == f.canonical.SrcPort {
-		f.fwdSrcIP = f.canonical.DstIP
-		f.fwdSrcPort = f.canonical.DstPort
+	if f.fwd == f.canonical.Src {
+		f.fwd = f.canonical.Dst
 	} else {
-		f.fwdSrcIP = f.canonical.SrcIP
-		f.fwdSrcPort = f.canonical.SrcPort
+		f.fwd = f.canonical.Src
 	}
 	f.fwdPkts, f.bwdPkts = f.bwdPkts, f.fwdPkts
 	f.fwdBytes, f.bwdBytes = f.bwdBytes, f.fwdBytes
@@ -294,19 +290,15 @@ func maxInt(a, b int) int {
 }
 
 func (f *Flow) forwardKey() ingest.FlowKey {
-	srcIP, dstIP := f.canonical.SrcIP, f.canonical.DstIP
-	srcPort, dstPort := f.canonical.SrcPort, f.canonical.DstPort
-	if f.fwdSrcIP != srcIP || f.fwdSrcPort != srcPort {
-		srcIP, dstIP = dstIP, srcIP
-		srcPort, dstPort = dstPort, srcPort
+	src, dst := f.canonical.Src, f.canonical.Dst
+	if f.fwd != f.canonical.Src {
+		src, dst = dst, src
 	}
 	return ingest.FlowKey{
-		SrcIP:   srcIP,
-		DstIP:   dstIP,
-		SrcPort: srcPort,
-		DstPort: dstPort,
-		Proto:   f.canonical.Proto,
-		IsIPv6:  f.canonical.IsIPv6,
+		Src:    src,
+		Dst:    dst,
+		Proto:  f.canonical.Proto,
+		IsIPv6: f.canonical.IsIPv6,
 	}
 }
 

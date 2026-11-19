@@ -2,8 +2,10 @@ package flow
 
 import "math"
 
-// Welford is an online mean/variance accumulator. It stores population
-// variance (divide by n), matching numpy.std and PyFlowMeter's std semantics.
+// Welford is an online mean/variance accumulator. Variance uses the sample
+// (n-1) denominator, matching numpy.std(..., ddof=1) and the canonical feature
+// contract. Fewer than two observations report zero variance, so single-packet
+// flows never produce NaN or Inf.
 type Welford struct {
 	Count int64
 	Mean  float64
@@ -36,21 +38,24 @@ func (w *Welford) Add(value float64) {
 	w.M2 += delta * (value - w.Mean)
 }
 
-// Variance returns the population variance. A single observation has zero
+// Variance returns the sample variance. A single observation has zero
 // variance, which keeps the serialized feature vector finite.
 func (w Welford) Variance() float64 {
-	if w.Count == 0 {
+	if w.Count < 2 {
 		return 0
 	}
-	variance := w.M2 / float64(w.Count)
-	if variance < 0 || math.IsNaN(variance) || math.IsInf(variance, 0) {
+	variance := math.Max(0, w.M2/float64(w.Count-1))
+	if math.IsNaN(variance) || math.IsInf(variance, 0) {
 		return 0
 	}
 	return variance
 }
 
-// Std returns the population standard deviation.
+// Std returns the sample standard deviation.
 func (w Welford) Std() float64 {
+	if w.Count < 2 {
+		return 0
+	}
 	return math.Sqrt(w.Variance())
 }
 

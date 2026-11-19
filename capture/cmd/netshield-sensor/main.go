@@ -5,7 +5,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/csv"
 	"errors"
 	"flag"
 	"fmt"
@@ -51,19 +51,6 @@ type config struct {
 	redisURL    string
 	apiKey      string
 	sensorID    string
-}
-
-type extractRecord struct {
-	FlowID     string             `json:"flow_id"`
-	SrcIP      string             `json:"src_ip"`
-	SrcPort    int                `json:"src_port"`
-	DstIP      string             `json:"dst_ip"`
-	DstPort    int                `json:"dst_port"`
-	Protocol   int                `json:"protocol"`
-	StartUS    int64              `json:"start_us"`
-	EndUS      int64              `json:"end_us"`
-	Features   map[string]float64 `json:"features"`
-	CICFeatures map[string]any    `json:"cic_features"`
 }
 
 func main() {
@@ -171,25 +158,8 @@ func runExtract(cfg config) error {
 		defer file.Close()
 		writer = file
 	}
-	encoder := json.NewEncoder(writer)
-	encoder.SetEscapeHTML(false)
-	for i := range records {
-		record := records[i]
-		line := extractRecord{
-			FlowID:      record.FlowID(),
-			SrcIP:       record.ForwardKey.SrcString(),
-			SrcPort:     int(record.ForwardKey.SrcPort),
-			DstIP:       record.ForwardKey.DstString(),
-			DstPort:     int(record.ForwardKey.DstPort),
-			Protocol:    int(record.ForwardKey.Proto),
-			StartUS:     record.StartUS,
-			EndUS:       record.EndUS,
-			Features:    record.FeatureMap(),
-			CICFeatures: record.CICMap(),
-		}
-		if err := encoder.Encode(line); err != nil {
-			return fmt.Errorf("write extract record: %w", err)
-		}
+	if err := writeExtractCSV(writer, records); err != nil {
+		return err
 	}
 	stats := source.Stats()
 	fmt.Fprintf(os.Stderr, "netshield-sensor: mode=extract packets=%d flows=%d received=%d output=%s\n",
@@ -208,7 +178,7 @@ func runSensor(cfg config) error {
 	}
 
 	metricSet := metrics.New()
-	reloader, err := inference.NewReloader(modelPath, manifestPath, flow.FeatureNames, func(bundle *inference.ModelBundle) {
+	reloader, err := inference.NewReloader(modelPath, manifestPath, flow.ModelFeatureNames, func(bundle *inference.ModelBundle) {
 		metricSet.SetModel(bundle.SHA256, bundle.Backend, bundle.Manifest.ModelVersion)
 		logger.Info("model bundle reloaded", "sha256", bundle.SHA256, "backend", bundle.Backend, "version", bundle.Manifest.ModelVersion)
 	})
@@ -227,11 +197,11 @@ func runSensor(cfg config) error {
 	var forwarder *state.Forwarder
 	if cfg.ingestURL != "" {
 		forwarder, err = state.NewForwarder(state.ForwarderOptions{
-			URL:     normalizeIngestURL(cfg.ingestURL),
-			APIKey:  cfg.apiKey,
-			BatchSize: 256,
+			URL:           normalizeIngestURL(cfg.ingestURL),
+			APIKey:        cfg.apiKey,
+			BatchSize:     256,
 			FlushInterval: 2 * time.Second,
-			Logger:  logger,
+			Logger:        logger,
 		})
 		if err != nil {
 			return fmt.Errorf("configure alert forwarder: %w", err)
@@ -305,7 +275,7 @@ func runSensor(cfg config) error {
 	statsTicker := time.NewTicker(time.Second)
 	defer statsTicker.Stop()
 	go func() {
-		var lastDropped uint64
+		var lastDropped, lastDecodeErrors uint64
 		for {
 			select {
 			case <-ctx.Done():
@@ -316,6 +286,10 @@ func runSensor(cfg config) error {
 					metricSet.PacketsDroppedKernel.Add(float64(stats.DroppedKernel - lastDropped))
 				}
 				lastDropped = stats.DroppedKernel
+				if stats.DecodeErrors >= lastDecodeErrors {
+					metricSet.PacketsDecodeErrors.Add(float64(stats.DecodeErrors - lastDecodeErrors))
+				}
+				lastDecodeErrors = stats.DecodeErrors
 				metricSet.ActiveFlows.Set(float64(engine.ActiveFlows()))
 			}
 		}
@@ -490,6 +464,26 @@ func outputName(path string) string {
 		return "stdout"
 	}
 	return path
+}
+
+// writeExtractCSV writes the canonical SchemaVersion column layout. Records are
+// already ordered by (start time, canonical five-tuple), so repeated runs and
+// different worker counts produce byte-identical files.
+func writeExtractCSV(writer io.Writer, records []flow.Snapshot) error {
+	csvWriter := csv.NewWriter(writer)
+	if err := csvWriter.Write(flow.CSVHeader()); err != nil {
+		return fmt.Errorf("write extract header: %w", err)
+	}
+	for i := range records {
+		if err := csvWriter.Write(records[i].CSVRow()); err != nil {
+			return fmt.Errorf("write extract record: %w", err)
+		}
+	}
+	csvWriter.Flush()
+	if err := csvWriter.Error(); err != nil {
+		return fmt.Errorf("flush extract output: %w", err)
+	}
+	return nil
 }
 
 func maxInt(a, b int) int {

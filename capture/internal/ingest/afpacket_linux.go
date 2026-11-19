@@ -15,9 +15,10 @@ import (
 // version explicitly so block retirement semantics are identical on every
 // kernel that supports it.
 type afpacketSource struct {
-	handle   *afpacket.TPacket
-	received atomic.Uint64
-	closed   atomic.Bool
+	handle       *afpacket.TPacket
+	received     atomic.Uint64
+	decodeErrors atomic.Uint64
+	closed       atomic.Bool
 }
 
 func openAfpacket(iface string) (PacketSource, error, bool) {
@@ -48,6 +49,9 @@ func (s *afpacketSource) NextPacket() (Packet, error) {
 		pkt := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.DecodeOptions{Lazy: true, NoCopy: true})
 		normalized, ok := FromGopacket(pkt)
 		if !ok {
+			if DecodeFailed(pkt) {
+				s.decodeErrors.Add(1)
+			}
 			continue
 		}
 		// Use the kernel capture timestamp; it is the only clock that is
@@ -70,7 +74,7 @@ func (s *afpacketSource) Close() error {
 }
 
 func (s *afpacketSource) Stats() SourceStats {
-	stats := SourceStats{Received: s.received.Load()}
+	stats := SourceStats{Received: s.received.Load(), DecodeErrors: s.decodeErrors.Load()}
 	if s.handle != nil {
 		if _, v3, err := s.handle.SocketStats(); err == nil {
 			stats.DroppedKernel = uint64(v3.Drops())

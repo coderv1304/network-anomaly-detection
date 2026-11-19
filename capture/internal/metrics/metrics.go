@@ -13,14 +13,15 @@ import (
 type Metrics struct {
 	registry *prometheus.Registry
 
-	PacketsReceived         prometheus.Counter
-	PacketsDroppedKernel    prometheus.Counter
-	ActiveFlows             prometheus.Gauge
-	FlowsCompleted          prometheus.Counter
+	PacketsReceived          prometheus.Counter
+	PacketsDecodeErrors      prometheus.Counter
+	PacketsDroppedKernel     prometheus.Counter
+	ActiveFlows              prometheus.Gauge
+	FlowsCompleted           prometheus.Counter
 	FlowsDroppedBackpressure prometheus.Counter
-	AlertsEmitted           prometheus.Counter
-	InferenceDuration       prometheus.Histogram
-	ModelInfo               *prometheus.GaugeVec
+	AlertsEmitted            prometheus.Counter
+	InferenceDuration        prometheus.Histogram
+	ModelInfo                *prometheus.GaugeVec
 }
 
 // New creates and registers the sensor collectors.
@@ -31,6 +32,10 @@ func New() *Metrics {
 		PacketsReceived: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "netshield_packets_received_total",
 			Help: "Total IPv4/IPv6 packets delivered by the capture source.",
+		}),
+		PacketsDecodeErrors: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "netshield_packets_decode_errors_total",
+			Help: "Total captured frames that failed link/network/transport decoding.",
 		}),
 		PacketsDroppedKernel: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "netshield_packets_dropped_kernel_total",
@@ -64,6 +69,7 @@ func New() *Metrics {
 	}
 	registry.MustRegister(
 		m.PacketsReceived,
+		m.PacketsDecodeErrors,
 		m.PacketsDroppedKernel,
 		m.ActiveFlows,
 		m.FlowsCompleted,

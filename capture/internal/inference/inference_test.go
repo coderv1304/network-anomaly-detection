@@ -12,7 +12,7 @@ import (
 
 func TestLinearManifestScorer(t *testing.T) {
 	manifestPath := writeManifest(t, t.TempDir(), 0.5, 0.05)
-	bundle, err := LoadBundle("", manifestPath, flow.FeatureNames)
+	bundle, err := LoadBundle("", manifestPath, flow.ModelFeatureNames)
 	if err != nil {
 		t.Fatalf("LoadBundle: %v", err)
 	}
@@ -20,7 +20,7 @@ func TestLinearManifestScorer(t *testing.T) {
 	if bundle.Backend != "linear-manifest" {
 		t.Fatalf("expected linear backend, got %q", bundle.Backend)
 	}
-	features := make([]float32, flow.FeatureCount)
+	features := make([]float32, flow.ModelFeatureCount)
 	for i := range features {
 		features[i] = 1
 	}
@@ -38,7 +38,7 @@ func TestLinearManifestScorer(t *testing.T) {
 
 func TestLoadBundleRejectsSchemaMismatch(t *testing.T) {
 	manifestPath := writeManifest(t, t.TempDir(), 0.5, 0.01)
-	expected := append([]string(nil), flow.FeatureNames...)
+	expected := append([]string(nil), flow.ModelFeatureNames...)
 	expected[0] = "different_name"
 	if _, err := LoadBundle("", manifestPath, expected); err == nil {
 		t.Fatal("expected schema mismatch error")
@@ -46,12 +46,12 @@ func TestLoadBundleRejectsSchemaMismatch(t *testing.T) {
 }
 
 func TestLoadBundleRejectsNonFiniteWeight(t *testing.T) {
-	weights := make([]float64, flow.FeatureCount)
+	weights := make([]float64, flow.ModelFeatureCount)
 	weights[1] = math.Inf(1)
 	manifest := Manifest{
 		ModelID:      "test-model",
 		ModelVersion: "test-v1",
-		FeatureNames: append([]string(nil), flow.FeatureNames...),
+		FeatureNames: append([]string(nil), flow.ModelFeatureNames...),
 		Classes:      []string{"BENIGN", "ATTACK"},
 		Threshold:    0.5,
 		Fallback: &LinearFallback{
@@ -69,7 +69,7 @@ func TestReloaderSwapsOnManifestChange(t *testing.T) {
 	dir := t.TempDir()
 	manifestPath := writeManifest(t, dir, 0.5, 0.01)
 	swaps := 0
-	reloader, err := NewReloader("", manifestPath, flow.FeatureNames, func(*ModelBundle) { swaps++ })
+	reloader, err := NewReloader("", manifestPath, flow.ModelFeatureNames, func(*ModelBundle) { swaps++ })
 	if err != nil {
 		t.Fatalf("NewReloader: %v", err)
 	}
@@ -137,7 +137,7 @@ func TestSigmoidIsStableAtExtremes(t *testing.T) {
 func TestRepositoryBundleLoadsAndScores(t *testing.T) {
 	modelPath := filepath.Join("..", "..", "..", "models", "netshield_flow.onnx")
 	manifestPath := filepath.Join("..", "..", "..", "models", "netshield_flow_manifest.json")
-	bundle, err := LoadBundle(modelPath, manifestPath, flow.FeatureNames)
+	bundle, err := LoadBundle(modelPath, manifestPath, flow.ModelFeatureNames)
 	if err != nil {
 		t.Fatalf("LoadBundle: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestRepositoryBundleLoadsAndScores(t *testing.T) {
 	if bundle.SHA256 == "" || bundle.Manifest.Threshold <= 0 {
 		t.Fatalf("incomplete bundle: sha=%q threshold=%v", bundle.SHA256, bundle.Manifest.Threshold)
 	}
-	features := make([]float32, flow.FeatureCount)
+	features := make([]float32, flow.ModelFeatureCount)
 	features[0] = 1.5
 	features[1] = 3
 	features[2] = 2
@@ -164,14 +164,14 @@ func TestRepositoryBundleLoadsAndScores(t *testing.T) {
 
 func writeManifest(t *testing.T, dir string, threshold, weight float64) string {
 	t.Helper()
-	weights := make([]float64, flow.FeatureCount)
+	weights := make([]float64, flow.ModelFeatureCount)
 	for i := range weights {
 		weights[i] = weight
 	}
 	manifest := Manifest{
 		ModelID:           "test-model",
 		ModelVersion:      "test-v1",
-		FeatureNames:      append([]string(nil), flow.FeatureNames...),
+		FeatureNames:      append([]string(nil), flow.ModelFeatureNames...),
 		Classes:           []string{"BENIGN", "ATTACK"},
 		Threshold:         threshold,
 		CalibrationMethod: "test",

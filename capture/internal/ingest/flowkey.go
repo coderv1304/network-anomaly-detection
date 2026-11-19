@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"hash/fnv"
 	"net"
 )
 
@@ -32,99 +31,98 @@ const (
 	TCPFlagCWR uint8 = 0x80
 )
 
-// FlowKey is a fixed-size directional five-tuple. It is deliberately a value
-// type with no pointers so it can be used directly as a Go map key and copied
-// without allocation on the packet hot path.
-//
-// IPv4 addresses are stored in the first four bytes of the 16-byte arrays with
-// the remaining bytes zero. IPv6 addresses use all sixteen bytes. IsIPv6 keeps
-// the two families distinct even if an address happens to be IPv4-mapped.
-type FlowKey struct {
-	SrcIP   [16]byte
-	DstIP   [16]byte
-	SrcPort uint16
-	DstPort uint16
-	Proto   uint8
-	IsIPv6  bool
+// FNV-1a 64-bit parameters, inlined so hashing a key never allocates.
+const (
+	fnvOffset64 uint64 = 14695981039346656037
+	fnvPrime64  uint64 = 1099511628211
+)
+
+// Endpoint is one side of a conversation. IPv4 addresses live in the first
+// four bytes with the remaining bytes zero; IPv6 addresses use all sixteen.
+type Endpoint struct {
+	IP   [16]byte
+	Port uint16
 }
 
-// Canonical returns the flow key with endpoints in a stable lexicographic
-// order. Both directions of a conversation map to the same canonical key, so a
-// hash of it routes every packet of the flow to one worker.
+// FlowKey is a fixed-size directional five-tuple. It is a comparable value type
+// with no pointers, so it is usable directly as a map key and copies without
+// allocating on the packet hot path.
+//
+// IsIPv6 keeps the two address families distinct even when an IPv4 address is
+// stored in its IPv4-mapped form.
+type FlowKey struct {
+	Src    Endpoint
+	Dst    Endpoint
+	Proto  uint8
+	IsIPv6 bool
+}
+
+// Canonical returns the flow key with endpoints in stable lexicographic order
+// (IP bytes, then port). Both directions of a conversation map to the same
+// canonical key, so every packet of a flow reaches one worker.
 func (k FlowKey) Canonical() FlowKey {
-	if endpointLess(k.DstIP, k.DstPort, k.SrcIP, k.SrcPort) {
-		return FlowKey{
-			SrcIP:   k.DstIP,
-			DstIP:   k.SrcIP,
-			SrcPort: k.DstPort,
-			DstPort: k.SrcPort,
-			Proto:   k.Proto,
-			IsIPv6:  k.IsIPv6,
-		}
+	if endpointLess(k.Dst, k.Src) {
+		return FlowKey{Src: k.Dst, Dst: k.Src, Proto: k.Proto, IsIPv6: k.IsIPv6}
 	}
 	return k
 }
 
 // Reverse returns the flow key with source and destination swapped.
 func (k FlowKey) Reverse() FlowKey {
-	return FlowKey{
-		SrcIP:   k.DstIP,
-		DstIP:   k.SrcIP,
-		SrcPort: k.DstPort,
-		DstPort: k.SrcPort,
-		Proto:   k.Proto,
-		IsIPv6:  k.IsIPv6,
-	}
+	return FlowKey{Src: k.Dst, Dst: k.Src, Proto: k.Proto, IsIPv6: k.IsIPv6}
 }
 
-// ShardIndex returns a deterministic worker index in [0, workers). A->B and
-// B->A always resolve to the same shard because the canonical form is hashed.
+// CanonicalShard maps the conversation to a worker index in [0, numWorkers).
+// The canonical endpoint order is hashed with FNV-1a 64, so A->B and B->A
+// always select the same shard.
+func (k FlowKey) CanonicalShard(numWorkers uint64) uint64 {
+	if numWorkers == 0 {
+		return 0
+	}
+	return k.hashCanonical() % numWorkers
+}
+
+// ShardIndex is the signed convenience form of CanonicalShard.
 func (k FlowKey) ShardIndex(workers int) int {
 	if workers <= 1 {
 		return 0
 	}
-	canonical := k.Canonical()
-	var buf [38]byte
-	copy(buf[0:16], canonical.SrcIP[:])
-	copy(buf[16:32], canonical.DstIP[:])
-	binary.BigEndian.PutUint16(buf[32:34], canonical.SrcPort)
-	binary.BigEndian.PutUint16(buf[34:36], canonical.DstPort)
-	buf[36] = canonical.Proto
-	if canonical.IsIPv6 {
-		buf[37] = 1
-	}
-	h := fnv.New64a()
-	_, _ = h.Write(buf[:])
-	return int(h.Sum64() % uint64(workers))
+	return int(k.CanonicalShard(uint64(workers)))
 }
 
 // Hash returns the FNV-1a 64-bit hash of the canonical key. Tests use it to
 // assert that both directions hash identically.
-func (k FlowKey) Hash() uint64 {
+func (k FlowKey) Hash() uint64 { return k.hashCanonical() }
+
+// hashCanonical hashes a fixed 38-byte canonical tuple without allocating.
+func (k FlowKey) hashCanonical() uint64 {
 	canonical := k.Canonical()
 	var buf [38]byte
-	copy(buf[0:16], canonical.SrcIP[:])
-	copy(buf[16:32], canonical.DstIP[:])
-	binary.BigEndian.PutUint16(buf[32:34], canonical.SrcPort)
-	binary.BigEndian.PutUint16(buf[34:36], canonical.DstPort)
+	copy(buf[0:16], canonical.Src.IP[:])
+	copy(buf[16:32], canonical.Dst.IP[:])
+	binary.BigEndian.PutUint16(buf[32:34], canonical.Src.Port)
+	binary.BigEndian.PutUint16(buf[34:36], canonical.Dst.Port)
 	buf[36] = canonical.Proto
 	if canonical.IsIPv6 {
 		buf[37] = 1
 	}
-	h := fnv.New64a()
-	_, _ = h.Write(buf[:])
-	return h.Sum64()
+	hash := fnvOffset64
+	for _, b := range buf[:] {
+		hash ^= uint64(b)
+		hash *= fnvPrime64
+	}
+	return hash
 }
 
 // SrcString renders the source address in canonical human-readable form.
-func (k FlowKey) SrcString() string { return ipString(k.SrcIP, k.IsIPv6) }
+func (k FlowKey) SrcString() string { return ipString(k.Src.IP, k.IsIPv6) }
 
 // DstString renders the destination address in canonical human-readable form.
-func (k FlowKey) DstString() string { return ipString(k.DstIP, k.IsIPv6) }
+func (k FlowKey) DstString() string { return ipString(k.Dst.IP, k.IsIPv6) }
 
 // String is a stable, log-friendly representation of the directional key.
 func (k FlowKey) String() string {
-	return fmt.Sprintf("%s:%d->%s:%d/%d", k.SrcString(), k.SrcPort, k.DstString(), k.DstPort, k.Proto)
+	return fmt.Sprintf("%s:%d->%s:%d/%d", k.SrcString(), k.Src.Port, k.DstString(), k.Dst.Port, k.Proto)
 }
 
 // SortKey is a byte representation suitable for deterministic ordering of
@@ -132,10 +130,10 @@ func (k FlowKey) String() string {
 func (k FlowKey) SortKey() []byte {
 	canonical := k.Canonical()
 	buf := make([]byte, 0, 40)
-	buf = append(buf, canonical.SrcIP[:]...)
-	buf = append(buf, canonical.DstIP[:]...)
-	buf = binary.BigEndian.AppendUint16(buf, canonical.SrcPort)
-	buf = binary.BigEndian.AppendUint16(buf, canonical.DstPort)
+	buf = append(buf, canonical.Src.IP[:]...)
+	buf = append(buf, canonical.Dst.IP[:]...)
+	buf = binary.BigEndian.AppendUint16(buf, canonical.Src.Port)
+	buf = binary.BigEndian.AppendUint16(buf, canonical.Dst.Port)
 	buf = append(buf, canonical.Proto)
 	if canonical.IsIPv6 {
 		buf = append(buf, 1)
@@ -150,11 +148,11 @@ func (k FlowKey) Hex() string {
 	return hex.EncodeToString(k.SortKey())
 }
 
-func endpointLess(aIP [16]byte, aPort uint16, bIP [16]byte, bPort uint16) bool {
-	if cmp := bytes.Compare(aIP[:], bIP[:]); cmp != 0 {
+func endpointLess(a, b Endpoint) bool {
+	if cmp := bytes.Compare(a.IP[:], b.IP[:]); cmp != 0 {
 		return cmp < 0
 	}
-	return aPort < bPort
+	return a.Port < b.Port
 }
 
 func ipString(addr [16]byte, isIPv6 bool) string {

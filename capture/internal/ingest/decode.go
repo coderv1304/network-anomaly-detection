@@ -33,13 +33,17 @@ type Packet struct {
 // Key returns the directional five-tuple for the packet.
 func (p *Packet) Key() FlowKey {
 	return FlowKey{
-		SrcIP:   p.SrcIP,
-		DstIP:   p.DstIP,
-		SrcPort: p.SrcPort,
-		DstPort: p.DstPort,
-		Proto:   p.Proto,
-		IsIPv6:  p.IsIPv6,
+		Src:    Endpoint{IP: p.SrcIP, Port: p.SrcPort},
+		Dst:    Endpoint{IP: p.DstIP, Port: p.DstPort},
+		Proto:  p.Proto,
+		IsIPv6: p.IsIPv6,
 	}
+}
+
+// DecodeFailed reports whether gopacket recorded a decode failure for a frame,
+// which the sources report as a decode error instead of silently skipping it.
+func DecodeFailed(pkt gopacket.Packet) bool {
+	return pkt != nil && pkt.ErrorLayer() != nil
 }
 
 // HasFlag reports whether every bit in mask is set in the TCP flags byte.

@@ -1,22 +1,23 @@
-# Build stage for Go capture binary
+# Build stage for the pure-Go capture sensor.
 FROM golang:1.26-alpine AS builder
 WORKDIR /src
 COPY capture/go.mod capture/go.sum ./
 RUN go mod download
-COPY capture/*.go ./
-# Build static binary
-RUN apk add --no-cache libpcap-dev gcc musl-dev && CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /go-bin/capture
+COPY capture/ ./
+# CGO stays off: AF_PACKET live capture is pure Go, so the image needs no C
+# toolchain, libpcap headers, or Npcap DLLs.
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o /go-bin/netshield-sensor ./cmd/netshield-sensor
 
 # Runtime stage (minimal)
 FROM alpine:3.20 AS capture-runtime
-RUN apk add --no-cache libpcap procps
-# Add non‑root user (but we will run as root for capability injection, then drop)
+RUN apk add --no-cache procps
+# Add non-root user (capabilities are injected at runtime, then dropped)
 RUN addgroup -S capture && adduser -S capture -G capture
-COPY --from=builder /go-bin/capture /usr/local/bin/capture
+COPY --from=builder /go-bin/netshield-sensor /usr/local/bin/netshield-sensor
 # Set permissions
-RUN chown capture:capture /usr/local/bin/capture
+RUN chown capture:capture /usr/local/bin/netshield-sensor
 USER capture
-# Default command (can be overridden by docker‑compose)
-ENTRYPOINT ["capture"]
+# Default command (can be overridden by docker-compose)
+ENTRYPOINT ["netshield-sensor"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD pgrep -x capture >/dev/null || exit 1
+  CMD pgrep -x netshield-sensor >/dev/null || exit 1
