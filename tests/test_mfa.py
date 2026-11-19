@@ -1,4 +1,4 @@
-"""MFA: RFC 6238 vectors, encryption, recovery codes, login, and API."""
+﻿"""MFA: RFC 6238 vectors, encryption, recovery codes, login, and API."""
 
 import uuid
 from datetime import datetime
@@ -9,8 +9,7 @@ from importlib.metadata import version
 from werkzeug.security import generate_password_hash
 
 import app as app_module
-import mfa as mfa_module
-
+from domain import mfa as mfa_module
 RFC_SECRET_ASCII = "12345678901234567890"
 RFC_SECRET = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
 
@@ -415,3 +414,4 @@ def test_account_page_explains_identity_provider_accounts(client):
     response = client.get("/account")
     assert response.status_code == 200
     assert b"managed by the identity provider" in response.data
+

@@ -1,9 +1,9 @@
-"""Integration test for the multi-signal incident endpoint."""
+﻿"""Integration test for the multi-signal incident endpoint."""
 
 from __future__ import annotations
 
 import app as app_module
-from evidence_accumulator import Observation
+from domain.evidence_accumulator import Observation
 
 
 def _client():
@@ -38,3 +38,4 @@ def test_incident_endpoint_returns_open_host_windows():
     assert incident["incident_open"] is True
     assert payload["calibration_status"]
     app_module._EVIDENCE_ACCUMULATOR.reset()
+

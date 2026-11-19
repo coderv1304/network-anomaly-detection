@@ -1,4 +1,4 @@
-"""Tests for Slips-style host/window evidence accumulation and calibration."""
+﻿"""Tests for Slips-style host/window evidence accumulation and calibration."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import math
 
 import pytest
 
-from evidence_accumulator import (
+from domain.evidence_accumulator import (
     EvidenceAccumulator,
     Observation,
     isolation_confidence,
@@ -203,3 +203,4 @@ def test_isolation_confidence_is_centred_on_the_threshold():
     assert isolation_confidence(None, threshold=0.1) is None
     assert isolation_confidence(float("nan"), threshold=0.1) is None
     assert math.isfinite(isolation_confidence(1e9, threshold=0.1))
+

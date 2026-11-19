@@ -1,10 +1,10 @@
-"""SOAR plans are reviewable and never claim execution."""
+﻿"""SOAR plans are reviewable and never claim execution."""
 
 import json
 
 import pytest
 
-from soar import (
+from domain.soar import (
     PlaybookError,
     containment_plan,
     dispatch_webhook,
@@ -110,3 +110,4 @@ def test_webhook_config_shape(monkeypatch):
     config = webhook_config()
     assert config["enabled"] is False
     assert config["allowlist"] == []
+

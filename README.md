@@ -7,6 +7,7 @@ The project measures the distance between a strong benchmark number and a usable
 **Frozen scope:** flow-based detection of volumetric and scanning traffic. NetShield is not a general NIDS, does not block traffic, and has no validated live accuracy.
 
 ![NetShield Operator Console](docs/images/operator-console.png)
+
 ![NetShield Research Workbench](docs/images/research-workbench.png)
 
 ## One-Click Demo
@@ -61,7 +62,7 @@ Two runnable surfaces:
 - **Operator console** (`/`) — flow queue, filters, sensor identity, ingestion topology, collector fleet health, host/window incident triage, review workflow, alert-budget status, provenance, audit trail.
 - **Research workbench** (`/research`) — evaluation reports, threshold policy, prevalence and cost analysis, calibration, cross-dataset results.
 
-Live capture is opt-in (`ENABLE_LOCAL_CAPTURE=true`) and experimental: the live extractor drops ICMP and IPv6 and its flag counts are 0/1 indicators, not measured counts. The console is the primary runnable surface.
+Live capture is opt-in. The upgraded Go sensor in [`capture/`](capture/README.md) supports deterministic PCAP replay and live packet-to-feature/inference flows with IPv4/IPv6/TCP/UDP/ICMP handling, exact TCP flag counts, and sharded flow processing; the optional Python adapter (`live_capture.py`, `ENABLE_LOCAL_CAPTURE=true`) remains experimental and its PyFlowMeter-based extraction does not match that parity or validation level. Offline benchmark numbers do not establish live detection efficacy for either path. The console is the primary runnable surface.
 
 ## Serving Artifact
 
@@ -166,17 +167,16 @@ The Dockerfile and Compose file are loopback-bound and run as a non-root user wi
 
 ```text
 app.py                     Flask app: console, workbench, API
-evidence_accumulator.py    Host/window multi-signal incident logic
-live_capture.py            Optional Python capture adapter
+domain/                    Domain services (auth/MFA/OIDC, incidents, evidence, SOAR, intel, sensor fleet, capture metadata, Zeek/runtime helpers)
+live_capture.py            Optional Python PyFlowMeter capture adapter (experimental)
 pcap_parser.py             PCAP/CSV flow parsing
-zeek_parser.py             Optional Zeek conn.log parser
 feature_mapper.py          Schema mapping to the model feature order
 models/                    Serving bundle, registry, metrics, manifests
-training/                  Training, audit, benchmark, SHAP pipelines
+training/                  Training, audit, benchmark, SHAP pipelines, ONNX export
 scripts/                   Evaluation, gates, drift, release tooling
 scripts/windows/           Windows batch runners
 monitoring/                Prometheus metrics and Grafana dashboard
-capture/                   Go live-capture collector
+capture/                   Go packet sensor and capture collector (deterministic replay, sharded flow engine, ONNX/fallback inference)
 templates/ static/         Operator console and workbench UI
 tests/fixtures/            Bundled 500-flow sample and parser fixtures
 docs/                      Protocols, reports, runbooks, claim matrix
@@ -202,10 +202,10 @@ pyproject.toml             Project metadata, Ruff and pytest configuration
 ## Limitations
 
 - **Not a general NIDS.** Botnet, web attacks, infiltration, zero-day and arbitrary novel attacks are out of scope; the multiclass head cannot emit those labels.
-- **Live accuracy is unvalidated.** Offline benchmark numbers do not transfer to live capture automatically, and the live and upload extractors disagree on several numeric features.
+- **Live accuracy is unvalidated.** Offline benchmark numbers do not transfer to live capture automatically. The upload parser, optional Python live adapter, and Go capture sensor use different extraction paths and have not been validated as equivalent to CICFlowMeter ground truth on labeled live traffic.
 - **Benchmark prevalence is unrealistic.** At 25.05% positives the model looks strong; at 0.1% precision falls to 7.40% (serving model) or 0.0000 (window evaluation).
 - **Cross-dataset transfer is negative.** Neither external dataset reproduces the CIC-IDS-2017 operating point without a redesigned feature set and threshold policy.
-- **The serving path is uncalibrated for display.** The console shows no confidence percentage; the stored attack score is the raw model score.
+- **Calibration and display.** A hash-bound isotonic calibrator is applied to the supervised signal used for host/window risk accumulation and incident gating in the default calibrated evidence mode when the calibration artifact matches. Per-flow decisions still use the frozen raw attack-score threshold (`1 - P(BENIGN)`), stored `attack_score` remains the raw model score, and the console displays accumulated risk points rather than a calibrated confidence percentage.
 - **Host/window incidents are experimental.** Risk points are a triage heuristic, not a probability, and the accumulator is in-memory and resets on restart.
 - **The Zeek parser is not validated detection.** It maps `conn.log` fields honestly and leaves per-packet maxima and exact flag counts unavailable.
 - **No containment.** NetShield does not block hosts, change firewall rules, or execute response actions.

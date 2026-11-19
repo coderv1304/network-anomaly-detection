@@ -1,4 +1,4 @@
-"""Flask research application for batch flow analysis and stored-flow review.
+﻿"""Flask research application for batch flow analysis and stored-flow review.
 
 The application accepts flow CSV and PCAP/PCAPNG uploads, runs local model
 inference, and exposes stored prediction records through a browser dashboard.
@@ -51,35 +51,35 @@ from feature_mapper import (
     _auto_normalize,
     normalize_flow_features,
 )
-from evidence_accumulator import (
+from domain.evidence_accumulator import (
     EvidenceAccumulator,
     Observation,
     isolation_confidence,
     load_calibrator,
 )
 from pcap_parser import dissect_pcap as _dissect_pcap
-import mfa as mfa_module
-import oidc as oidc_module
-from capture_metadata import (
+from domain import mfa as mfa_module
+from domain import oidc as oidc_module
+from domain.capture_metadata import (
     INGESTION_VECTORS,
     VECTOR_LABELS,
     classify_ingestion_vector,
     ingestion_label,
 )
-from incident_triage import (
+from domain.incident_triage import (
     severity_for,
     triage_payload,
     validate_status,
 )
-from sensor_fleet import SensorReportError, merge_fleet, parse_report as parse_sensor_report
-from soar import (
+from domain.sensor_fleet import SensorReportError, merge_fleet, parse_report as parse_sensor_report
+from domain.soar import (
     PlaybookError,
     containment_plan,
     dispatch_webhook,
     stix_bundle,
     webhook_config,
 )
-from threat_intel import enrich_ip, lookup_abuseipdb, reputation_stats
+from domain.threat_intel import enrich_ip, lookup_abuseipdb, reputation_stats
 from monitoring.prometheus_metrics import (
     ALERT_DELIVERY_FAILURES,
     ALERT_DELIVERY_LATENCY,
@@ -128,7 +128,7 @@ except ImportError:  # python-dotenv is pinned, but keep import failure harmless
 # the bottom of this file).
 #
 # NETSHIELD_CAPTURE_INTERFACE accepts:
-#   auto       the adapter that owns the OS default route right now — works
+#   auto       the adapter that owns the OS default route right now â€” works
 #              for Wi-Fi, Ethernet, mobile hotspot / USB tethering, VPN, or
 #              any other connectivity without configuration changes
 #   all        every adapter that has an IP address, captured simultaneously
@@ -300,7 +300,7 @@ _INGEST_ACTIVE = 0
 def service_worker():
     response = send_from_directory('static', 'service-worker.js')
     response.headers['Content-Type'] = 'application/javascript; charset=utf-8'
-    # Never let browsers/CDNs cache the SW file itself — it's how updates propagate.
+    # Never let browsers/CDNs cache the SW file itself â€” it's how updates propagate.
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['Service-Worker-Allowed'] = '/'
     return response
@@ -1559,7 +1559,7 @@ if not SKIP_BOOTSTRAP:
     with app.app_context():
         if MIGRATIONS_REQUIRED:
             _configure_sqlite_pragmas()
-            from migrations_runtime import assert_database_current
+            from domain.migrations_runtime import assert_database_current
 
             assert_database_current(db.engine)
             DEFAULT_TENANT = _bootstrap_tenant_and_admin()
@@ -2260,7 +2260,7 @@ def _accumulate_flow_evidence(tenant_id, flow_dict, evidence, src_ip, dst_ip, ds
     if not MULTI_SIGNAL_ENABLED:
         return None
     source = str(src_ip or "").strip()
-    if not source or source in {"—", "Not present in upload"}:
+    if not source or source in {"â€”", "Not present in upload"}:
         return None
     reputation_score = None
     if THREAT_INTEL_ON_INGEST and evidence.get("is_attack"):
@@ -3094,8 +3094,8 @@ def ingest_flow():
             # sensor identity. No identity is fabricated when neither is sent.
             if sensor_id is None:
                 sensor_id = interface
-            src_ip = str(_extract_flow_field(flow_dict, "src_ip", "Source IP", "src_ip_addr") or "—")
-            dst_ip = str(_extract_flow_field(flow_dict, "dst_ip", "Destination IP", "dst_ip_addr") or "—")
+            src_ip = str(_extract_flow_field(flow_dict, "src_ip", "Source IP", "src_ip_addr") or "â€”")
+            dst_ip = str(_extract_flow_field(flow_dict, "dst_ip", "Destination IP", "dst_ip_addr") or "â€”")
             src_port = _safe_int(_extract_flow_field(flow_dict, "src_port", "Source Port"))
             dst_port = _safe_int(_extract_flow_field(flow_dict, "dst_port", "Destination Port"))
             if len(src_ip) > 64 or len(dst_ip) > 64 or (src_port is not None and not 0 <= src_port <= 65535) or (dst_port is not None and not 0 <= dst_port <= 65535):
@@ -3280,8 +3280,8 @@ def load_sample():
     records = []
     alerts = 0
     for flow_dict, evidence in zip(flow_dicts, evidence_rows):
-        src_ip = str(_extract_flow_field(flow_dict, "src_ip", "Source IP") or "—")
-        dst_ip = str(_extract_flow_field(flow_dict, "dst_ip", "Destination IP") or "—")
+        src_ip = str(_extract_flow_field(flow_dict, "src_ip", "Source IP") or "â€”")
+        dst_ip = str(_extract_flow_field(flow_dict, "dst_ip", "Destination IP") or "â€”")
         src_port = _safe_int(_extract_flow_field(flow_dict, "src_port", "Source Port"))
         dst_port = _safe_int(_extract_flow_field(flow_dict, "dst_port", "Destination Port"))
         raw_proto = str(
@@ -3398,7 +3398,7 @@ def list_flows():
     except (TypeError, ValueError):
         return jsonify({"error": "limit and offset must be integers"}), 400
     if not 1 <= limit <= 500 or not 0 <= offset <= 1_000_000_000:
-        return jsonify({"error": "limit must be 1–500 and offset must be non-negative"}), 400
+        return jsonify({"error": "limit must be 1â€“500 and offset must be non-negative"}), 400
     only_attacks = request.args.get("attacks_only", "false").lower() == "true"
     sensor_filter = request.args.get("sensor_id")
     interface_filter = request.args.get("interface")
@@ -4762,7 +4762,7 @@ def simulate_flow():
     import random
 
     # Demo fixtures only: this randomness never feeds a security decision.
-    labels = ["BENIGN", "BENIGN", "BENIGN", "DDoS", "PortScan", "Web Attack – Brute Force"]
+    labels = ["BENIGN", "BENIGN", "BENIGN", "DDoS", "PortScan", "Web Attack â€“ Brute Force"]
     label = random.choice(labels)  # nosec B311
     is_attack = label != "BENIGN"
     payload = {
@@ -4830,7 +4830,7 @@ def _start_live_capture(base_url: str):
         from pyflowmeter.features.flow_bytes import FlowBytes
         from pyflowmeter.sniffer import create_sniffer
     except ImportError:
-        print("[app] pyflowmeter not installed or available — packet capture is unavailable.")
+        print("[app] pyflowmeter not installed or available â€” packet capture is unavailable.")
         CAPTURE_STATUS.update(
             state="unavailable",
             message="pyflowmeter is unavailable; install project requirements to capture packets.",
@@ -4843,7 +4843,7 @@ def _start_live_capture(base_url: str):
         return
 
     try:
-        from capture_interfaces import format_capture_interfaces, resolve_capture_interfaces
+        from domain.capture_interfaces import format_capture_interfaces, resolve_capture_interfaces
     except ImportError:
         CAPTURE_STATUS.update(
             state="unavailable",
@@ -4960,7 +4960,7 @@ if __name__ == "__main__":
 
     print(f"[app] Waiting for server to come up at {base_url} ...")
     if not _wait_for_server(base_url):
-        print("[app] WARNING: server did not respond in time — capture may fail to connect.")
+        print("[app] WARNING: server did not respond in time â€” capture may fail to connect.")
     else:
         print(f"[app] NetShield ready: {base_url}/")
 
@@ -4975,3 +4975,4 @@ if __name__ == "__main__":
             ),
         )
         server_thread.join()
+

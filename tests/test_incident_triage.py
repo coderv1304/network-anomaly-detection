@@ -1,10 +1,10 @@
-"""Incident severity, SLA, and triage validation."""
+﻿"""Incident severity, SLA, and triage validation."""
 
 from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from incident_triage import (
+from domain.incident_triage import (
     SEVERITY_POLICY,
     severity_for,
     sla_payload,
@@ -83,3 +83,4 @@ def test_invalid_status_is_rejected():
 
 def test_policy_ids_are_stable():
     assert [rule["id"] for rule in SEVERITY_POLICY] == ["P1", "P2", "P3", "P4"]
+

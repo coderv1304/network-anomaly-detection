@@ -1,11 +1,11 @@
-"""Integration tests for the SOC surface: heartbeat, fleet, triage, SOAR."""
+﻿"""Integration tests for the SOC surface: heartbeat, fleet, triage, SOAR."""
 
 import uuid
 
 import pytest
 
 import app as app_module
-from evidence_accumulator import Observation
+from domain.evidence_accumulator import Observation
 
 
 def _client():
@@ -209,3 +209,4 @@ def test_triage_rejects_invalid_status_and_missing_incident():
         "/api/incidents/10.0.0.1:1/triage", json={"status": "new"}
     )
     assert missing.status_code == 404
+

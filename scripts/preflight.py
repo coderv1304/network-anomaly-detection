@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """Preflight gate for a staging or production NetShield deployment.
 
 This is the last automated check before a release starts serving. It is
@@ -36,7 +36,7 @@ os.environ.setdefault("METRICS_ENABLED", "false")
 
 from sqlalchemy import create_engine, text  # noqa: E402
 
-from migrations_runtime import MigrationStateError, assert_database_current  # noqa: E402
+from domain.migrations_runtime import MigrationStateError, assert_database_current  # noqa: E402
 from training.model_registry import (  # noqa: E402
     DEFAULT_REGISTRY_PATH,
     DeploymentCheckError,
@@ -267,8 +267,7 @@ def oidc_discovery_check(env):
     if (env.get("OIDC_ENABLED") or "false").strip().lower() != "true":
         return []
     try:
-        import oidc as oidc_module
-
+        from domain import oidc as oidc_module
         document = oidc_module.discover(env["OIDC_ISSUER"])
         return [
             {
@@ -332,3 +331,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

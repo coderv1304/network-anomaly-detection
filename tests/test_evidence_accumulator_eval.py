@@ -1,4 +1,4 @@
-"""Tests for the Phase 3 host/window incident evaluation.
+﻿"""Tests for the Phase 3 host/window incident evaluation.
 
 Two layers are covered:
 
@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from evidence_accumulator import (
+from domain.evidence_accumulator import (
     DEFAULT_PER_FLOW_CAP,
     DEFAULT_P_FLOOR,
     EvidenceAccumulator,
@@ -307,3 +307,4 @@ def test_timestamps_are_seconds_such_that_a_300s_window_spans_five_minutes():
     # A nanosecond epoch would overflow the int64 window key.
     with pytest.raises(Exception):
         window_index(hosts, timestamps * 1e9, WINDOW_SECONDS)
+

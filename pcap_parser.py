@@ -1,4 +1,4 @@
-"""PCAP/PCAPNG packet dissection and bidirectional flow feature extraction.
+﻿"""PCAP/PCAPNG packet dissection and bidirectional flow feature extraction.
 
 The upload path emits the full 80-feature CIC-IDS-2017 serving schema. Features
 that this module computes per packet (bulk statistics, active/idle times,
@@ -20,7 +20,7 @@ upload path follows the training CSV semantics):
 import numpy as np
 import pandas as pd
 
-from capture_metadata import describe_pcap_link_type
+from domain.capture_metadata import describe_pcap_link_type
 
 # Reference state-machine constants, mirrored from pyflowmeter.constants so the
 # upload path and the live path agree by construction.
@@ -484,3 +484,4 @@ def _bulk_summary(state):
         "packets_per_bulk": float(packets_per_bulk),
         "bulk_rate": float(bulk_rate),
     }
+

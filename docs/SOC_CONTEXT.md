@@ -8,7 +8,7 @@
 
 Wi-Fi, Ethernet, cellular, and VPN describe Layer-1/2 framing or a deployment context. Once packets reach IP, the detector consumes Layer-3/4 flow statistics (duration, byte/packet rates, IAT, flags, lengths). The capture vector changes *where* a probe listens, not the feature vector.
 
-`capture_metadata.py` classifies adapters into:
+`domain/capture_metadata.py` classifies adapters into:
 
 | Vector | Typical adapters | Basis |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ The local `/api/capture/interface` endpoint applies the same heuristic to resolv
 
 ## 2. Enrichment: unknown is not clean
 
-`threat_intel.py` supports two independent, optional sources:
+`domain/threat_intel.py` supports two independent, optional sources:
 
 - **MaxMind GeoLite2** (`geoip2` package plus operator-supplied `GeoLite2-City.mmdb` and/or `GeoLite2-ASN.mmdb`). Paths come from `NETSHIELD_GEOIP_CITY_DB` / `NETSHIELD_GEOIP_ASN_DB`.
 - **AbuseIPDB** (`ABUSEIPDB_API_KEY`), off unless `NETSHIELD_THREAT_INTEL_ENABLED=true` **and** a key is present.

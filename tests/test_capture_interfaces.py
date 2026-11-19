@@ -1,7 +1,6 @@
-"""Tests for cross-platform capture interface selection."""
+﻿"""Tests for cross-platform capture interface selection."""
 
-import capture_interfaces as ci
-
+from domain import capture_interfaces as ci
 FAKE_INTERFACES = [
     {"name": "Wi-Fi", "description": "MediaTek Wi-Fi 6E", "ip": "10.0.0.5", "mac": "aa", "loopback": False},
     {"name": "Ethernet", "description": "Realtek GbE", "ip": "192.168.1.20", "mac": "bb", "loopback": False},
@@ -77,3 +76,4 @@ def test_interface_list_is_sorted_with_loopback_last(monkeypatch):
     monkeypatch.setattr(ci, "_scapy_ifaces", lambda: [])
     rows = ci.list_capture_interfaces()
     assert rows == []
+

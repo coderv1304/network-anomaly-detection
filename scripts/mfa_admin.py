@@ -1,4 +1,4 @@
-"""Break-glass MFA administration for local accounts.
+﻿"""Break-glass MFA administration for local accounts.
 
 Normal enrollment happens through ``POST /api/me/mfa/enroll`` while signed in.
 This CLI exists for the operator case where an authenticator is lost and the
@@ -26,7 +26,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import app as app_module  # noqa: E402
-import mfa as mfa_module  # noqa: E402
+from domain import mfa as mfa_module  # noqa: E402
 
 
 def _user(email: str):

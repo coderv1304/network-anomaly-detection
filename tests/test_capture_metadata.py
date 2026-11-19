@@ -1,6 +1,6 @@
-"""Capture-vector and ingestion-label classification tests."""
+﻿"""Capture-vector and ingestion-label classification tests."""
 
-from capture_metadata import (
+from domain.capture_metadata import (
     classify_ingestion_vector,
     ingestion_label,
     link_type_metadata,
@@ -45,3 +45,4 @@ def test_ingestion_labels_describe_schema_not_marketing():
     generic = ingestion_label("flows.csv", ["src_ip", "dst_ip", "bytes"])
     assert generic == "Generic flow CSV"
     assert ingestion_label("flows.csv", ["whatever"]) == "CSV flow export"
+

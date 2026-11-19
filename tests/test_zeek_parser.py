@@ -1,4 +1,4 @@
-"""Tests for the optional Zeek ``conn.log`` parser."""
+﻿"""Tests for the optional Zeek ``conn.log`` parser."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from training.portable_features import PORTABLE_FEATURE_NAMES, portable_matrix
-from zeek_parser import (
+from domain.zeek_parser import (
     TIER_A_COLUMNS,
     iter_conn_records,
     main,
@@ -153,3 +153,4 @@ def test_cli_prints_portable_json(capsys):
     payload = json.loads(capsys.readouterr().out)
     assert len(payload) == 1
     assert set(payload[0]) == set(PORTABLE_FEATURE_NAMES)
+

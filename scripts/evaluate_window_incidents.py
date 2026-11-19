@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """Phase 3: ground-truth evaluation of host/time-window evidence accumulation.
 
 Question
@@ -60,7 +60,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 
-from evidence_accumulator import (  # noqa: E402
+from domain.evidence_accumulator import (  # noqa: E402
     EvidenceAccumulator,
     Observation,
     calibrated_flow_points,
@@ -1629,3 +1629,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

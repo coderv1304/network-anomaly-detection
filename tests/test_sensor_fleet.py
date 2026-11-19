@@ -1,10 +1,10 @@
-"""Collector heartbeat validation and fleet-state tests."""
+﻿"""Collector heartbeat validation and fleet-state tests."""
 
 from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from sensor_fleet import (
+from domain.sensor_fleet import (
     SensorReportError,
     fleet_entry,
     merge_fleet,
@@ -107,3 +107,4 @@ def test_merge_fleet_does_not_invent_missing_metrics():
     assert payload["sensors"][0]["flows_total"] == 9
     assert payload["sensors"][0]["link_speed_mbps"] is None
     assert payload["heartbeat_source"] == "collector-reported metrics only"
+

@@ -52,7 +52,7 @@ python -m alembic current
 python -m alembic history --verbose
 ```
 
-`migrations_runtime.py` checks the database revision during startup when
+`domain/migrations_runtime.py` checks the database revision during startup when
 `MIGRATIONS_REQUIRED=true` (the default in staging and production). Startup
 fails closed if the database is unversioned, behind, or ahead of the code. This
 is deliberate: a process must not serve against an unexpected schema.
@@ -117,7 +117,7 @@ a claim that every tenant has enrolled.
 
 ## 5. OIDC SSO
 
-`oidc.py` implements the authorization-code flow with:
+`domain/oidc.py` implements the authorization-code flow with:
 
 - discovery-document validation;
 - `state`, `nonce`, and PKCE S256;

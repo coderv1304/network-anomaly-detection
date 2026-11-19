@@ -1,4 +1,4 @@
-"""
+﻿"""
 live_capture.py
 
 Standalone live-traffic collector. Sniffs live network traffic on one or more
@@ -7,8 +7,8 @@ CICFlowMeter-style statistical features per flow, and POSTs each completed
 flow to the Flask backend's /api/flows endpoint for real-time classification,
 storage, and dashboard push.
 
-Works on any connectivity — Wi-Fi, Ethernet, mobile hotspot / USB tethering,
-VPN, virtual adapters, and loopback — because interface selection goes
+Works on any connectivity â€” Wi-Fi, Ethernet, mobile hotspot / USB tethering,
+VPN, virtual adapters, and loopback â€” because interface selection goes
 through ``capture_interfaces``:
 
     NETSHIELD_CAPTURE_INTERFACE=auto        default-route adapter (recommended)
@@ -22,11 +22,11 @@ capture on.
 REQUIREMENTS
 ------------
 - Wireshark/Npcap installed (Npcap is bundled with the Wireshark
-  installer — make sure "Install Npcap" was checked).
+  installer â€” make sure "Install Npcap" was checked).
 - pip install pyflowmeter
 - app.py must already be running (python app.py) before you start this.
 - MUST be run from a terminal with Administrator privileges on
-  Windows — packet capture needs privileged access.
+  Windows â€” packet capture needs privileged access.
 
 If pyflowmeter's create_sniffer() signature differs from what's used
 below (it's a small, infrequently-updated package), run:
@@ -57,7 +57,7 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from capture_interfaces import (
+    from domain.capture_interfaces import (
         format_capture_interfaces,
         resolve_capture_interfaces,
     )
@@ -171,3 +171,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

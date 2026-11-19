@@ -1,4 +1,4 @@
-"""OpenID Connect client and SSO route tests against a fake provider."""
+﻿"""OpenID Connect client and SSO route tests against a fake provider."""
 
 import base64
 import hashlib
@@ -14,9 +14,7 @@ import werkzeug
 from importlib.metadata import version
 
 import app as app_module
-import oidc as oidc_module
-
-
+from domain import oidc as oidc_module
 def _b64url(raw: bytes) -> str:
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
@@ -335,3 +333,4 @@ def test_oidc_callback_requires_verified_email(client, monkeypatch, oidc_user):
 def test_oidc_routes_are_hidden_when_disabled(client):
     assert client.get("/auth/oidc/login").status_code == 404
     assert client.get("/auth/oidc/callback").status_code == 404
+

@@ -249,7 +249,7 @@ Supported:
 - An automated HTTP baseline found no failures.
 - Dependencies were upgraded and the full test suite passes.
 - Local accounts support TOTP MFA with encrypted secrets and hashed single-use
-  recovery codes; `oidc.py` implements authorization-code + PKCE with RS256
+  recovery codes; `domain/oidc.py` implements authorization-code + PKCE with RS256
   ID-token verification. OIDC is tested against a fake provider only.
 - The serving artifact is hash-pinned and gated by a registry check.
 - Retention, export, and deletion behavior is documented against the actual

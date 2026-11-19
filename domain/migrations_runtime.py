@@ -14,8 +14,8 @@ from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_CONFIG_PATH = os.path.join(PROJECT_ROOT, "alembic.ini")
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+DEFAULT_CONFIG_PATH = os.path.join(REPO_ROOT, "alembic.ini")
 
 
 class MigrationStateError(RuntimeError):

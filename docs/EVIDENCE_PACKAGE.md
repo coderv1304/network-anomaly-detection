@@ -190,15 +190,15 @@ Serving, evaluation, and gating now load the same artifact bytes: the registry-a
 | `requirements.txt` | `a002047f9a22c6d36c6e94f0636dfa6f4b71ca599c94d0a68e2a1ba0bb8a8702` |
 | `requirements-runtime.txt` | `f4005921fa01ba83ec5a7ae0731a79f3ba1f6904ce49c03f61d3c0fba3615c66` |
 | `app.py` | `dc6f698678cbc7b1d29cafe01ddb01d8560f90455512596ed3f77d866bc4ed86` |
-| `capture_metadata.py` | `8f73a1104d051e4181079d1634e1b156d6640b2c97bbedea4b13b20efa3cad77` |
+| `domain/capture_metadata.py` | `8f73a1104d051e4181079d1634e1b156d6640b2c97bbedea4b13b20efa3cad77` |
 | `pcap_parser.py` | `b2c805b899da6bb62e5830e68db1c25bf755ad925607ed703baea4f5c31273b4` |
-| `threat_intel.py` | `e5e0ad8f20a3a028920cfeef3d5a2a8bf44aa2f8a29404e4098296a3f5460789` |
-| `sensor_fleet.py` | `615db61bb688f00986dd1ef7280969cf7a2864d0a4db79d1981ffea8e64b2f10` |
-| `incident_triage.py` | `bb3df76c34ffb456ce33295cfaea20079d0d573f7424d9d520a570c2bcc8aaba` |
-| `soar.py` | `611b102263fd578354da8f54f0dca5cdde9a1c4d1526c9856be2f3942937106b` |
-| `mfa.py` | `c26900276ad0a7ed02714945e6becc1bd990a1a9468f10c4a327a76c25d9ecaa` |
-| `oidc.py` | `f6d5ab4d3bc4e21c7aa5ca4e0922cc504d23763dcbd3b8dd0dd1d307bc73f06d` |
-| `migrations_runtime.py` | `4054b780467fb958e39855c8986f28015396d760b10bb6e9fcac344307a2e9df` |
+| `domain/threat_intel.py` | `e5e0ad8f20a3a028920cfeef3d5a2a8bf44aa2f8a29404e4098296a3f5460789` |
+| `domain/sensor_fleet.py` | `615db61bb688f00986dd1ef7280969cf7a2864d0a4db79d1981ffea8e64b2f10` |
+| `domain/incident_triage.py` | `bb3df76c34ffb456ce33295cfaea20079d0d573f7424d9d520a570c2bcc8aaba` |
+| `domain/soar.py` | `611b102263fd578354da8f54f0dca5cdde9a1c4d1526c9856be2f3942937106b` |
+| `domain/mfa.py` | `c26900276ad0a7ed02714945e6becc1bd990a1a9468f10c4a327a76c25d9ecaa` |
+| `domain/oidc.py` | `f6d5ab4d3bc4e21c7aa5ca4e0922cc504d23763dcbd3b8dd0dd1d307bc73f06d` |
+| `domain/migrations_runtime.py` | `4054b780467fb958e39855c8986f28015396d760b10bb6e9fcac344307a2e9df` |
 | `alembic.ini` | `fe45d42f852b5cdf90d7e62a85d6372209248a1f2e0d79b4b70c17be750f8032` |
 | `migrations/env.py` | `1120de400d92d37650febb50aa5685ed68982f5578694812ba88af370448f3e2` |
 | `migrations/versions/f68710d807f3_baseline_schema.py` | `8caedfeaee13c0d181d06c04ece321888ae39164d42477f6e8d8162a666d0463` |
@@ -528,10 +528,10 @@ The response should contain `model_bundle_rf_day_based_seed42.pkl`, `RandomFores
 | `docs/OPERATIONS_RUNBOOK.md` | Phase S5 environments, release, rollback, and routine operations |
 | `docs/STAGING_AND_MIGRATIONS.md` | Staging profile, Alembic migrations, preflight gate, MFA, and OIDC status |
 | `migrations/versions/f68710d807f3_baseline_schema.py` | Alembic baseline schema revision |
-| `migrations_runtime.py` | Startup revision guard for staging and production |
+| `domain/migrations_runtime.py` | Startup revision guard for staging and production |
 | `scripts/preflight.py` | Staging/production preflight gate |
-| `mfa.py` | TOTP, encrypted secret storage, and recovery codes |
-| `oidc.py` | OIDC discovery, PKCE, code exchange, and RS256 token verification |
+| `domain/mfa.py` | TOTP, encrypted secret storage, and recovery codes |
+| `domain/oidc.py` | OIDC discovery, PKCE, code exchange, and RS256 token verification |
 | `templates/account.html`, `static/js/account.js` | Self-service MFA enrollment and recovery-code surface |
 | `tests/test_mfa.py`, `tests/test_oidc.py`, `tests/test_migrations.py`, `tests/test_preflight.py`, `tests/test_staging_config.py` | Identity, migration, preflight, and fail-closed staging tests |
 | `.env.staging.example` | Staging configuration template with placeholders only |

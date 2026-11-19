@@ -1,6 +1,4 @@
-import threat_intel
-
-
+﻿from domain import threat_intel
 class FakeResponse:
     def raise_for_status(self):
         return None

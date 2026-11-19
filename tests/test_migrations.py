@@ -1,4 +1,4 @@
-"""Alembic baseline and runtime revision guard."""
+﻿"""Alembic baseline and runtime revision guard."""
 
 import os
 import subprocess
@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import create_engine, inspect
 
 import app as app_module
-from migrations_runtime import (
+from domain.migrations_runtime import (
     MigrationStateError,
     assert_database_current,
     current_revision,
@@ -52,3 +52,4 @@ def test_unversioned_database_fails_the_startup_guard(tmp_path):
     engine = create_engine(f"sqlite:///{database.as_posix()}")
     with pytest.raises(MigrationStateError, match="no Alembic revision"):
         assert_database_current(engine)
+

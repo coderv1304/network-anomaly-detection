@@ -2,7 +2,7 @@
 
 **Status:** experimental, additive triage layer. It does not change the serving
 model, the per-flow decision, or stored `Flow` rows.
-**Module:** [`../evidence_accumulator.py`](../evidence_accumulator.py).
+**Module:** [`../domain/evidence_accumulator.py`](../domain/evidence_accumulator.py).
 **API:** `GET /api/incidents`.
 **Tests:** [`../tests/test_evidence_accumulator.py`](../tests/test_evidence_accumulator.py),
 [`../tests/test_incidents_api.py`](../tests/test_incidents_api.py).

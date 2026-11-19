@@ -1,4 +1,4 @@
-"""Collector heartbeat validation and fleet presentation.
+﻿"""Collector heartbeat validation and fleet presentation.
 
 The fleet grid is only as honest as the data collectors send. There is no
 synthetic bandwidth, no invented packet-drop percentage, and no "DPDK" label
@@ -13,7 +13,7 @@ import math
 import os
 from datetime import datetime, timezone
 
-from capture_metadata import classify_ingestion_vector
+from .capture_metadata import classify_ingestion_vector
 
 DEFAULT_OFFLINE_SECONDS = 90
 MAX_INTERFACE_LENGTH = 120
@@ -234,3 +234,4 @@ def merge_fleet(reports: list[dict], flow_rows: list[dict], *, now: datetime | N
             "collector reports them. Missing values stay null; none are synthesised."
         ),
     }
+

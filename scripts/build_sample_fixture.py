@@ -1,4 +1,4 @@
-"""Build the bundled 500-flow sample fixture used by the one-click demo.
+﻿"""Build the bundled 500-flow sample fixture used by the one-click demo.
 
 The fixture is an extract of the held-out CIC-IDS-2017 Thursday-Friday split,
 not synthetic telemetry:
@@ -634,7 +634,7 @@ def score_and_accumulate(path: str) -> dict:
     """
     import joblib
 
-    from evidence_accumulator import EvidenceAccumulator, Observation, load_calibrator
+    from domain.evidence_accumulator import EvidenceAccumulator, Observation, load_calibrator
 
     bundle = joblib.load(BUNDLE_PATH)
     pipeline = bundle["pipeline"]
@@ -783,3 +783,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

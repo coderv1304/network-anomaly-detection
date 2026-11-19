@@ -1,7 +1,7 @@
 # Optional Zeek `conn.log` Collector
 
 **Status:** parser and CSV converter only; Zeek itself is not bundled.
-**Module:** [`../zeek_parser.py`](../zeek_parser.py).
+**Module:** [`../domain/zeek_parser.py`](../domain/zeek_parser.py).
 **Tests:** [`../tests/test_zeek_parser.py`](../tests/test_zeek_parser.py).
 **Scope:** flow-based volumetric and scanning behavior. Not a general NIDS.
 
@@ -87,19 +87,19 @@ bundle.
 Convert to portable ratio rows:
 
 ```bash
-venv/Scripts/python.exe zeek_parser.py path/to/conn.log --portable
+venv/Scripts/python.exe -m domain.zeek_parser path/to/conn.log --portable
 ```
 
 Write Tier A-shaped rows for an external consumer:
 
 ```bash
-venv/Scripts/python.exe zeek_parser.py path/to/conn.log --output conn_tier_a.csv
+venv/Scripts/python.exe -m domain.zeek_parser path/to/conn.log --output conn_tier_a.csv
 ```
 
 From Python:
 
 ```python
-from zeek_parser import zeek_to_flows, zeek_to_portable_rows
+from domain.zeek_parser import zeek_to_flows, zeek_to_portable_rows
 
 flows = zeek_to_flows("conn.log", max_records=10_000)
 portable = zeek_to_portable_rows("conn.log")
