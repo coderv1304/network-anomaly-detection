@@ -1,18 +1,18 @@
 """Export the sensor's flow classifier to ONNX with a pure-Go fallback.
 
-The Go sensor consumes a frozen 24-feature vector (``capture/internal/flow``)
-whose values are derived from a bidirectional five-tuple. This script trains
-the same classifier family on the held-out CIC-style fixture, exports it to
-``models/netshield_flow.onnx``, and records enough metadata for the sensor's
-non-CGo build to keep scoring:
+The Go sensor consumes the canonical ``netshield-flow-v1`` vector
+(``capture/internal/flow/schema.go``): 26 features derived from a bidirectional
+five-tuple, identical to the columns written by ``--mode=extract``. This script
+trains a calibrated HistGradientBoosting classifier on the CIC-style fixture,
+exports ``models/netshield_flow.onnx`` at opset 15, and records everything the
+non-CGo sensor needs to keep scoring:
 
-* ``models/netshield_flow_manifest.json`` pins the ONNX SHA-256, the feature
-  order, the calibrated threshold, and a logistic fallback expressed in the
-  sensor's raw feature space. The Go sensor validates the SHA-256 before it
-  swaps a live model.
+* ``models/netshield_flow_manifest.json`` pins the schema version, the schema
+  digest, the ONNX SHA-256, the calibrated threshold, and a standardized
+  logistic fallback (means/stds/weights/bias).
 * ``models/netshield_flow_parity.json`` stores 1,000 deterministic feature rows
-  with the reference probabilities so ``tests/test_export_onnx.py`` can assert
-  ONNX/sklearn parity without re-training.
+  with reference probabilities so ``tests/test_export_onnx.py`` can assert
+  ONNX/scikit-learn parity without re-training.
 
 Run from the repository root:
 
@@ -59,11 +59,14 @@ DEFAULT_PARITY = os.path.join(PROJECT_ROOT, "models", "netshield_flow_parity.jso
 SEED = 42
 PARITY_ROWS = 1000
 PARITY_TOLERANCE = 1e-5
+TARGET_OPSET = 15
 RATIO_EPSILON = 1e-6
 
-# This order is part of the Go sensor's wire contract. Changing it requires a
-# matching change in capture/internal/flow/features.go and a new manifest.
+# This order is the Go sensor's wire contract: it must match FeatureNames in
+# capture/internal/flow/schema.go exactly, and schema_sha256 pins the pairing.
+SCHEMA_VERSION = "netshield-flow-v1"
 FEATURE_NAMES = (
+    "protocol",
     "duration_sec",
     "fwd_pkts",
     "bwd_pkts",
@@ -71,24 +74,26 @@ FEATURE_NAMES = (
     "bwd_bytes",
     "fwd_hdr_bytes",
     "bwd_hdr_bytes",
-    "pkt_len_mean",
-    "pkt_len_std",
-    "iat_mean",
-    "iat_std",
     "fin_cnt",
     "syn_cnt",
     "rst_cnt",
     "psh_cnt",
     "ack_cnt",
+    "urg_cnt",
+    "ece_cnt",
+    "cwr_cnt",
+    "flow_iat_mean",
+    "flow_iat_std",
+    "flow_iat_max",
+    "pkt_len_mean",
+    "pkt_len_std",
+    "pkt_len_max",
     "bytes_per_sec",
     "pkts_per_sec",
     "fwd_bwd_pkt_ratio",
-    "fwd_bwd_byte_ratio",
     "syn_ack_ratio",
-    "fin_rst_ratio",
-    "mean_pkt_size",
-    "iat_cv",
 )
+SCHEMA_SHA256 = hashlib.sha256(",".join(FEATURE_NAMES).encode("utf-8")).hexdigest()
 
 
 def _numeric(frame: pd.DataFrame, column: str) -> np.ndarray:
@@ -100,13 +105,14 @@ def _numeric(frame: pd.DataFrame, column: str) -> np.ndarray:
 
 
 def derive_features(frame: pd.DataFrame) -> np.ndarray:
-    """Derive the Go sensor's 24 features from CIC-style fixture columns.
+    """Derive the 26 canonical features from CIC-style fixture columns.
 
     The arithmetic mirrors ``flow.Snapshot.FeatureValues`` exactly, including
-    the epsilon floors and the ``max(denominator, 1)`` guards, so a model
-    trained here sees the same scale the sensor emits at inference time.
+    the epsilon floor on duration and the ``max(denominator, 1)`` guards, so a
+    model trained here sees the scale the sensor emits at inference time.
     """
 
+    protocol = _numeric(frame, "Protocol")
     duration_us = np.maximum(_numeric(frame, "Flow Duration"), 0.0)
     duration_sec = np.maximum(duration_us / 1e6, RATIO_EPSILON)
 
@@ -117,26 +123,30 @@ def derive_features(frame: pd.DataFrame) -> np.ndarray:
     fwd_hdr = np.maximum(_numeric(frame, "Fwd Header Length"), 0.0)
     bwd_hdr = np.maximum(_numeric(frame, "Bwd Header Length"), 0.0)
 
-    pkt_len_mean = _numeric(frame, "Packet Length Mean")
-    pkt_len_std = _numeric(frame, "Packet Length Std")
-    iat_mean = _numeric(frame, "Flow IAT Mean")
-    iat_std = _numeric(frame, "Flow IAT Std")
-
     fin = _numeric(frame, "FIN Flag Count")
     syn = _numeric(frame, "SYN Flag Count")
     rst = _numeric(frame, "RST Flag Count")
     psh = _numeric(frame, "PSH Flag Count")
     ack = _numeric(frame, "ACK Flag Count")
+    urg = _numeric(frame, "URG Flag Count")
+    ece = _numeric(frame, "ECE Flag Count")
+    cwr = _numeric(frame, "CWE Flag Count")
+
+    iat_mean = _numeric(frame, "Flow IAT Mean")
+    iat_std = _numeric(frame, "Flow IAT Std")
+    iat_max = _numeric(frame, "Flow IAT Max")
+    pkt_len_mean = _numeric(frame, "Packet Length Mean")
+    pkt_len_std = _numeric(frame, "Packet Length Std")
+    pkt_len_max = _numeric(frame, "Max Packet Length")
 
     total_pkts = fwd_pkts + bwd_pkts
     total_bytes = fwd_bytes + bwd_bytes
-    packet_floor = np.maximum(total_pkts, 1.0)
     bwd_pkt_floor = np.maximum(bwd_pkts, 1.0)
-    bwd_byte_floor = np.maximum(bwd_bytes, 1.0)
     ack_floor = np.maximum(ack, 1.0)
 
     values = np.column_stack(
         [
+            protocol,  # protocol
             duration_sec,  # duration_sec
             fwd_pkts,  # fwd_pkts
             bwd_pkts,  # bwd_pkts
@@ -144,27 +154,28 @@ def derive_features(frame: pd.DataFrame) -> np.ndarray:
             bwd_bytes,  # bwd_bytes
             fwd_hdr,  # fwd_hdr_bytes
             bwd_hdr,  # bwd_hdr_bytes
-            pkt_len_mean,  # pkt_len_mean
-            pkt_len_std,  # pkt_len_std
-            iat_mean,  # iat_mean
-            iat_std,  # iat_std
             fin,  # fin_cnt
             syn,  # syn_cnt
             rst,  # rst_cnt
             psh,  # psh_cnt
             ack,  # ack_cnt
+            urg,  # urg_cnt
+            ece,  # ece_cnt
+            cwr,  # cwr_cnt
+            iat_mean,  # flow_iat_mean
+            iat_std,  # flow_iat_std
+            iat_max,  # flow_iat_max
+            pkt_len_mean,  # pkt_len_mean
+            pkt_len_std,  # pkt_len_std
+            pkt_len_max,  # pkt_len_max
             total_bytes / duration_sec,  # bytes_per_sec
             total_pkts / duration_sec,  # pkts_per_sec
             fwd_pkts / bwd_pkt_floor,  # fwd_bwd_pkt_ratio
-            fwd_bytes / bwd_byte_floor,  # fwd_bwd_byte_ratio
             syn / ack_floor,  # syn_ack_ratio
-            (fin + rst) / packet_floor,  # fin_rst_ratio
-            total_bytes / packet_floor,  # mean_pkt_size
-            iat_std / np.maximum(iat_mean, RATIO_EPSILON),  # iat_cv
         ]
     )
-    # The sensor never emits NaN or Infinity. Mirror that guarantee here so the
-    # training matrix and ONNX inputs stay identical.
+    # The sensor sanitizes every row, so mirror that guarantee here: the
+    # training matrix and ONNX inputs must never contain NaN or Inf.
     values = np.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0)
     return np.ascontiguousarray(values, dtype=np.float32)
 
@@ -192,25 +203,29 @@ def calibrate_threshold(probabilities: np.ndarray, labels: np.ndarray) -> float:
     return round(min(max(best_threshold, 0.01), 0.99), 6)
 
 
-def raw_logistic_coefficients(pipeline) -> tuple[list[float], float]:
-    """Express a standardized logistic model in the sensor's raw space.
+def linear_fallback_payload(pipeline) -> dict:
+    """Express the standardized logistic model in the Go scorer's terms.
 
-    Go's fallback scorer only multiplies raw features by weights and adds a
-    bias. If ``z = (x - mean) / scale`` and ``logit = w_z * z + b_z``, then the
-    equivalent raw-space coefficients are ``w = w_z / scale`` and
-    ``b = b_z - sum(w_z * mean / scale)``.
+    ``LinearManifestScorer`` computes ``z = bias + sum(w * (x - mean) / std)``
+    and applies a sigmoid, so the manifest carries the scaler statistics
+    verbatim instead of pre-collapsing them into raw-space weights.
     """
 
     scaler = pipeline.named_steps["standardscaler"]
     model = pipeline.named_steps["logisticregression"]
-    coefficient = np.asarray(model.coef_, dtype=np.float64).reshape(-1)
-    intercept = float(np.asarray(model.intercept_, dtype=np.float64).reshape(-1)[0])
-    mean = np.asarray(scaler.mean_, dtype=np.float64)
-    scale = np.asarray(scaler.scale_, dtype=np.float64)
-    scale = np.where(np.abs(scale) < 1e-12, 1.0, scale)
-    weights = coefficient / scale
-    bias = intercept - float(np.sum(coefficient * mean / scale))
-    return [float(value) for value in weights], float(bias)
+    means = np.asarray(scaler.mean_, dtype=np.float64)
+    stds = np.asarray(scaler.scale_, dtype=np.float64)
+    stds = np.where(np.abs(stds) < 1e-12, 1.0, stds)
+    weights = np.asarray(model.coef_, dtype=np.float64).reshape(-1)
+    bias = float(np.asarray(model.intercept_, dtype=np.float64).reshape(-1)[0])
+    return {
+        "type": "logistic",
+        "activation": "sigmoid",
+        "means": [float(value) for value in means],
+        "stds": [float(value) for value in stds],
+        "weights": [float(value) for value in weights],
+        "bias": bias,
+    }
 
 
 def export_onnx(model, sample: np.ndarray):
@@ -240,6 +255,7 @@ def export_onnx(model, sample: np.ndarray):
             model,
             sample,
             options={id(model): {"zipmap": False}},
+            target_opset=TARGET_OPSET,
         )
     finally:
         tree_ensemble.add_node = original_add_node
@@ -364,7 +380,6 @@ def main() -> int:
         ),
     )
     fallback.fit(x_train, y_train)
-    weights, bias = raw_logistic_coefficients(fallback)
     fallback_probabilities = fallback.predict_proba(x_valid)[:, 1]
     fallback_metrics = {
         "precision": round(float(precision_score(y_valid, fallback_probabilities >= threshold, zero_division=0)), 6),
@@ -377,22 +392,20 @@ def main() -> int:
         handle.write(serialized)
 
     manifest = {
+        "schema_version": SCHEMA_VERSION,
+        "schema_sha256": SCHEMA_SHA256,
         "model_id": "netshield-flow-hgb",
-        "model_version": "hgb-portable-v1-seed42",
+        "model_version": "hgb-portable-v2-seed42",
         "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "feature_names": list(FEATURE_NAMES),
         "classes": ["BENIGN", "ATTACK"],
         "threshold": threshold,
         "calibration_method": "validation_f1_sweep",
-        "sha256": model_sha256,
+        "onnx_sha256": model_sha256,
         "onnx_input": "X",
         "onnx_output": "probabilities",
-        "fallback": {
-            "type": "logistic",
-            "weights": weights,
-            "bias": bias,
-            "activation": "sigmoid",
-        },
+        "target_opset": TARGET_OPSET,
+        "linear_fallback": linear_fallback_payload(fallback),
         "validation_metrics": {
             "onnx": metrics,
             "fallback": fallback_metrics,
@@ -406,6 +419,8 @@ def main() -> int:
     write_json(args.manifest_out, manifest)
 
     parity = {
+        "schema_version": SCHEMA_VERSION,
+        "schema_sha256": SCHEMA_SHA256,
         "feature_names": list(FEATURE_NAMES),
         "onnx_sha256": model_sha256,
         "threshold": threshold,
@@ -424,6 +439,7 @@ def main() -> int:
         "parity rows="
         f"{len(parity_rows)} max|delta|={manifest['validation_metrics']['parity_max_abs_delta']:.3e}"
     )
+    print(f"schema={SCHEMA_VERSION} sha256={SCHEMA_SHA256}")
     return 0
 
 
