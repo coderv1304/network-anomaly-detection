@@ -9,6 +9,7 @@ This application is not a validated production network detection service.
 REST API
 --------
 POST /api/flows              -> ingest a flow record (collector endpoint)
+POST /api/ingest             -> alias for /api/flows (netshield-sensor)
 GET  /api/flows              -> paginated stored flow history
 GET  /api/flows/<id>         -> one stored flow record
 GET  /api/stats              -> counts by predicted label
@@ -3045,6 +3046,7 @@ def simulate_soar_webhook():
 # REST API
 # ---------------------------------------------------------------------
 @app.route("/api/flows", methods=["POST"])
+@app.route("/api/ingest", methods=["POST"])
 @limiter.limit(os.environ.get("INGEST_RATE_LIMIT", "60 per second;1200 per minute"))
 @require_api_key
 @ingest_admission

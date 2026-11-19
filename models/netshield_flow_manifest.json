@@ -1,0 +1,90 @@
+{
+  "calibration_method": "validation_f1_sweep",
+  "classes": [
+    "BENIGN",
+    "ATTACK"
+  ],
+  "created_utc": "2026-11-19T13:34:18+00:00",
+  "fallback": {
+    "activation": "sigmoid",
+    "bias": -4.810453458842992,
+    "type": "logistic",
+    "weights": [
+      -0.01982547612392837,
+      -0.03424798592147991,
+      -0.015539789648746184,
+      -0.0003874577891091897,
+      2.6330710149027992e-08,
+      -0.0013275804371891346,
+      -0.0006508861079529971,
+      0.0011396922135621774,
+      0.0010732351602359541,
+      -1.4462193252168166e-07,
+      2.0847279229081794e-07,
+      -1.5557565448042516,
+      -2.802563522219108,
+      0.0,
+      4.8726713495636975,
+      2.683624145446874,
+      -3.1267340119932884e-08,
+      -1.3983230820336792e-06,
+      1.214440878512738,
+      -0.018543619146533564,
+      -2.802563522219108,
+      -3.1115130896085033,
+      0.0012229360159263848,
+      -0.9377945711293955
+    ]
+  },
+  "feature_names": [
+    "duration_sec",
+    "fwd_pkts",
+    "bwd_pkts",
+    "fwd_bytes",
+    "bwd_bytes",
+    "fwd_hdr_bytes",
+    "bwd_hdr_bytes",
+    "pkt_len_mean",
+    "pkt_len_std",
+    "iat_mean",
+    "iat_std",
+    "fin_cnt",
+    "syn_cnt",
+    "rst_cnt",
+    "psh_cnt",
+    "ack_cnt",
+    "bytes_per_sec",
+    "pkts_per_sec",
+    "fwd_bwd_pkt_ratio",
+    "fwd_bwd_byte_ratio",
+    "syn_ack_ratio",
+    "fin_rst_ratio",
+    "mean_pkt_size",
+    "iat_cv"
+  ],
+  "model_id": "netshield-flow-hgb",
+  "model_version": "hgb-portable-v1-seed42",
+  "onnx_input": "X",
+  "onnx_output": "probabilities",
+  "sha256": "64fcf21cd9515e3773b8444fe419c6b5b08972727cce172d5fb9734533f264fc",
+  "threshold": 0.565319,
+  "validation_metrics": {
+    "fallback": {
+      "precision": 0.849057,
+      "recall": 1.0,
+      "roc_auc": 0.956614
+    },
+    "onnx": {
+      "accuracy": 0.986667,
+      "f1": 0.978261,
+      "precision": 0.957447,
+      "recall": 1.0,
+      "roc_auc": 0.999365,
+      "rows_train": 350,
+      "rows_validation": 150,
+      "threshold": 0.565319
+    },
+    "parity_max_abs_delta": 1.5000000008758008e-07,
+    "parity_rows": 1000
+  }
+}

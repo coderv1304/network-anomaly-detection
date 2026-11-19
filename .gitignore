@@ -42,8 +42,9 @@ data/*.pcap
 # models/random_forest.pkl is ~73MB and should not be tracked directly in git history
 models/*.pkl
 models/*.onnx
-# The registry-active serving bundle is small and required for a runnable clone
+# The registry-active serving bundle and sensor artifacts are required for a runnable clone
 !models/model_bundle_rf_day_based_seed42.pkl
+!models/netshield_flow.onnx
 # Regenerable score caches; rebuild with scripts/build_score_cache.py
 models/eval_cache/
 !models/README.md
