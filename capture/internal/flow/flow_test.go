@@ -40,9 +40,6 @@ func TestCanonicalSchemaContract(t *testing.T) {
 	if got := SchemaSHA256(); got != wantDigest {
 		t.Fatalf("schema digest changed: got %s want %s", got, wantDigest)
 	}
-	if len(ModelFeatureNames) != ModelFeatureCount || ModelFeatureCount != 24 {
-		t.Fatalf("model input order must stay at 24 values, got %d/%d", len(ModelFeatureNames), ModelFeatureCount)
-	}
 }
 
 func TestCSVHeaderFollowsSchema(t *testing.T) {
@@ -189,9 +186,6 @@ func TestFeatureValuesAreFinite(t *testing.T) {
 	}
 	if values[22] <= 0 || values[23] <= 0 {
 		t.Fatalf("rate features should be positive: bytes/s=%v pkts/s=%v", values[22], values[23])
-	}
-	if model := emitted.items[0].ModelFeatureValues(); len(model) != ModelFeatureCount {
-		t.Fatalf("model vector must stay %d wide, got %d", ModelFeatureCount, len(model))
 	}
 }
 

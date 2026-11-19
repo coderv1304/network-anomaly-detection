@@ -10,66 +10,97 @@ import (
 	"capture/internal/flow"
 )
 
-func TestLinearManifestScorer(t *testing.T) {
-	manifestPath := writeManifest(t, t.TempDir(), 0.5, 0.05)
-	bundle, err := LoadBundle("", manifestPath, flow.ModelFeatureNames)
+func TestLinearManifestScorerScoresStandardizedFeatures(t *testing.T) {
+	manifestPath := writeManifest(t, t.TempDir(), manifestFixture(0.5, 0.05))
+	bundle, err := LoadBundle("", manifestPath)
 	if err != nil {
 		t.Fatalf("LoadBundle: %v", err)
 	}
-	defer bundle.Scorer.Close()
 	if bundle.Backend != "linear-manifest" {
-		t.Fatalf("expected linear backend, got %q", bundle.Backend)
+		t.Fatalf("expected the pure-Go fallback backend, got %q", bundle.Backend)
 	}
-	features := make([]float32, flow.ModelFeatureCount)
-	for i := range features {
-		features[i] = 1
+	if bundle.SchemaSHA256 != flow.SchemaSHA256() {
+		t.Fatalf("bundle schema digest %q does not match %q", bundle.SchemaSHA256, flow.SchemaSHA256())
 	}
-	score, err := bundle.Scorer.Score(features)
+	if bundle.ManifestSHA256 == "" || bundle.Scorer.ManifestSHA256() != bundle.ManifestSHA256 {
+		t.Fatal("scorer must expose the manifest digest it was loaded for")
+	}
+
+	result, err := bundle.Scorer.Score(testVector())
 	if err != nil {
 		t.Fatalf("Score: %v", err)
 	}
-	if math.IsNaN(score.AttackProbability) || score.AttackProbability <= 0 || score.AttackProbability >= 1 {
-		t.Fatalf("unexpected probability: %v", score.AttackProbability)
+	if math.Abs(result.Probability-1) > 1e-6 {
+		t.Fatalf("expected a saturated probability, got %v", result.Probability)
 	}
-	if score.Label != "ATTACK" {
-		t.Fatalf("expected ATTACK above threshold, got %q (%v)", score.Label, score.AttackProbability)
+	if !result.IsAlert {
+		t.Fatal("probability above the threshold must alert")
+	}
+	if math.Abs(result.RiskPoints-result.Probability*100) > 1e-9 {
+		t.Fatalf("risk points must mirror the probability scale: %v vs %v", result.RiskPoints, result.Probability)
+	}
+
+	negative := manifestFixture(0.5, -0.05)
+	negativePath := writeManifest(t, t.TempDir(), negative)
+	quiet, err := LoadBundle("", negativePath)
+	if err != nil {
+		t.Fatalf("LoadBundle: %v", err)
+	}
+	quietResult, err := quiet.Scorer.Score(testVector())
+	if err != nil {
+		t.Fatalf("Score: %v", err)
+	}
+	if quietResult.IsAlert || quietResult.Probability >= 0.5 {
+		t.Fatalf("negative weights must stay below the threshold, got %+v", quietResult)
 	}
 }
 
 func TestLoadBundleRejectsSchemaMismatch(t *testing.T) {
-	manifestPath := writeManifest(t, t.TempDir(), 0.5, 0.01)
-	expected := append([]string(nil), flow.ModelFeatureNames...)
-	expected[0] = "different_name"
-	if _, err := LoadBundle("", manifestPath, expected); err == nil {
-		t.Fatal("expected schema mismatch error")
+	manifest := manifestFixture(0.5, 0.05)
+	manifest.SchemaSHA256 = "0000000000000000000000000000000000000000000000000000000000000000"
+	path := writeManifest(t, t.TempDir(), manifest)
+
+	if _, err := LoadBundle("", path); err == nil {
+		t.Fatal("expected a schema digest mismatch to be rejected")
 	}
 }
 
-func TestLoadBundleRejectsNonFiniteWeight(t *testing.T) {
-	weights := make([]float64, flow.ModelFeatureCount)
-	weights[1] = math.Inf(1)
-	manifest := Manifest{
-		ModelID:      "test-model",
-		ModelVersion: "test-v1",
-		FeatureNames: append([]string(nil), flow.ModelFeatureNames...),
-		Classes:      []string{"BENIGN", "ATTACK"},
-		Threshold:    0.5,
-		Fallback: &LinearFallback{
-			Type:       "logistic",
-			Weights:    weights,
-			Activation: "sigmoid",
-		},
-	}
-	if _, err := NewLinearManifestScorer(manifest); err == nil {
-		t.Fatal("expected non-finite weight rejection")
+func TestLoadBundleRejectsSchemaVersionMismatch(t *testing.T) {
+	manifest := manifestFixture(0.5, 0.05)
+	manifest.SchemaVersion = "netshield-flow-v0"
+	path := writeManifest(t, t.TempDir(), manifest)
+
+	if _, err := LoadBundle("", path); err == nil {
+		t.Fatal("expected a schema version mismatch to be rejected")
 	}
 }
 
-func TestReloaderSwapsOnManifestChange(t *testing.T) {
+func TestLoadBundleRejectsFeatureOrderMismatch(t *testing.T) {
+	manifest := manifestFixture(0.5, 0.05)
+	manifest.FeatureNames[3], manifest.FeatureNames[4] = manifest.FeatureNames[4], manifest.FeatureNames[3]
+	path := writeManifest(t, t.TempDir(), manifest)
+
+	if _, err := LoadBundle("", path); err == nil {
+		t.Fatal("expected a feature order mismatch to be rejected")
+	}
+}
+
+func TestLinearManifestScorerRejectsNonFiniteWeight(t *testing.T) {
+	// JSON cannot carry Infinity, so this guard is exercised through the
+	// constructor rather than through a manifest file.
+	manifest := manifestFixture(0.5, 0.05)
+	manifest.LinearFallback.Weights[2] = math.Inf(1)
+
+	if _, err := NewLinearManifestScorer(manifest, "manifest-sha"); err == nil {
+		t.Fatal("expected a non-finite weight to be rejected")
+	}
+}
+
+func TestReloaderSwapsOnlyAfterValidatedChange(t *testing.T) {
 	dir := t.TempDir()
-	manifestPath := writeManifest(t, dir, 0.5, 0.01)
+	path := writeManifest(t, dir, manifestFixture(0.5, 0.01))
 	swaps := 0
-	reloader, err := NewReloader("", manifestPath, flow.ModelFeatureNames, func(*ModelBundle) { swaps++ })
+	reloader, err := NewReloader("", path, func(*BundleState) { swaps++ })
 	if err != nil {
 		t.Fatalf("NewReloader: %v", err)
 	}
@@ -77,7 +108,8 @@ func TestReloaderSwapsOnManifestChange(t *testing.T) {
 	if reloader.Current().Manifest.Threshold != 0.5 {
 		t.Fatalf("unexpected initial threshold: %v", reloader.Current().Manifest.Threshold)
 	}
-	writeManifest(t, dir, 0.2, 0.01)
+
+	writeManifest(t, dir, manifestFixture(0.2, 0.01))
 	if err := reloader.Reload(); err != nil {
 		t.Fatalf("Reload: %v", err)
 	}
@@ -87,6 +119,7 @@ func TestReloaderSwapsOnManifestChange(t *testing.T) {
 	if swaps != 1 {
 		t.Fatalf("expected one swap callback, got %d", swaps)
 	}
+
 	// An unchanged reload must not churn the scorer.
 	if err := reloader.Reload(); err != nil {
 		t.Fatalf("second Reload: %v", err)
@@ -94,94 +127,114 @@ func TestReloaderSwapsOnManifestChange(t *testing.T) {
 	if swaps != 1 {
 		t.Fatalf("unchanged artifacts triggered a swap: %d", swaps)
 	}
+
+	// A broken manifest must leave the previous generation serving.
+	broken := manifestFixture(0.2, 0.01)
+	broken.SchemaSHA256 = "not-the-sensor-schema"
+	writeManifest(t, dir, broken)
+	if err := reloader.Reload(); err == nil {
+		t.Fatal("expected a broken manifest to be rejected")
+	}
+	if reloader.Current().Manifest.Threshold != 0.2 || swaps != 1 {
+		t.Fatal("a rejected reload must not disturb the active bundle")
+	}
 }
 
-func TestQueueShedsElephantFlowsAboveWatermark(t *testing.T) {
-	queue := NewQueue(100)
+func TestPipelineShedsLowRiskEstablishedFlowsAboveWatermark(t *testing.T) {
+	pipeline := NewPipeline(100, nil)
+	defer pipeline.Close()
+
 	for i := 0; i < 85; i++ {
-		if !queue.Submit(flow.Snapshot{SynCnt: 1}) {
-			t.Fatalf("non-elephant flow %d was rejected below the watermark", i)
+		if !pipeline.Submit(flow.Snapshot{SynCnt: 1}) {
+			t.Fatalf("flow %d was rejected below the watermark", i)
 		}
 	}
-	elephant := flow.Snapshot{FwdBytes: 2_000_000}
-	if queue.Submit(elephant) {
-		t.Fatal("elephant flow should be shed above the 85% watermark")
+	established := flow.Snapshot{FwdBytes: 2_000_000}
+	if pipeline.Submit(established) {
+		t.Fatal("low-risk established flow must be shed at the 85% watermark")
 	}
-	if queue.Dropped() != 1 {
-		t.Fatalf("expected one drop, got %d", queue.Dropped())
+	if pipeline.Shed() != 1 || pipeline.Dropped() != 1 {
+		t.Fatalf("expected one shed flow, got shed=%d dropped=%d", pipeline.Shed(), pipeline.Dropped())
 	}
-	if !queue.Submit(flow.Snapshot{SynCnt: 1}) {
-		t.Fatal("non-elephant flow should still be admitted while capacity remains")
+	if pipeline.Submit(flow.Snapshot{SynCnt: 1}) != true {
+		t.Fatal("non-established flow should still be admitted while capacity remains")
 	}
-	for queue.Len() < queue.Cap() {
-		queue.Submit(flow.Snapshot{SynCnt: 1})
+	// A teardown-free flow is only shed once the queue is saturated; below the
+	// watermark it is queued normally.
+	small := NewPipeline(100, nil)
+	defer small.Close()
+	if !small.Submit(established) || small.Shed() != 0 {
+		t.Fatal("established flow must be admitted below the watermark")
 	}
-	if queue.Submit(flow.Snapshot{SynCnt: 1}) {
-		t.Fatal("full queue must reject new flows")
-	}
-	queue.Close()
-	if queue.Submit(flow.Snapshot{SynCnt: 1}) {
-		t.Fatal("closed queue must reject new flows")
-	}
-}
 
-func TestSigmoidIsStableAtExtremes(t *testing.T) {
-	if sigmoid(1000) != 1 {
-		t.Fatalf("sigmoid overflow: %v", sigmoid(1000))
+	for pipeline.Len() < pipeline.Cap() {
+		pipeline.Submit(flow.Snapshot{SynCnt: 1})
 	}
-	if sigmoid(-1000) != 0 {
-		t.Fatalf("sigmoid underflow: %v", sigmoid(-1000))
+	if pipeline.Submit(flow.Snapshot{SynCnt: 1}) {
+		t.Fatal("full pipeline must reject new flows")
 	}
 }
 
 func TestRepositoryBundleLoadsAndScores(t *testing.T) {
 	modelPath := filepath.Join("..", "..", "..", "models", "netshield_flow.onnx")
 	manifestPath := filepath.Join("..", "..", "..", "models", "netshield_flow_manifest.json")
-	bundle, err := LoadBundle(modelPath, manifestPath, flow.ModelFeatureNames)
+	bundle, err := LoadBundle(modelPath, manifestPath)
 	if err != nil {
 		t.Fatalf("LoadBundle: %v", err)
 	}
-	defer bundle.Scorer.Close()
-	if bundle.SHA256 == "" || bundle.Manifest.Threshold <= 0 {
-		t.Fatalf("incomplete bundle: sha=%q threshold=%v", bundle.SHA256, bundle.Manifest.Threshold)
+	defer closeScorer(bundle.Scorer)
+	if bundle.ModelSHA256 == "" || bundle.Manifest.Threshold <= 0 {
+		t.Fatalf("incomplete bundle: model_sha=%q threshold=%v", bundle.ModelSHA256, bundle.Manifest.Threshold)
 	}
-	features := make([]float32, flow.ModelFeatureCount)
-	features[0] = 1.5
-	features[1] = 3
-	features[2] = 2
-	features[16] = 333.33
-	score, err := bundle.Scorer.Score(features)
+	if bundle.SchemaSHA256 != flow.SchemaSHA256() {
+		t.Fatalf("repository bundle schema %q does not match sensor %q", bundle.SchemaSHA256, flow.SchemaSHA256())
+	}
+	if len(bundle.Manifest.FeatureNames) != flow.FeatureCount {
+		t.Fatalf("expected %d features, got %d", flow.FeatureCount, len(bundle.Manifest.FeatureNames))
+	}
+	result, err := bundle.Scorer.Score(testVector())
 	if err != nil {
 		t.Fatalf("Score: %v", err)
 	}
-	if math.IsNaN(score.AttackProbability) || score.AttackProbability < 0 || score.AttackProbability > 1 {
-		t.Fatalf("probability is not in [0,1]: %v", score.AttackProbability)
+	if math.IsNaN(result.Probability) || result.Probability < 0 || result.Probability > 1 {
+		t.Fatalf("probability is not in [0,1]: %v", result.Probability)
 	}
-	if len(score.Probabilities) != 2 {
-		t.Fatalf("expected two class probabilities, got %v", score.Probabilities)
+	if result.IsAlert != (result.Probability >= bundle.Manifest.Threshold) {
+		t.Fatal("IsAlert must follow the calibrated threshold")
 	}
 }
 
-func writeManifest(t *testing.T, dir string, threshold, weight float64) string {
-	t.Helper()
-	weights := make([]float64, flow.ModelFeatureCount)
-	for i := range weights {
+func manifestFixture(threshold, weight float64) Manifest {
+	count := flow.FeatureCount
+	means := make([]float64, count)
+	stds := make([]float64, count)
+	weights := make([]float64, count)
+	for i := 0; i < count; i++ {
+		stds[i] = 1
 		weights[i] = weight
 	}
-	manifest := Manifest{
+	return Manifest{
+		SchemaVersion:     flow.SchemaVersion,
+		SchemaSHA256:      flow.SchemaSHA256(),
 		ModelID:           "test-model",
 		ModelVersion:      "test-v1",
-		FeatureNames:      append([]string(nil), flow.ModelFeatureNames...),
+		FeatureNames:      append([]string(nil), flow.FeatureNames...),
 		Classes:           []string{"BENIGN", "ATTACK"},
 		Threshold:         threshold,
 		CalibrationMethod: "test",
-		Fallback: &LinearFallback{
+		LinearFallback: &LinearFallback{
 			Type:       "logistic",
+			Activation: "sigmoid",
+			Means:      means,
+			Stds:       stds,
 			Weights:    weights,
 			Bias:       0,
-			Activation: "sigmoid",
 		},
 	}
+}
+
+func writeManifest(t *testing.T, dir string, manifest Manifest) string {
+	t.Helper()
 	data, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		t.Fatalf("marshal manifest: %v", err)

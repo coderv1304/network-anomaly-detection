@@ -8,40 +8,6 @@ import (
 	"capture/internal/ingest"
 )
 
-// ModelFeatureNames is the frozen 24-input order of the shipped ONNX flow
-// classifier (models/netshield_flow_manifest.json). The canonical training
-// schema is FeatureNames in schema.go; the sensor keeps feeding the model the
-// vector it was trained on through ModelFeatureValues.
-var ModelFeatureNames = []string{
-	"duration_sec",
-	"fwd_pkts",
-	"bwd_pkts",
-	"fwd_bytes",
-	"bwd_bytes",
-	"fwd_hdr_bytes",
-	"bwd_hdr_bytes",
-	"pkt_len_mean",
-	"pkt_len_std",
-	"iat_mean",
-	"iat_std",
-	"fin_cnt",
-	"syn_cnt",
-	"rst_cnt",
-	"psh_cnt",
-	"ack_cnt",
-	"bytes_per_sec",
-	"pkts_per_sec",
-	"fwd_bwd_pkt_ratio",
-	"fwd_bwd_byte_ratio",
-	"syn_ack_ratio",
-	"fin_rst_ratio",
-	"mean_pkt_size",
-	"iat_cv",
-}
-
-// ModelFeatureCount is the number of inputs the shipped model was trained on.
-const ModelFeatureCount = 24
-
 // RatioEpsilon guards every division that could otherwise produce NaN or Inf.
 const RatioEpsilon = 1e-6
 
@@ -136,57 +102,6 @@ func (s *Snapshot) FeatureValues() [FeatureCount]float64 {
 	out[25] = safeDiv(float64(s.SynCnt), float64(maxUint(s.AckCnt, 1)))
 
 	sanitizeFeatures(out[:])
-	return out
-}
-
-// ModelFeatureValues projects the canonical statistics onto the 24-input order
-// the shipped model was trained on. The shared features are read from
-// FeatureValues so training and serving cannot drift; the four model-only
-// ratios are derived from the same counters.
-func (s *Snapshot) ModelFeatureValues() [ModelFeatureCount]float64 {
-	canonical := s.FeatureValues()
-	totalPackets := s.FwdPkts + s.BwdPkts
-	totalBytes := s.FwdBytes + s.BwdBytes
-	iatMean := finite(s.FlowIAT.Mean)
-	iatStd := finite(s.FlowIAT.Std)
-
-	var out [ModelFeatureCount]float64
-	out[0] = canonical[1]   // duration_sec
-	out[1] = canonical[2]   // fwd_pkts
-	out[2] = canonical[3]   // bwd_pkts
-	out[3] = canonical[4]   // fwd_bytes
-	out[4] = canonical[5]   // bwd_bytes
-	out[5] = canonical[6]   // fwd_hdr_bytes
-	out[6] = canonical[7]   // bwd_hdr_bytes
-	out[7] = canonical[19]  // pkt_len_mean
-	out[8] = canonical[20]  // pkt_len_std
-	out[9] = canonical[16]  // iat_mean
-	out[10] = canonical[17] // iat_std
-	out[11] = canonical[8]  // fin_cnt
-	out[12] = canonical[9]  // syn_cnt
-	out[13] = canonical[10] // rst_cnt
-	out[14] = canonical[11] // psh_cnt
-	out[15] = canonical[12] // ack_cnt
-	out[16] = canonical[22] // bytes_per_sec
-	out[17] = canonical[23] // pkts_per_sec
-	out[18] = canonical[24] // fwd_bwd_pkt_ratio
-	out[19] = safeDiv(float64(s.FwdBytes), float64(maxUint(s.BwdBytes, 1)))
-	out[20] = canonical[25] // syn_ack_ratio
-	out[21] = safeDiv(float64(s.FinCnt+s.RstCnt), float64(maxUint(totalPackets, 1)))
-	out[22] = safeDiv(float64(totalBytes), float64(maxUint(totalPackets, 1)))
-	out[23] = safeDiv(iatStd, math.Max(iatMean, RatioEpsilon))
-
-	sanitizeFeatures(out[:])
-	return out
-}
-
-// FeatureVector returns the model inputs as float32 for zero-copy tensor input.
-func (s *Snapshot) FeatureVector() []float32 {
-	values := s.ModelFeatureValues()
-	out := make([]float32, ModelFeatureCount)
-	for i, value := range values {
-		out[i] = float32(value)
-	}
 	return out
 }
 

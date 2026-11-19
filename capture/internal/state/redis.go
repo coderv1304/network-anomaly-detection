@@ -5,39 +5,48 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"strconv"
 	"sync/atomic"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
+// redisWindowScript appends one flow's points to the host window, prunes entries
+// older than the sliding window, refreshes the key TTL, and returns the entry
+// count plus the summed risk points. The ZSET score is the event time so range
+// pruning is correct; the points travel in the member as "<flowID>:<points>".
 const redisWindowScript = `
 local key = KEYS[1]
 local member = ARGV[1]
-local risk = tonumber(ARGV[2])
-local now = tonumber(ARGV[3])
-local window = tonumber(ARGV[4])
-local expire = tonumber(ARGV[5])
-redis.call('ZADD', key, risk, member)
+local now = tonumber(ARGV[2])
+local window = tonumber(ARGV[3])
+local expire = tonumber(ARGV[4])
+redis.call('ZADD', key, now, member)
 redis.call('ZREMRANGEBYSCORE', key, '-inf', now - window)
 redis.call('EXPIRE', key, expire)
-local entries = redis.call('ZRANGE', key, 0, -1, 'WITHSCORES')
+local entries = redis.call('ZRANGE', key, 0, -1)
 local total = 0
-for i = 2, #entries, 2 do
-  total = total + tonumber(entries[i])
+for i = 1, #entries do
+  local points = tonumber(string.match(entries[i], ':([^:]+)$'))
+  if points then
+    total = total + points
+  end
 end
-return {#entries / 2, total}
+return {#entries, total}
 `
 
-type redisAccumulator struct {
+// RedisWindowStore keeps each host's sliding window in one sorted set, so the
+// score update, expiry, and window sum are a single atomic round trip.
+type RedisWindowStore struct {
 	client   *redis.Client
 	windowS  float64
-	fallback *memoryAccumulator
+	fallback *MemoryWindowStore
 	logger   *slog.Logger
 	healthy  atomic.Bool
 }
 
-func newRedisAccumulator(ctx context.Context, redisURL string, window time.Duration, fallback *memoryAccumulator, logger *slog.Logger) (*redisAccumulator, error) {
+func newRedisWindowStore(ctx context.Context, redisURL string, window time.Duration, fallback *MemoryWindowStore, logger *slog.Logger) (*RedisWindowStore, error) {
 	options, err := redis.ParseURL(redisURL)
 	if err != nil {
 		return nil, fmt.Errorf("parse redis URL: %w", err)
@@ -54,7 +63,7 @@ func newRedisAccumulator(ctx context.Context, redisURL string, window time.Durat
 		_ = client.Close()
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
-	acc := &redisAccumulator{
+	acc := &RedisWindowStore{
 		client:   client,
 		windowS:  window.Seconds(),
 		fallback: fallback,
@@ -64,26 +73,27 @@ func newRedisAccumulator(ctx context.Context, redisURL string, window time.Durat
 	return acc, nil
 }
 
-func (a *redisAccumulator) Backend() string {
+func (a *RedisWindowStore) Backend() string {
 	if a.healthy.Load() {
 		return "redis"
 	}
 	return "memory"
 }
 
-func (a *redisAccumulator) Close() error {
+func (a *RedisWindowStore) Close() error {
 	return a.client.Close()
 }
 
-func (a *redisAccumulator) Record(ctx context.Context, event Event) (WindowSnapshot, error) {
+func (a *RedisWindowStore) Record(ctx context.Context, event Event) (WindowSnapshot, error) {
 	if event.SourceIP == "" {
 		return WindowSnapshot{}, nil
 	}
 	nowSeconds := float64(event.TimestampUS) / 1e6
-	member := event.FlowID
-	if member == "" {
-		member = fmt.Sprintf("%d|%s", event.TimestampUS, event.Label)
+	identity := event.FlowID
+	if identity == "" {
+		identity = fmt.Sprintf("%d|%s", event.TimestampUS, event.Label)
 	}
+	member := identity + ":" + strconv.FormatFloat(clampRisk(event.Risk), 'f', -1, 64)
 	callCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	result, err := a.client.Eval(
@@ -91,7 +101,6 @@ func (a *redisAccumulator) Record(ctx context.Context, event Event) (WindowSnaps
 		redisWindowScript,
 		[]string{"netshield:win:" + event.SourceIP},
 		member,
-		clampRisk(event.Risk),
 		nowSeconds,
 		a.windowS,
 		360,

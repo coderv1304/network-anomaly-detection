@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-func TestMemoryAccumulatorWindowPruning(t *testing.T) {
-	acc := newMemoryAccumulator(300 * time.Second)
+func TestMemoryWindowStoreSlidingWindow(t *testing.T) {
+	acc := NewMemoryWindowStore(300 * time.Second)
 	ctx := context.Background()
 
 	first, err := acc.Record(ctx, Event{SourceIP: "10.0.0.1", TimestampUS: 0, Risk: 50, FlowID: "a"})
@@ -36,8 +36,8 @@ func TestMemoryAccumulatorWindowPruning(t *testing.T) {
 	}
 }
 
-func TestMemoryAccumulatorIsShardedAndConcurrent(t *testing.T) {
-	acc := newMemoryAccumulator(time.Minute)
+func TestMemoryWindowStoreIsShardedAndConcurrent(t *testing.T) {
+	acc := NewMemoryWindowStore(time.Minute)
 	ctx := context.Background()
 	done := make(chan struct{})
 	for i := 0; i < 8; i++ {
@@ -58,7 +58,7 @@ func TestMemoryAccumulatorIsShardedAndConcurrent(t *testing.T) {
 	}
 }
 
-func TestForwarderBatchesAndAuthenticates(t *testing.T) {
+func TestBatchAlertSinkBatchesAndAuthenticates(t *testing.T) {
 	received := make(chan []map[string]any, 4)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-API-Key") != "secret" {
@@ -78,7 +78,7 @@ func TestForwarderBatchesAndAuthenticates(t *testing.T) {
 	}))
 	defer server.Close()
 
-	forwarder, err := NewForwarder(ForwarderOptions{
+	forwarder, err := NewBatchAlertSink(BatchAlertSinkOptions{
 		URL:           server.URL,
 		APIKey:        "secret",
 		BatchSize:     2,
@@ -106,7 +106,7 @@ func TestForwarderBatchesAndAuthenticates(t *testing.T) {
 	}
 }
 
-func TestForwarderRetriesWithBackoff(t *testing.T) {
+func TestBatchAlertSinkRetriesWithBackoff(t *testing.T) {
 	var attempts atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if attempts.Add(1) <= 2 {
@@ -117,7 +117,7 @@ func TestForwarderRetriesWithBackoff(t *testing.T) {
 	}))
 	defer server.Close()
 
-	forwarder, err := NewForwarder(ForwarderOptions{
+	forwarder, err := NewBatchAlertSink(BatchAlertSinkOptions{
 		URL:              server.URL,
 		BatchSize:        1,
 		FlushInterval:    10 * time.Millisecond,
@@ -146,13 +146,13 @@ func TestForwarderRetriesWithBackoff(t *testing.T) {
 	}
 }
 
-func TestForwarderCircuitBreakerDropsDuringCooldown(t *testing.T) {
+func TestBatchAlertSinkCircuitBreakerDropsDuringCooldown(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "down", http.StatusInternalServerError)
 	}))
 	defer server.Close()
 
-	forwarder, err := NewForwarder(ForwarderOptions{
+	forwarder, err := NewBatchAlertSink(BatchAlertSinkOptions{
 		URL:              server.URL,
 		BatchSize:        1,
 		FlushInterval:    10 * time.Millisecond,

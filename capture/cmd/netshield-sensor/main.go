@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -35,7 +34,6 @@ const (
 	modeSensor  = "sensor"
 
 	windowDuration = 5 * time.Minute
-	incidentScore  = 70.0
 )
 
 type config struct {
@@ -178,25 +176,30 @@ func runSensor(cfg config) error {
 	}
 
 	metricSet := metrics.New()
-	reloader, err := inference.NewReloader(modelPath, manifestPath, flow.ModelFeatureNames, func(bundle *inference.ModelBundle) {
-		metricSet.SetModel(bundle.SHA256, bundle.Backend, bundle.Manifest.ModelVersion)
-		logger.Info("model bundle reloaded", "sha256", bundle.SHA256, "backend", bundle.Backend, "version", bundle.Manifest.ModelVersion)
+	reloader, err := inference.NewReloader(modelPath, manifestPath, func(bundle *inference.BundleState) {
+		metricSet.SetModel(bundle.ModelSHA256, bundle.Backend, bundle.Manifest.ModelVersion)
+		logger.Info("model bundle reloaded",
+			"model_sha256", bundle.ModelSHA256,
+			"manifest_sha256", bundle.ManifestSHA256,
+			"schema", bundle.SchemaSHA256,
+			"backend", bundle.Backend,
+			"version", bundle.Manifest.ModelVersion)
 	})
 	if err != nil {
 		return fmt.Errorf("load model bundle: %w", err)
 	}
 	defer reloader.Close()
-	metricSet.SetModel(reloader.Current().SHA256, reloader.Current().Backend, reloader.Current().Manifest.ModelVersion)
+	metricSet.SetModel(reloader.Current().ModelSHA256, reloader.Current().Backend, reloader.Current().Manifest.ModelVersion)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	accumulator := state.NewAccumulator(ctx, cfg.redisURL, windowDuration, logger)
-	defer accumulator.Close()
+	store := state.NewWindowStore(ctx, cfg.redisURL, windowDuration, logger)
+	defer store.Close()
 
-	var forwarder *state.Forwarder
+	var sink *state.BatchAlertSink
 	if cfg.ingestURL != "" {
-		forwarder, err = state.NewForwarder(state.ForwarderOptions{
+		sink, err = state.NewBatchAlertSink(state.BatchAlertSinkOptions{
 			URL:           normalizeIngestURL(cfg.ingestURL),
 			APIKey:        cfg.apiKey,
 			BatchSize:     256,
@@ -204,18 +207,18 @@ func runSensor(cfg config) error {
 			Logger:        logger,
 		})
 		if err != nil {
-			return fmt.Errorf("configure alert forwarder: %w", err)
+			return fmt.Errorf("configure alert sink: %w", err)
 		}
-		forwarder.Start(ctx)
-		defer forwarder.Close()
+		sink.Start(ctx)
+		defer sink.Close()
 	}
 
-	queue := inference.NewQueue(inference.DefaultQueueCapacity)
+	pipeline := inference.NewPipeline(inference.DefaultPipelineCapacity, metricSet)
 	engine := flow.NewEngine(cfg.workers, flow.DefaultIdleTimeout, flow.DefaultActiveTimeout, func(snapshot flow.Snapshot) {
 		metricSet.FlowsCompleted.Inc()
-		if !queue.Submit(snapshot) {
-			metricSet.FlowsDroppedBackpressure.Inc()
-		}
+		// Submit never blocks; it sheds low-risk established flows above the
+		// 85% watermark and counts any rejection.
+		pipeline.Submit(snapshot)
 	})
 	engine.Start()
 
@@ -225,8 +228,8 @@ func runSensor(cfg config) error {
 		scoreWG.Add(1)
 		go func() {
 			defer scoreWG.Done()
-			for snapshot := range queue.Chan() {
-				scoreOne(ctx, snapshot, reloader, accumulator, forwarder, metricSet, logger, cfg.sensorID, cfg.iface)
+			for snapshot := range pipeline.Chan() {
+				scoreOne(ctx, snapshot, reloader, store, sink, metricSet, logger, cfg.sensorID, cfg.iface)
 			}
 		}()
 	}
@@ -234,7 +237,7 @@ func runSensor(cfg config) error {
 	source, err := ingest.OpenSource(cfg.iface, cfg.pcapPath)
 	if err != nil {
 		engine.Close()
-		queue.Close()
+		pipeline.Close()
 		scoreWG.Wait()
 		return err
 	}
@@ -245,7 +248,7 @@ func runSensor(cfg config) error {
 		metricsServer, err = startMetricsServer(cfg.metricsAddr, metricSet)
 		if err != nil {
 			engine.Close()
-			queue.Close()
+			pipeline.Close()
 			scoreWG.Wait()
 			return err
 		}
@@ -320,17 +323,18 @@ func runSensor(cfg config) error {
 
 	engine.Close()
 	metricSet.ActiveFlows.Set(0)
-	queue.Close()
+	pipeline.Close()
 	scoreWG.Wait()
-	if forwarder != nil {
-		forwarder.Close()
+	if sink != nil {
+		sink.Close()
 	}
-	_ = accumulator.Close()
+	_ = store.Close()
 	_ = reloader.Close()
 	logger.Info("sensor stopped",
 		"packets", packets,
-		"queue_dropped", queue.Dropped(),
-		"alerts_sent", sentCount(forwarder),
+		"pipeline_dropped", pipeline.Dropped(),
+		"pipeline_shed", pipeline.Shed(),
+		"alerts_sent", sentCount(sink),
 	)
 	return nil
 }
@@ -339,8 +343,8 @@ func scoreOne(
 	ctx context.Context,
 	snapshot flow.Snapshot,
 	reloader *inference.Reloader,
-	accumulator state.WindowAccumulator,
-	forwarder *state.Forwarder,
+	store state.WindowStore,
+	sink *state.BatchAlertSink,
 	metricSet *metrics.Metrics,
 	logger *slog.Logger,
 	sensorID, iface string,
@@ -349,46 +353,79 @@ func scoreOne(
 	if bundle == nil || bundle.Scorer == nil {
 		return
 	}
+	values := snapshot.FeatureValues()
 	started := time.Now()
-	score, err := bundle.Scorer.Score(snapshot.FeatureVector())
+	result, err := bundle.Scorer.Score(values[:])
 	metricSet.InferenceDuration.Observe(time.Since(started).Seconds())
 	if err != nil {
 		logger.Warn("flow scoring failed", "flow_id", snapshot.FlowID(), "error", err)
 		return
 	}
-	if score.AttackProbability < bundle.Manifest.Threshold {
+	if !result.IsAlert {
 		return
 	}
 
 	sourceIP := snapshot.ForwardKey.SrcString()
-	risk := math.Min(100, score.AttackProbability*50)
-	window, err := accumulator.Record(ctx, state.Event{
+	risk := result.RiskPoints
+	window, err := store.Record(ctx, state.Event{
 		SourceIP:    sourceIP,
 		TimestampUS: snapshot.EndUS,
 		Risk:        risk,
-		Label:       score.Label,
 		FlowID:      snapshot.FlowID(),
 	})
 	if err != nil {
 		logger.Warn("window accumulation failed", "source_ip", sourceIP, "error", err)
 	}
-	if window.Score >= incidentScore {
+	// One consolidated incident per host per crossing of the threshold, so a
+	// burst of flagged flows from one host does not become a burst of alerts.
+	incident := window.RiskSum >= state.IncidentThreshold && window.RiskSum-risk < state.IncidentThreshold
+	if incident {
 		logger.Info("host window incident threshold reached",
-			"source_ip", sourceIP, "score", window.Score, "events", window.Count, "backend", window.Backend)
+			"source_ip", sourceIP,
+			"risk_points", window.RiskSum,
+			"events", window.Count,
+			"backend", window.Backend)
 	}
 
-	if forwarder == nil {
+	if sink == nil {
 		return
 	}
 	payload := snapshot.CICMap()
 	payload["sensor_id"] = sensorID
 	payload["interface"] = iface
-	if forwarder.Enqueue(state.Alert{
+	payload["kind"] = "flow"
+	payload["attack_probability"] = result.Probability
+	payload["risk_points"] = risk
+	if sink.Enqueue(state.Alert{
 		FlowID:      snapshot.FlowID(),
 		SourceIP:    sourceIP,
 		Risk:        risk,
 		TimestampUS: snapshot.EndUS,
 		Payload:     payload,
+	}) {
+		metricSet.AlertsEmitted.Inc()
+	}
+
+	if !incident {
+		return
+	}
+	incidentPayload := map[string]any{
+		"flow_id":      snapshot.FlowID() + "-incident",
+		"kind":         "incident",
+		"src_ip":       sourceIP,
+		"risk_points":  window.RiskSum,
+		"window_count": window.Count,
+		"window_start": float64(window.WindowStartUS) / 1e6,
+		"timestamp":    float64(window.WindowEndUS) / 1e6,
+		"sensor_id":    sensorID,
+		"interface":    iface,
+	}
+	if sink.Enqueue(state.Alert{
+		FlowID:      snapshot.FlowID() + "-incident",
+		SourceIP:    sourceIP,
+		Risk:        window.RiskSum,
+		TimestampUS: window.WindowEndUS,
+		Payload:     incidentPayload,
 	}) {
 		metricSet.AlertsEmitted.Inc()
 	}
@@ -452,11 +489,11 @@ func shutdownMetricsServer(server *http.Server) {
 	_ = server.Shutdown(ctx)
 }
 
-func sentCount(forwarder *state.Forwarder) uint64 {
-	if forwarder == nil {
+func sentCount(sink *state.BatchAlertSink) uint64 {
+	if sink == nil {
 		return 0
 	}
-	return forwarder.Sent()
+	return sink.Sent()
 }
 
 func outputName(path string) string {

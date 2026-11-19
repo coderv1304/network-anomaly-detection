@@ -23,29 +23,30 @@ type Alert struct {
 	Payload     map[string]any
 }
 
-// ForwarderOptions configures the batched alert sink.
-type ForwarderOptions struct {
+// BatchAlertSinkOptions configures the batched alert sink.
+type BatchAlertSinkOptions struct {
 	URL              string
 	APIKey           string
 	Client           *http.Client
 	BatchSize        int
 	FlushInterval    time.Duration
 	QueueCapacity    int
+	BackoffBase      time.Duration
 	MaxBackoff       time.Duration
 	BreakerThreshold int
 	BreakerCooldown  time.Duration
 	Logger           *slog.Logger
 }
 
-// Forwarder batches alerts and posts them to the Flask ingest endpoint. It
-// never blocks capture workers and uses a circuit breaker so a console outage
-// cannot turn into an unbounded retry storm.
-type Forwarder struct {
-	opts ForwarderOptions
+// BatchAlertSink batches flagged flows and consolidated host incidents and
+// posts them to the Flask ingest endpoint. It never blocks capture workers and
+// uses a circuit breaker so a console outage cannot become a retry storm.
+type BatchAlertSink struct {
+	opts BatchAlertSinkOptions
 	url  string
 
-	queue chan Alert
-	mu    sync.RWMutex
+	queue  chan Alert
+	mu     sync.RWMutex
 	closed bool
 
 	started bool
@@ -63,7 +64,7 @@ type Forwarder struct {
 
 // NewForwarder validates options and creates the sink. Start must be called
 // before Enqueue.
-func NewForwarder(opts ForwarderOptions) (*Forwarder, error) {
+func NewBatchAlertSink(opts BatchAlertSinkOptions) (*BatchAlertSink, error) {
 	if opts.URL == "" {
 		return nil, errors.New("alert forwarder requires a URL")
 	}
@@ -79,8 +80,11 @@ func NewForwarder(opts ForwarderOptions) (*Forwarder, error) {
 	if opts.QueueCapacity <= 0 {
 		opts.QueueCapacity = 4096
 	}
+	if opts.BackoffBase <= 0 {
+		opts.BackoffBase = 100 * time.Millisecond
+	}
 	if opts.MaxBackoff <= 0 {
-		opts.MaxBackoff = 30 * time.Second
+		opts.MaxBackoff = 5 * time.Second
 	}
 	if opts.BreakerThreshold <= 0 {
 		opts.BreakerThreshold = 5
@@ -88,7 +92,7 @@ func NewForwarder(opts ForwarderOptions) (*Forwarder, error) {
 	if opts.BreakerCooldown <= 0 {
 		opts.BreakerCooldown = 30 * time.Second
 	}
-	return &Forwarder{
+	return &BatchAlertSink{
 		opts:  opts,
 		url:   opts.URL,
 		queue: make(chan Alert, opts.QueueCapacity),
@@ -96,7 +100,7 @@ func NewForwarder(opts ForwarderOptions) (*Forwarder, error) {
 }
 
 // Start launches the batch loop.
-func (f *Forwarder) Start(parent context.Context) {
+func (f *BatchAlertSink) Start(parent context.Context) {
 	f.mu.Lock()
 	if f.started {
 		f.mu.Unlock()
@@ -113,7 +117,7 @@ func (f *Forwarder) Start(parent context.Context) {
 
 // Enqueue admits an alert without blocking. It returns false when the queue is
 // full or the forwarder is shutting down.
-func (f *Forwarder) Enqueue(alert Alert) bool {
+func (f *BatchAlertSink) Enqueue(alert Alert) bool {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	if f.closed {
@@ -130,16 +134,16 @@ func (f *Forwarder) Enqueue(alert Alert) bool {
 }
 
 // Sent returns the number of alerts acknowledged by the receiver.
-func (f *Forwarder) Sent() uint64 { return f.sent.Load() }
+func (f *BatchAlertSink) Sent() uint64 { return f.sent.Load() }
 
 // Dropped returns the number of alerts rejected by queue or breaker limits.
-func (f *Forwarder) Dropped() uint64 { return f.dropped.Load() }
+func (f *BatchAlertSink) Dropped() uint64 { return f.dropped.Load() }
 
 // Failed returns the number of send attempts that were not acknowledged.
-func (f *Forwarder) Failed() uint64 { return f.failed.Load() }
+func (f *BatchAlertSink) Failed() uint64 { return f.failed.Load() }
 
 // Close drains the queue and performs one final best-effort flush.
-func (f *Forwarder) Close() {
+func (f *BatchAlertSink) Close() {
 	f.mu.Lock()
 	if f.closed {
 		f.mu.Unlock()
@@ -158,7 +162,7 @@ func (f *Forwarder) Close() {
 	}
 }
 
-func (f *Forwarder) loop(ctx context.Context) {
+func (f *BatchAlertSink) loop(ctx context.Context) {
 	defer f.wg.Done()
 	ticker := time.NewTicker(f.opts.FlushInterval)
 	defer ticker.Stop()
@@ -192,7 +196,7 @@ func (f *Forwarder) loop(ctx context.Context) {
 	}
 }
 
-func (f *Forwarder) drain(pending *[]Alert, maxPending int) {
+func (f *BatchAlertSink) drain(pending *[]Alert, maxPending int) {
 	for {
 		select {
 		case alert, ok := <-f.queue:
@@ -211,7 +215,7 @@ func (f *Forwarder) drain(pending *[]Alert, maxPending int) {
 	}
 }
 
-func (f *Forwarder) flush(pending *[]Alert) {
+func (f *BatchAlertSink) flush(pending *[]Alert) {
 	if len(*pending) == 0 {
 		return
 	}
@@ -255,22 +259,27 @@ func (f *Forwarder) flush(pending *[]Alert) {
 	*pending = append((*pending)[:0], (*pending)[size:]...)
 }
 
-func (f *Forwarder) backoff(failures int32) time.Duration {
+// backoff doubles from BackoffBase (100ms by default) and saturates at
+// MaxBackoff (5s by default), so a short console blip recovers quickly without
+// ever turning into a long sleep.
+func (f *BatchAlertSink) backoff(failures int32) time.Duration {
 	if failures < 1 {
 		failures = 1
 	}
-	shift := failures - 1
-	if shift > 10 {
-		shift = 10
+	backoff := f.opts.BackoffBase
+	for attempt := int32(1); attempt < failures; attempt++ {
+		if backoff >= f.opts.MaxBackoff {
+			break
+		}
+		backoff *= 2
 	}
-	backoff := time.Second * time.Duration(1<<shift)
 	if backoff > f.opts.MaxBackoff {
 		backoff = f.opts.MaxBackoff
 	}
 	return backoff
 }
 
-func (f *Forwarder) send(batch []Alert) error {
+func (f *BatchAlertSink) send(batch []Alert) error {
 	flows := make([]map[string]any, 0, len(batch))
 	for _, alert := range batch {
 		flows = append(flows, alert.Payload)

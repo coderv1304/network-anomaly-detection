@@ -14,6 +14,10 @@ import (
 // DefaultWindow is the host risk window from the specification.
 const DefaultWindow = 5 * time.Minute
 
+// IncidentThreshold is the sliding-window risk-point total that consolidates a
+// host's flagged flows into one incident.
+const IncidentThreshold = 70.0
+
 // Event is one scored flow contribution to a host window. Risk is expressed in
 // the same 0-100 point scale used by the Flask incident accumulator.
 type Event struct {
@@ -35,37 +39,37 @@ type WindowSnapshot struct {
 	Backend       string
 }
 
-// WindowAccumulator records flow risk events and returns the current window.
-type WindowAccumulator interface {
+// WindowStore records flow risk events and returns the current window.
+type WindowStore interface {
 	Record(ctx context.Context, event Event) (WindowSnapshot, error)
 	Backend() string
 	Close() error
 }
 
-// NewAccumulator returns a Redis-backed accumulator when redisURL is set and
-// reachable, otherwise an in-memory sharded accumulator. Redis failures at
-// runtime transparently fall back to the in-memory path.
-func NewAccumulator(ctx context.Context, redisURL string, window time.Duration, logger *slog.Logger) WindowAccumulator {
+// NewWindowStore returns a Redis-backed store when redisURL is set and
+// reachable, otherwise an in-memory sharded store. Redis failures at runtime
+// transparently fall back to the in-memory path.
+func NewWindowStore(ctx context.Context, redisURL string, window time.Duration, logger *slog.Logger) WindowStore {
 	if window <= 0 {
 		window = DefaultWindow
 	}
-	memory := newMemoryAccumulator(window)
+	memory := NewMemoryWindowStore(window)
 	if redisURL == "" {
 		return memory
 	}
-	redisAcc, err := newRedisAccumulator(ctx, redisURL, window, memory, logger)
+	redisStore, err := newRedisWindowStore(ctx, redisURL, window, memory, logger)
 	if err != nil {
 		if logger != nil {
 			logger.Warn("redis window state unavailable; using in-memory fallback", "error", err)
 		}
 		return memory
 	}
-	return redisAcc
+	return redisStore
 }
 
 const memoryShardCount = 64
 
-type memoryAccumulator struct {
+type MemoryWindowStore struct {
 	shards     [memoryShardCount]memoryShard
 	windowUS   int64
 	maxPerHost int
@@ -88,8 +92,8 @@ type memoryEvent struct {
 	label       string
 }
 
-func newMemoryAccumulator(window time.Duration) *memoryAccumulator {
-	acc := &memoryAccumulator{
+func NewMemoryWindowStore(window time.Duration) *MemoryWindowStore {
+	acc := &MemoryWindowStore{
 		windowUS:   window.Microseconds(),
 		maxPerHost: 4096,
 	}
@@ -99,11 +103,11 @@ func newMemoryAccumulator(window time.Duration) *memoryAccumulator {
 	return acc
 }
 
-func (a *memoryAccumulator) Backend() string { return "memory" }
+func (a *MemoryWindowStore) Backend() string { return "memory" }
 
-func (a *memoryAccumulator) Close() error { return nil }
+func (a *MemoryWindowStore) Close() error { return nil }
 
-func (a *memoryAccumulator) Record(_ context.Context, event Event) (WindowSnapshot, error) {
+func (a *MemoryWindowStore) Record(_ context.Context, event Event) (WindowSnapshot, error) {
 	now := event.TimestampUS
 	shard := &a.shards[shardIndex(event.SourceIP)]
 	shard.mu.Lock()
