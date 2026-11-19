@@ -77,6 +77,8 @@ Live capture is opt-in. The upgraded Go sensor in [`capture/`](capture/README.md
 
 The registry-active bundle and its registry are committed so a clone reproduces the documented operating point. The hash match is provenance, not detection evidence.
 
+Because the multiclass head only knows the Monday–Tuesday classes (BENIGN, FTP-Patator, SSH-Patator), Thursday–Friday DDoS and PortScan traffic is deliberately not a named class: `1 - P(BENIGN)` is used as an open-set anomaly score, so unseen volumetric and scanning classes are rejected as anomalous rather than classified as a known label.
+
 ## Evidence Snapshot
 
 All numbers come from the frozen evaluation protocol or from explicitly labelled sensitivity runs. They are development evidence, not a blind confirmatory test.
@@ -134,7 +136,9 @@ Go collector tests:
 cd capture && go test ./... && cd ..
 ```
 
-Long-running evaluation runners are Windows batch wrappers under `scripts/windows/` (`run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`, `run_all_experiments.bat`, `run_isolation_forest.bat`, `build_capture.bat`). Each changes to the repository root first, so they run from any directory. `.github/workflows/security.yml` additionally runs `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
+Long-running evaluation runners are Windows batch wrappers under `scripts/windows/` (`run_all_baselines.bat`, `run_feedback_simulation.bat`, `run_drift_monitor.bat`, `verify_feature_parity.bat`, `run_all_experiments.bat`, `run_isolation_forest.bat`, `build_capture.bat`). Each changes to the repository root first, so they run from any directory.
+
+CI (`.github/workflows/security.yml`) additionally runs `pip-audit`, a Docker build, a Trivy image scan, and the S8 release gate.
 
 ## Configuration
 
@@ -165,24 +169,24 @@ The Dockerfile and Compose file are loopback-bound and run as a non-root user wi
 
 ## Repository Map
 
-```text
-app.py                     Flask app: console, workbench, API
-domain/                    Domain services (auth/MFA/OIDC, incidents, evidence, SOAR, intel, sensor fleet, capture metadata, Zeek/runtime helpers)
-live_capture.py            Optional Python PyFlowMeter capture adapter (experimental)
-pcap_parser.py             PCAP/CSV flow parsing
-feature_mapper.py          Schema mapping to the model feature order
-models/                    Serving bundle, registry, metrics, manifests
-training/                  Training, audit, benchmark, SHAP pipelines, ONNX export
-scripts/                   Evaluation, gates, drift, release tooling
-scripts/windows/           Windows batch runners
-monitoring/                Prometheus metrics and Grafana dashboard
-capture/                   Go packet sensor and capture collector (deterministic replay, sharded flow engine, ONNX/fallback inference)
-templates/ static/         Operator console and workbench UI
-tests/fixtures/            Bundled 500-flow sample and parser fixtures
-docs/                      Protocols, reports, runbooks, claim matrix
-Makefile                   setup, run, test, lint, docker targets
-pyproject.toml             Project metadata, Ruff and pytest configuration
-```
+| Path | Contents |
+| --- | --- |
+| `app.py` | Flask app: console, workbench, API |
+| `domain/` | Domain services (auth/MFA/OIDC, incidents, evidence, SOAR, intel, sensor fleet, capture metadata, Zeek/runtime helpers) |
+| `live_capture.py` | Optional Python PyFlowMeter capture adapter (experimental) |
+| `pcap_parser.py` | PCAP/CSV flow parsing |
+| `feature_mapper.py` | Schema mapping to the model feature order |
+| `models/` | Serving bundle, registry, metrics, manifests |
+| `training/` | Training, audit, benchmark, SHAP pipelines, ONNX export |
+| `scripts/` | Evaluation, gates, drift, release tooling |
+| `scripts/windows/` | Windows batch runners |
+| `monitoring/` | Prometheus metrics and Grafana dashboard |
+| `capture/` | Go packet sensor and capture collector (deterministic replay, sharded flow engine, ONNX/fallback inference) |
+| `templates/`, `static/` | Operator console and workbench UI |
+| `tests/fixtures/` | Bundled 500-flow sample and parser fixtures |
+| `docs/` | Protocols, reports, runbooks, claim matrix |
+| `Makefile` | setup, run, test, lint, docker targets |
+| `pyproject.toml` | Project metadata, Ruff and pytest configuration |
 
 ## Documentation
 
